@@ -143,7 +143,6 @@ def get_wind_data(latitude=LAT, longitude=LONG, hours=24, days=3):
 
 
 def kmh_to_mph(kmh: float) -> float:
-
     return round(kmh * 0.621371, 1)
 
 
@@ -192,7 +191,6 @@ def classify_wind_relative_to_beach(wind_deg, beach_facing_deg=140):
 
 
 def convert_data_to_text(wind_data: List[Dict[str, Any]]) -> str:
-
     text = ""
     for entry in wind_data:
         text += f"Time: {entry['time']}\n"
