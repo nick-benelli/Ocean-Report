@@ -87,8 +87,8 @@ def format_wind_forecast_email(wind_data: List[Dict[str, Any]]) -> str:
 
     for entry in wind_data:
         line = (
-            f"- {entry['time']}\t – {entry['speed_mph']} mph from "
-            f"{entry['direction']} ({entry['direction_deg']}°)\t → {entry['wind_type']}"
+            f"- {entry['time']} – {entry['speed_mph']} mph from "
+            f"{entry['direction']} ({entry['direction_deg']}°) → {entry['wind_type']}"
         )
         lines.append(line)
 
