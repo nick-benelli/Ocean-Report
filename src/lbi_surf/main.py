@@ -2,7 +2,7 @@
 import os
 from datetime import datetime
 from dotenv import load_dotenv
-from . import constants, tide, water_temp, emailer
+from . import constants, tide, water_temp, emailer, wind
 import logging
 
 logging.basicConfig(
@@ -32,9 +32,15 @@ def main():
     h20_temp = water_temp.fetch_water_temp(station_id=constants.STATION_ID)
     h20_temp_str = water_temp.format_water_temp(h20_temp)
 
+    # Get wind data
+    logger.info("Fetching wind data...")
+    wind_text = wind.get_wind_data_for_email()
+
     # Send email
     logger.info("Generating email body...")
-    email_body = emailer.generate_email_body(daytime_tides, h20_temp_str)
+    email_body = emailer.generate_email_body(
+        daytime_tides, h20_temp_str, wind_text=wind_text
+    )
     logger.info("Sending email...")
     emailer.send_email(
         subject=f"🌊 Daily Water Report: {today_date_str}",
