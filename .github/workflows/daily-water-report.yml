@@ -2,7 +2,8 @@ name: Daily Water Report
 
 on:
   schedule:
-    - cron: "0 11 * * *" # Runs daily at 11:00 UTC (7:00 AM US Eastern)
+    - cron: "35 10 * * *" # Runs daily at 10:35 UTC (6:35 AM US Eastern)
+    #- cron: "0 11 * * *" # Runs daily at 11:00 UTC (7:00 AM US Eastern)
   workflow_dispatch: # Allows manual trigger from GitHub UI
 
 jobs:
@@ -28,5 +29,6 @@ jobs:
           EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+          BCC_RECIPIENTS: ${{ secrets.BCC_RECIPIENTS }}
         run: |
           python -m lbi_surf.main

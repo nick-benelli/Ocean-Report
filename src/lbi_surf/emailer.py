@@ -1,64 +1,57 @@
 import smtplib
 from email.mime.text import MIMEText
-from datetime import datetime
+from email.message import EmailMessage
+from typing import Optional, List
 
-
-# Email config
+# Email configuration constants
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 EMAIL_SENDER = "nbenelli.waterreport@gmail.com"
-# EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-EMAIL_RECIPIENT = "nick.benelli12@gmail.com"
 
 
 def send_email(
-    subject="🌊 Daily Water Report",
-    body="Here is the daily water",
-    sender_email="yourapp@gmail.com",
-    recipient_email="your@email.com",
-    email_password="your_app_password",
-):
+    subject: str = "🌊 Daily Water Report",
+    body: str = "Here is the daily water report.",
+    sender_email: str = "from-person@example.com",
+    recipient_email: str = "example-recipient@gmail.com",
+    bcc_list: List[str] = [],
+    email_password: Optional[str] = None,
+) -> None:
     """
-    Send an email.
+    Sends an email with the provided subject and body using SMTP.
+
+    Args:
+        subject (str): Subject of the email.
+        body (str): Body content of the email.
+        sender_email (str): Sender's email address.
+        recipient_email (str): Recipient's email address.
+        email_password (str): Password or app-specific password for the sender's email.
+
+    Returns:
+        None
     """
+    if email_password is None:
+        raise ValueError("Email password must be provided.")
+
+    if recipient_email == "example-recipient@gmail.com" or recipient_email is None:
+        recipient_email = ""
+
+    if bcc_list == []:
+        bcc_list = [""]
+
+    # Construct the email message
     msg = MIMEText(body)
     msg["Subject"] = subject
-    msg["From"] = sender_email  # EMAIL_SENDER
-    msg["To"] = recipient_email  # EMAIL_RECIPIENT
+    msg["From"] = sender_email
+    msg["To"] = recipient_email
+    msg["Bcc"] = ", ".join(bcc_list)  # ✅ Use commas per RFC 5322
 
+    # Connect to the SMTP server and send the email
     with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-        server.starttls()
+        server.starttls()  # Upgrade the connection to secure
         server.login(sender_email, email_password)
-        server.send_message(msg)
+        server.send_message(msg)  # Send the message
 
+    # Optionally, log or print success message
+    print("Email sent successfully.")
     return None
-
-
-def format_tide_for_email(tide_events):
-    formatted = []
-    for tide in tide_events:
-        dt = datetime.strptime(tide["t"], "%Y-%m-%d %H:%M")
-        time_str = dt.strftime("%-I:%M %p")  # e.g., 2:47 PM
-        tide_type = "High Tide" if tide["type"] == "H" else "Low Tide"
-        height = float(tide["v"])
-        formatted.append(f"{tide_type} at {time_str} — {height:.1f} ft")
-    return "\n".join(formatted)
-
-
-def generate_email_body(
-    tide_events, water_temp_fahrenheit, wind_text: str = None
-) -> str:
-    today = datetime.now().strftime("%A, %B %d, %Y")
-
-    tide_section = format_tide_for_email(tide_events)
-
-    body = (
-        f"Daily Water Report – {today} \n\n"
-        f"🌡️ Water Temperature: {water_temp_fahrenheit}\n\n"
-        f"🌊 Tides:\n{tide_section}\n\n"
-    )
-    if wind_text:
-        # body += f"🌬️ Wind:\n{wind_text}\n\n"
-        body += f"{wind_text}\n\n"
-
-    return body
