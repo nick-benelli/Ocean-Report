@@ -205,14 +205,14 @@ def convert_data_to_text(wind_data: List[Dict[str, Any]]) -> str:
 
 def format_wind_forecast_email(wind_data: List[Dict[str, Any]]) -> str:
     lines = []
-    lines.append("**Wind Forecast for Today** 🌬️\n")
+    lines.append("Wind Forecast for Today 🌬️")
     lines.append(
         "Here’s the wind forecast near your beach (facing 140°) for key times today:\n"
     )
 
     for entry in wind_data:
         # line = f"- **{entry['time']}** – {entry['speed_mph']} mph ({entry['speed_kmh']} km/h) from **{entry['direction']} ({entry['direction_deg']}°)** → **{entry['wind_type']}**"
-        line = f"- **{entry['time']}** – {entry['speed_mph']} mph from **{entry['direction']} ({entry['direction_deg']}°)** → **{entry['wind_type']}**"
+        line = f"- {entry['time']} – {entry['speed_mph']} mph from {entry['direction']} ({entry['direction_deg']}°) → {entry['wind_type']}"
         lines.append(line)
 
     lines.append(
@@ -221,3 +221,20 @@ def format_wind_forecast_email(wind_data: List[Dict[str, Any]]) -> str:
 
     text = "\n".join(lines)
     return text
+
+
+def format_wind_forecast_html(wind_data: List[Dict[str, Any]]) -> str:
+    lines = []
+    lines.append("<h2>Wind Forecast for Today 🌬️</h2>")
+    lines.append(
+        "<p>Here’s the wind forecast near your beach (facing 140°) for key times today:</p>"
+    )
+    lines.append("<ul>")
+    for entry in wind_data:
+        line = f"<li><strong>{entry['time']}</strong> – {entry['speed_mph']} mph from <strong>{entry['direction']} ({entry['direction_deg']}°)</strong> → <strong>{entry['wind_type']}</strong></li>"
+        lines.append(line)
+    lines.append("</ul>")
+    lines.append(
+        "<p>All winds are <strong>onshore</strong>, which may create choppier ocean conditions and less ideal surf.</p>"
+    )
+    return "\n".join(lines)
