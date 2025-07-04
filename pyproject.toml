@@ -1,0 +1,21 @@
+[project]
+name = "lbi-surf"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Nick-Benelli", email = "31021342+nick-benelli@users.noreply.github.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "ipykernel>=6.29.5",
+    "pandas>=2.3.0",
+    "requests>=2.32.4",
+]
+
+[project.scripts]
+lbi-surf = "lbi_surf:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
