@@ -14,8 +14,13 @@ logger = logging.getLogger(__name__)
 def main():
     load_dotenv()
 
-    email_password = os.getenv("EMAIL_PASSWORD")
+    EMAIL_SENDER = os.getenv("EMAIL_SENDER")
+    EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+    EMAIL_RECIPIENT = os.getenv("EMAIL_RECIPIENT")
+
+    # email_password = os.getenv("EMAIL_PASSWORD")
     today = datetime.now().strftime("%Y%m%d")
+    today_date_str = datetime.today().strftime("%Y-%m-%d")
 
     # Get tides
     logger.info("Fetching tide data...")
@@ -32,11 +37,11 @@ def main():
     email_body = emailer.generate_email_body(daytime_tides, h20_temp_str)
     logger.info("Sending email...")
     emailer.send_email(
-        subject="🌊 Daily Water Report",
+        subject=f"🌊 Daily Water Report: {today_date_str}",
         body=email_body,
-        sender_email=constants.EMAIL_SENDER,
-        recipient_email=constants.EMAIL_RECIPIENT,
-        email_password=email_password,
+        sender_email=EMAIL_SENDER,
+        recipient_email=EMAIL_RECIPIENT,
+        email_password=EMAIL_PASSWORD,
     )
 
     print("Email sent successfully!")

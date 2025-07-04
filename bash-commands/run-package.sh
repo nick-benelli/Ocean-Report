@@ -1,0 +1,1 @@
+uv run -m lbi_surf.main
