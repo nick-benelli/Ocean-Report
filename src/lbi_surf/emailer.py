@@ -51,7 +51,7 @@ def generate_email_body(tide_events, water_temp_fahrenheit):
     tide_section = format_tide_for_email(tide_events)
 
     body = (
-        f"🌊 Daily Water Report – {today} 🌊\n\n"
+        f"Daily Water Report – {today} \n\n"
         f"🌡️ Water Temperature: {water_temp_fahrenheit}\n\n"
         f"🌊 Tides:\n{tide_section}\n\n"
         # f"Have a great day on the water!"
