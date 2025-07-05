@@ -84,23 +84,18 @@ def format_wind_forecast_email(wind_data: List[Dict[str, Any]]) -> str:
         "🌬️ Wind Forecast for Today",
         "/tHere’s the wind forecast near your beach (facing 140°) for key times today:\n",
     ]
-    
+
     for entry in wind_data:
-        time_str = entry["time"].ljust(5)  # e.g., '8 AM ' or '12 PM'
-        speed_str = f"{entry['speed_mph']:.1f}".rjust(4)  # right-align speeds like '13.0' or ' 4.0'
-        direction = entry["direction"].ljust(3)           # 'NW ', 'ENE', etc.
-        deg = f"({entry['direction_deg']}°)".rjust(6)     # Align degrees with parentheses
+        time_str = entry["time"].rjust(5)  # e.g., '8 AM ' or '12 PM'
+        speed_str = f"{entry['speed_mph']:.1f}".rjust(
+            4
+        )  # right-align speeds like '13.0' or ' 4.0'
+        direction = entry["direction"].ljust(3)  # 'NW ', 'ENE', etc.
+        deg = f"({entry['direction_deg']}°)".rjust(6)  # Align degrees with parentheses
         wind_type = entry["wind_type"]
 
-        line = f"- {time_str} – {speed_str} mph from {direction} {deg} → {wind_type}"
+        line = f"- {time_str}: {speed_str} mph from {direction} {deg} → {wind_type}"
         lines.append(line)
-
-    #for entry in wind_data:
-        #line = (
-            #f"- {entry['time']} – {entry['speed_mph']} mph from "
-            #f"{entry['direction']} ({entry['direction_deg']}°) → {entry['wind_type']}"
-        #)
-        #lines.append(line)
 
     return "\n".join(lines) + "\n\n"
 

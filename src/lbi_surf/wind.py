@@ -103,10 +103,10 @@ def classify_wind_relative_to_beach(
     if diff <= 22.5:
         return "Onshore"
     elif diff <= 67.5:
-        return "Onshore/Cross-shore"
+        return "Cross/Onshore"
     elif diff <= 112.5:
         return "Cross-shore"
     elif diff <= 157.5:
-        return "Cross-shore/Offshore"
+        return "Cross/Offshore"
     else:
         return "Offshore"

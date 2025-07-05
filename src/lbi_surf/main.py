@@ -5,8 +5,6 @@ from dotenv import load_dotenv
 from . import constants, tide, water_temp, emailer, wind, email_formatter as formatter
 import logging
 
-# Constants
-SEND_EMAIL = True
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
@@ -14,7 +12,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def main():
+def main(run_email: bool = True):
     load_dotenv()
 
     # Env Variables
@@ -58,7 +56,7 @@ def main():
 
     email_subject = f"🌊 Daily Water Report: {today_date_str}"
     logger.info("Sending email...")
-    if SEND_EMAIL:
+    if run_email:
         emailer.send_email(
             subject=email_subject,
             body=email_body,
