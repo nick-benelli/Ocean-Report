@@ -82,7 +82,7 @@ def format_wind_forecast_email(wind_data: List[Dict[str, Any]]) -> str:
     """
     lines = [
         "🌬️ Wind Forecast for Today",
-        "/tHere’s the wind forecast near your beach (facing 140°) for key times today:\n",
+        "Here’s the wind forecast near your beach (facing 140°) for key times today:\n",
     ]
 
     for entry in wind_data:
