@@ -94,7 +94,7 @@ def format_wind_forecast_email(wind_data: List[Dict[str, Any]]) -> str:
         deg = f"({entry['direction_deg']}°)".rjust(6)  # Align degrees with parentheses
         wind_type = entry["wind_type"]
 
-        line = f"- {time_str}: {speed_str} mph from {direction} {deg} → {wind_type}"
+        line = f"- {time_str}: {speed_str} mph {direction} {deg} → {wind_type}"
         lines.append(line)
 
     return "\n".join(lines) + "\n\n"
