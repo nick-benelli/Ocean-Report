@@ -1,7 +1,7 @@
 name: Test Daily Water Report
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  workflow_dispatch: # Manual trigger only
 
 jobs:
   run-water-report:
@@ -28,8 +28,12 @@ jobs:
           EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
           BCC_URL: ${{ secrets.BCC_URL }}
         run: |
-          python -c "
-import lbi_surf
-lbi_surf.hello()
-lbi_surf.main(run_email=True, test=True)
-"
+          python -c "import lbi_surf; lbi_surf.hello(); lbi_surf.main(run_email=True, test=True)"
+      - name: Check for errors
+        run: |
+          if [ $? -ne 0 ]; then
+            echo "Error occurred while running the water report."
+            exit 1
+          else
+            echo "Water report ran successfully."
+          fi
