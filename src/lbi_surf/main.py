@@ -2,9 +2,7 @@
 from datetime import datetime
 from dotenv import load_dotenv
 from . import tide, water_temp, emailer, wind, email_formatter as formatter
-from .config import (
-    config,
-)
+from .config import config
 from .logger import logger
 from .address_fetcher import get_recipients
 
@@ -33,10 +31,9 @@ def main(run_email: bool = True, test: bool = False) -> None:
 
     # NOTE: This is an unnecessary step because it is already formated
     if test:
+        TEST_RECIPIENTS = config["email"].get("test_recipients", "")
         BCC_RECIPIENTS = [
-            config["email"].get("test_recipient")
-            for email in BCC_RECIPIENTS_RAW.split(",")
-            if email.strip()
+            email.strip() for email in TEST_RECIPIENTS.split(",") if email.strip()
         ]
     else:
         BCC_RECIPIENTS = [
@@ -74,6 +71,8 @@ def main(run_email: bool = True, test: bool = False) -> None:
     )
 
     email_subject = f"🌊 Daily Water Report: {today_date_str}"
+    if test:
+        email_subject = f"TEST: {email_subject}"
     logger.info("Sending email...")
     if run_email:
         emailer.send_email(
@@ -90,7 +89,8 @@ def main(run_email: bool = True, test: bool = False) -> None:
         print("Email sending is disabled.")
         print(
             (f"\nTo: {EMAIL_RECIPIENT}\n"),
-            (f"From: {EMAIL_SENDER}\nBCC: {BCC_RECIPIENTS}"),
+            (f"BCC: {', '.join(BCC_RECIPIENTS)}\n"),
+            (f"From: {EMAIL_SENDER}\n\n\n"),
             (f"{email_subject}\n\n{email_body}"),
         )
 
