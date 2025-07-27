@@ -15,15 +15,15 @@ GITHUB_GIST_URL = os.getenv("BCC_URL")
 
 # NOAA Station ID
 EXAMPLE_STATION_ID = "8534720"
-EXAMPLE__BUOY_ID = "44091"
+EXAMPLE_BUOY_ID = "44091"
 STATION_ID = config["noaa"].get("station_id", EXAMPLE_STATION_ID)
-BUOY_ID = config["noaa"].get("buoy_id", EXAMPLE__BUOY_ID)
+BUOY_ID = config["noaa"].get("buoy_id", EXAMPLE_BUOY_ID)
 
 # Longitude and Latitude
 EXAMPLE_LONGITUDE = -74.2
 EXAMPLE_LATITUDE = 39.5
 LONGITUDE = float(config["location"].get("longitude", EXAMPLE_LONGITUDE))
-LATITUDE = flout(config["location"].get("latitude", EXAMPLE_LATITUDE))
+LATITUDE = float(config["location"].get("latitude", EXAMPLE_LATITUDE))
 
 # Email Settings
 EMAIL_SENDER = config["email"].get("sender")
