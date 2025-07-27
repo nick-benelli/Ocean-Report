@@ -5,8 +5,8 @@ from typing import Optional, List
 from .config import config
 
 # Email configuration constants
-SMTP_SERVER = config["email"]["smtp_server"]
-SMTP_PORT = config["email"]["smtp_port"]
+SMTP_SERVER = config["email"].get("smtp_server")
+SMTP_PORT = config["email"].get("smtp_port")
 
 
 def send_email(
