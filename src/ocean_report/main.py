@@ -1,55 +1,60 @@
 # src/ocean_report/main.py
 from datetime import datetime
 from dotenv import load_dotenv
+
 from . import tide, water_temp, emailer, wind, email_formatter as formatter
 from .config import config, LONGITUDE, LATITUDE, BEACH_ORIENTATION_DEGREES
 from .logger import logger
 from .address_fetcher import get_recipients
 
+# Whether to use the recipients URL for email or environment varaible
+USE_RECIP_URL = True
+
 
 def main(run_email: bool = True, test: bool = False) -> None:
     """
-    Main function to fetch tide, water temperature, and wind data,
-    format it, and send an email report.
+    Fetch tide, water temperature, and wind data, format it, and send or print an email report.
+
     Args:
-        run_email (bool): If True, send the email. If False, just print the email content.
+        run_email (bool): If True, send the email. If False, print the email content.
         test (bool): If True, use test email settings.
     """
     load_dotenv()
 
-    # Env Variables
-    # Email Settings
-    EMAIL_SENDER = config["email"].get("sender", "sender@example.com")
-    EMAIL_PASSWORD = config["email"].get("password", "password1234")
-    EMAIL_RECIPIENTS = config["email"].get("recipients", "")
-    BCC_RECIPIENTS_RAW = get_recipients(test_recips=test)
+    # --- Email Settings ---
+    email_sender = config["email"].get("sender", "sender@example.com")
+    email_password = config["email"].get("password", "password1234")
+    email_recipients = config["email"].get("recipients", "")
 
-    # Location Settings
-    # LONGITUDE = config["location"].get("longitude")
-    # LATITUDE = config["location"].get("latitude")
-    STATION_ID = config["noaa"]["station_id"]
-
-    # NOTE: This is an unnecessary step because it is already formated
-    BCC_RECIPIENTS = [
-        email.strip() for email in BCC_RECIPIENTS_RAW.split(",") if email.strip()
+    # --- Recipients (BCC) ---
+    if USE_RECIP_URL:
+        bcc_recipients_raw = get_recipients(test_recips=test)
+    else:
+        bcc_recipients_raw = config["email"].get("recipients", "")
+    bcc_recipients = [
+        email.strip() for email in bcc_recipients_raw.split(",") if email.strip()
     ]
 
-    # Date
-    today = datetime.now().strftime("%Y%m%d")
+    # --- Location/Station Settings ---
+    station_id = config["noaa"]["station_id"]
+
+    # --- Date ---
+    today_str = datetime.now().strftime("%Y%m%d")
     today_date_str = datetime.today().strftime("%Y-%m-%d")
 
-    # Get tides
+    # --- Fetch Data ---
+    # Tide data
     logger.info("Fetching tide data...")
-    tides = tide.fetch_tide_data(station_id=STATION_ID, date=today)
+    tides = tide.fetch_tide_data(station_id=station_id, date=today_str)
     daytime_tides = tide.filter_daytime_tides(tides)
     tide_text = formatter.format_tide_for_email(daytime_tides)
 
-    # Get water temperature
+    # Water temperature data
     logger.info("Fetching water temp data...")
-    h20_temp = water_temp.fetch_water_temp(station_id=STATION_ID)
+    h20_temp = water_temp.fetch_water_temp(station_id=station_id)
     h20_temp_str = formatter.format_water_temp(h20_temp)
 
-    # Get wind data
+    # Wind data
     logger.info("Fetching wind data...")
     wind_data = wind.get_daily_wind_data(
         latitude=LATITUDE,
@@ -59,34 +64,35 @@ def main(run_email: bool = True, test: bool = False) -> None:
     )
     wind_text = formatter.format_wind_forecast_email(wind_data)
 
-    # Send email
+    # --- Format Email ---
     logger.info("Generating email body...")
     email_body = formatter.generate_email_body(
         sections=[h20_temp_str, tide_text, wind_text]
     )
 
-    email_subject = f"🌊 Daily Water Report: {today_date_str}"
+    email_subject = f"🌊 LBI Daily Water Report: {today_date_str}"
     if test:
         email_subject = f"TEST: {email_subject}"
-    logger.info("Sending email...")
+
+    # --- Send or Print Email ---
+    logger.info("Sending email..." if run_email else "Email sending is disabled.")
     if run_email:
         emailer.send_email(
             subject=email_subject,
             body=email_body,
-            sender_email=EMAIL_SENDER,
-            recipient_email=EMAIL_RECIPIENTS,
-            bcc_list=BCC_RECIPIENTS,
-            email_password=EMAIL_PASSWORD,
+            sender_email=email_sender,
+            recipient_email=email_recipients,
+            bcc_list=bcc_recipients,
+            email_password=email_password,
         )
-
         print("Email sent!")
     else:
         print("Email sending is disabled.")
         print(
-            (f"\nTo: {EMAIL_RECIPIENTS}\n"),
-            (f"BCC: {', '.join(BCC_RECIPIENTS)}\n"),
-            (f"From: {EMAIL_SENDER}\n\n\n"),
-            (f"{email_subject}\n\n{email_body}"),
+            f"\nTo: {email_recipients}\n",
+            f"BCC: {', '.join(bcc_recipients)}\n",
+            f"From: {email_sender}\n\n\n",
+            f"{email_subject}\n\n{email_body}",
         )
 
     return None
