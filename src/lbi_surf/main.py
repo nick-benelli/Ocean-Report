@@ -19,9 +19,9 @@ def main(run_email: bool = True, test: bool = False) -> None:
 
     # Env Variables
     # Email Settings
-    EMAIL_SENDER = config["email"]["sender"]
-    EMAIL_PASSWORD = config["email"]["password"]
-    EMAIL_RECIPIENT = config["email"]["recipient"]
+    EMAIL_SENDER = config["email"].get("sender", "sender@example.com")
+    EMAIL_PASSWORD = config["email"].get("password", "password1234")
+    EMAIL_RECIPIENTS = config["email"].get("recipients", "")
     BCC_RECIPIENTS_RAW = get_recipients(test_recips=test)
 
     # Location Settings
@@ -73,7 +73,7 @@ def main(run_email: bool = True, test: bool = False) -> None:
             subject=email_subject,
             body=email_body,
             sender_email=EMAIL_SENDER,
-            recipient_email=EMAIL_RECIPIENT,
+            recipient_email=EMAIL_RECIPIENTS,
             bcc_list=BCC_RECIPIENTS,
             email_password=EMAIL_PASSWORD,
         )
@@ -82,7 +82,7 @@ def main(run_email: bool = True, test: bool = False) -> None:
     else:
         print("Email sending is disabled.")
         print(
-            (f"\nTo: {EMAIL_RECIPIENT}\n"),
+            (f"\nTo: {EMAIL_RECIPIENTS}\n"),
             (f"BCC: {', '.join(BCC_RECIPIENTS)}\n"),
             (f"From: {EMAIL_SENDER}\n\n\n"),
             (f"{email_subject}\n\n{email_body}"),

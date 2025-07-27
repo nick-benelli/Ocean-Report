@@ -28,7 +28,7 @@ jobs:
         env:
           EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+          EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
           BCC_URL: ${{ secrets.BCC_URL }}
           TEST_RECIPIENTS: ${{ secrets.TEST_RECIPIENTS }}
           LONGITUDE: ${{ secrets.LONGITUDE }}

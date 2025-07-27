@@ -34,9 +34,9 @@ def test_fetch_recipients_from_gist_no_url():
 
 
 def test_get_recipients_integration(monkeypatch):
-    # Patch the GITHUB_GIST_URL and requests.get
+    # Patch the RECIPIENTS_GIST_URL and requests.get
     monkeypatch.setattr(
-        address_fetcher, "GITHUB_GIST_URL", "https://example.com/gist.txt"
+        address_fetcher, "RECIPIENTS_GIST_URL", "https://example.com/gist.txt"
     )
     with patch("requests.get") as mock_get:
         mock_response = mock_get.return_value
@@ -44,3 +44,9 @@ def test_get_recipients_integration(monkeypatch):
         mock_response.text = "A@EXAMPLE.COM, b@example.com\nc@example.com"
         result = address_fetcher.get_recipients()
         assert result == "a@example.com,b@example.com,c@example.com"
+
+
+if __name__ == "__main__":
+    import pytest
+
+    pytest.main([__file__])

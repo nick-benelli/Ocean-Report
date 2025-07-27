@@ -9,7 +9,7 @@ email:
   smtp_port: 587
   sender: ${EMAIL_SENDER}
   password: ${EMAIL_PASSWORD}
-  recipient: ${EMAIL_RECIPIENT}
+  recipients: ${EMAIL_RECIPIENTS}
   test_recipients: ${TEST_RECIPIENTS} # Optional for testing
 
 # Location Coordinates
