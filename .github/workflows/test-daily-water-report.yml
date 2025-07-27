@@ -1,4 +1,4 @@
-name: Ad Hoc Water Report
+name: Test Daily Water Report
 
 on:
   workflow_dispatch:  # Manual trigger only
