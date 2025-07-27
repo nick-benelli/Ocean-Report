@@ -1,7 +1,7 @@
 [project]
-name = "lbi-surf"
+name = "ocean-report"
 version = "0.1.0"
-description = "Add your description here"
+description = "Pulls ocean and wind data and generates a report to be emailed."
 readme = "README.md"
 authors = [
     { name = "Nick-Benelli", email = "31021342+nick-benelli@users.noreply.github.com" }
@@ -17,8 +17,8 @@ dependencies = [
     "requests>=2.32.4",
 ]
 
-[project.scripts]
-lbi-surf = "lbi_surf:main"
+[project.scripts] 
+ocean-report = "ocean_report:main"
 
 [build-system]
 requires = ["hatchling"]

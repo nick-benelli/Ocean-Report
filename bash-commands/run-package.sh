@@ -1,1 +1,1 @@
-uv run -m lbi_surf.main
+uv run -m ocean_report.main

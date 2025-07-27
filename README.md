@@ -1,6 +1,6 @@
-# LBI-Surf: Daily Surf Wind Forecast Emailer 🌊
+# Ocean-Report: Daily Surf Wind Forecast Emailer 🌊
 
-LBI ocean info and water temperature
+Ocean conditions, wind, and water temperature
 
 This project automatically fetches the wind forecast near Long Beach Island, NJ each morning and emails it to a list of recipients. It uses data from [Open-Meteo](https://open-meteo.com/) and is scheduled via GitHub Actions.
 
@@ -17,33 +17,35 @@ This project automatically fetches the wind forecast near Long Beach Island, NJ 
 
 The forecast is centered on:
 
-- **Latitude**: `39.57895`
-- **Longitude**: `-74.22461`
+- **Latitude**: `39.58`
+- **Longitude**: `-74.22`
 - Approximate orientation of beach: `140°` (southeast-facing)
+- _Note: Location is approximate and can be adjusted for your local beach_
 
 ## 🛠️ Setup
 
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/surf-wind-forecast.git
-cd surf-wind-forecast
+git clone https://github.com/your-username/ocean-report.git
+cd ocean-report
 ```
 
 ### 2. Add environment variables
 
-Create a `.env` file in the root of the repo:
+Create a `.env` file in the root of the repo (example values shown):
 
 ```ini
 EMAIL_HOST=smtp.example.com
 EMAIL_PORT=587
 EMAIL_ADDRESS=your@email.com
 EMAIL_PASSWORD=your_app_password
-EMAIL_RECIPIENTS=friend1@example.com,friend2@example.com
+EMAIL_RECIPIENTS=recipient1@example.com,recipient2@example.com
 EMAIL_BCC=your@email.com
 ```
 
 - ✅ Use an App Password if using Gmail or another provider with 2FA.
+- _Do not use real email addresses in public repositories. Use environment variables or secrets for sensitive data._
 
 ### 🔐 3. Configure GitHub Secrets
 
@@ -124,5 +126,5 @@ uv build
 MIT License. Use and adapt freely.
 
 ```yaml
-Let me know if you'd like to include [deployment instructions](f), a [screenshots section](f), or a badge for [GitHub Actions status](f).
+Let me know if you'd like to include deployment instructions, a screenshots section, or a badge for GitHub Actions status.
 ```

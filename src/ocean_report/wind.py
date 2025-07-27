@@ -1,4 +1,4 @@
-# src/lbi_surf/wind.py
+# src/ocean_report/wind.py
 import requests
 from datetime import datetime
 import json
@@ -9,10 +9,20 @@ from .config import LONGITUDE as LONG, LATITUDE as LAT
 def get_daily_wind_data(
     latitude: float = LAT,
     longitude: float = LONG,
+    beach_facing_deg: float = 140.0,
     times_to_get: Set[str] = {"08:00", "12:00", "15:00", "18:00"},
 ) -> List[Dict[str, Any]]:
     """
     Retrieve hourly wind data and filter it for the specified times today.
+    Args:
+        latitude (float): Latitude of the location.
+        longitude (float): Longitude of the location.
+        beach_facing_deg (float): Orientation of the beach in degrees.
+        times_to_get (Set[str]): Set of times to filter the wind data.
+    Returns:
+        List[Dict[str, Any]]: List of dictionaries containing wind data for the specified times.
+    Raises:
+        RuntimeError: If there is an error fetching the wind data.
     """
     verbose = False
     params = {
@@ -49,7 +59,9 @@ def get_daily_wind_data(
                     "direction_deg": deg,
                     "speed_mph": kmh_to_mph(speed),
                     "direction": deg_to_16_point_direction(deg),
-                    "wind_type": classify_wind_relative_to_beach(deg),
+                    "wind_type": classify_wind_relative_to_beach(
+                        deg, beach_facing_deg=beach_facing_deg
+                    ),
                 }
             )
 
@@ -90,7 +102,7 @@ def deg_to_16_point_direction(deg: float) -> str:
 
 
 def classify_wind_relative_to_beach(
-    wind_deg: float, beach_facing_deg: float = 140
+    wind_deg: float, beach_facing_deg: float = 140.0
 ) -> str:
     """
     Classify wind direction relative to beach orientation.

@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e .  # install lbi_surf from source
+          pip install -e .  # install ocean_report from source
 
       - name: Run custom water report
         env:
@@ -34,7 +34,7 @@ jobs:
           TEST_RECIPIENTS_GIST_URL: ${{ secrets.TEST_RECIPIENTS_GIST_URL }}
 
         run: |
-          python -c "import lbi_surf; lbi_surf.hello(); lbi_surf.main(run_email=True, test=True)"
+          python -c "import ocean_report; ocean_report.hello(); ocean_report.main(run_email=True, test=True)"
       - name: Check for errors
         run: |
           if [ $? -ne 0 ]; then

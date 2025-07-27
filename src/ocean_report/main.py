@@ -1,8 +1,8 @@
-# src/lbi_surf/main.py
+# src/ocean_report/main.py
 from datetime import datetime
 from dotenv import load_dotenv
 from . import tide, water_temp, emailer, wind, email_formatter as formatter
-from .config import config, LONGITUDE, LATITUDE
+from .config import config, LONGITUDE, LATITUDE, BEACH_ORIENTATION_DEGREES
 from .logger import logger
 from .address_fetcher import get_recipients
 
@@ -54,6 +54,7 @@ def main(run_email: bool = True, test: bool = False) -> None:
     wind_data = wind.get_daily_wind_data(
         latitude=LATITUDE,
         longitude=LONGITUDE,
+        beach_facing_deg=BEACH_ORIENTATION_DEGREES,
         times_to_get={"08:00", "12:00", "15:00", "18:00"},
     )
     wind_text = formatter.format_wind_forecast_email(wind_data)

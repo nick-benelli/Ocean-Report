@@ -1,6 +1,6 @@
 import os
 import tempfile
-from lbi_surf.utils import load_config_with_env_substitution
+from ocean_report.utils import load_config_with_env_substitution
 
 
 def test_load_config_with_env_substitution(monkeypatch):

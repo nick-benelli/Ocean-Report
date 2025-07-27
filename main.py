@@ -1,8 +1,8 @@
 def main():
-    import lbi_surf
+    import ocean_report
 
-    lbi_surf.hello()
-    lbi_surf.main(run_email=False)
+    ocean_report.hello()
+    ocean_report.main(run_email=False)
     return None
 
 

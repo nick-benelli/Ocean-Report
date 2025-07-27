@@ -1,4 +1,4 @@
-# src/lbi_surf/logger.py
+# src/ocean_report/logger.py
 import logging
 
 # Configure logging

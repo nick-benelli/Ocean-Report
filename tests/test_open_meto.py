@@ -2,7 +2,7 @@ import requests
 from datetime import datetime
 import pytest
 
-from lbi_surf.wind import get_daily_wind_data
+from ocean_report.wind import get_daily_wind_data
 
 
 @pytest.fixture

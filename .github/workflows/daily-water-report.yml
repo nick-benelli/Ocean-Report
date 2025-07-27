@@ -36,4 +36,4 @@ jobs:
           RECIPIENTS_GIST_URL: ${{ secrets.RECIPIENTS_GIST_URL }}
           TEST_RECIPIENTS_GIST_URL: ${{ secrets.TEST_RECIPIENTS_GIST_URL }}
         run: |
-          python -m lbi_surf.main
+          python -m ocean_report.main

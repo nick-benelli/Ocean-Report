@@ -1,4 +1,4 @@
-# lbi_surf/email_formatter.py
+# ocean_report/email_formatter.py
 from datetime import datetime
 from typing import List, Dict, Any
 

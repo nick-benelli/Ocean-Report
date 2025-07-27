@@ -1,4 +1,4 @@
-from lbi_surf.wind import deg_to_compass, classify_wind_type
+from ocean_report.wind import deg_to_compass, classify_wind_type
 
 
 def test_deg_to_compass():

@@ -16,3 +16,4 @@ email:
 location:
   longitude: ${LONGITUDE}
   latitude: ${LATITUDE}
+  beach_orientation_degrees: 140 # ${BEACH_ORIENTATION_DEGREES}
