@@ -29,7 +29,11 @@ jobs:
           EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
-          # BCC_RECIPIENTS: ${{ secrets.BCC_RECIPIENTS }}
           BCC_URL: ${{ secrets.BCC_URL }}
+          TEST_RECIPIENTS: ${{ secrets.TEST_RECIPIENTS }}
+          LONGITUDE: ${{ secrets.LONGITUDE }}
+          LATITUDE: ${{ secrets.LATITUDE }}
+          RECIPIENTS_GIST_URL: ${{ secrets.RECIPIENTS_GIST_URL }}
+          TEST_RECIPIENTS_GIST_URL: ${{ secrets.TEST_RECIPIENTS_GIST_URL }}
         run: |
           python -m lbi_surf.main
