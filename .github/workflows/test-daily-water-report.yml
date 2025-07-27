@@ -30,6 +30,9 @@ jobs:
           TEST_RECIPIENTS: ${{ secrets.TEST_RECIPIENTS }}
           LONGITUDE: ${{ secrets.LONGITUDE }}
           LATITUDE: ${{ secrets.LATITUDE }}
+          RECIPIENTS_GIST_URL: ${{ secrets.RECIPIENTS_GIST_URL }}
+          TEST_RECIPIENTS_GIST_URL: ${{ secrets.TEST_RECIPIENTS_G
+
         run: |
           python -c "import lbi_surf; lbi_surf.hello(); lbi_surf.main(run_email=True, test=True)"
       - name: Check for errors
