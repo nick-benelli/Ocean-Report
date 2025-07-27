@@ -22,8 +22,8 @@ BUOY_ID = config["noaa"].get("buoy_id", EXAMPLE__BUOY_ID)
 # Longitude and Latitude
 EXAMPLE_LONGITUDE = -74.2
 EXAMPLE_LATITUDE = 39.5
-LONGITUDE = config["location"].get("longitude", EXAMPLE_LONGITUDE)
-LATITUDE = config["location"].get("latitude", EXAMPLE_LATITUDE)
+LONGITUDE = float(config["location"].get("longitude", EXAMPLE_LONGITUDE))
+LATITUDE = flout(config["location"].get("latitude", EXAMPLE_LATITUDE))
 
 # Email Settings
 EMAIL_SENDER = config["email"].get("sender")

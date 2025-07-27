@@ -2,7 +2,7 @@
 from datetime import datetime
 from dotenv import load_dotenv
 from . import tide, water_temp, emailer, wind, email_formatter as formatter
-from .config import config
+from .config import config, LONGITUDE, LATITUDE
 from .logger import logger
 from .address_fetcher import get_recipients
 
@@ -25,8 +25,8 @@ def main(run_email: bool = True, test: bool = False) -> None:
     BCC_RECIPIENTS_RAW = get_recipients()
 
     # Location Settings
-    LONGITUDE = config["location"]["longitude"]
-    LATITUDE = config["location"]["latitude"]
+    # LONGITUDE = config["location"]["longitude"]
+    # LATITUDE = config["location"]["latitude"]
     STATION_ID = config["noaa"]["station_id"]
 
     # NOTE: This is an unnecessary step because it is already formated
