@@ -1,10 +1,10 @@
 import requests
 import json
 from typing import Optional
-from .config import GITHUB_GIST_URL
+from .config import RECIPIENTS_GIST_URL, TEST_RECIPIENTS_GIST_URL
 
 
-def get_recipients(verbose: bool = False) -> str:
+def get_recipients(verbose: bool = False, test_recips: bool = False) -> str:
     """
     Fetches and cleans a list of email recipients from the configured Gist.
 
@@ -14,8 +14,12 @@ def get_recipients(verbose: bool = False) -> str:
     Returns:
         str: Cleaned, comma-separated string of email addresses.
     """
+    if test_recips:
+        url = TEST_RECIPIENTS_GIST_URL
+    else:
+        url = RECIPIENTS_GIST_URL
 
-    raw_text = fetch_recipients_from_gist(url=GITHUB_GIST_URL)
+    raw_text = fetch_recipients_from_gist(url=url)
     return parse_recipients(raw_text, verbose=verbose)
 
 

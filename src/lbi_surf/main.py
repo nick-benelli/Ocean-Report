@@ -22,7 +22,7 @@ def main(run_email: bool = True, test: bool = False) -> None:
     EMAIL_SENDER = config["email"]["sender"]
     EMAIL_PASSWORD = config["email"]["password"]
     EMAIL_RECIPIENT = config["email"]["recipient"]
-    BCC_RECIPIENTS_RAW = get_recipients()
+    BCC_RECIPIENTS_RAW = get_recipients(test_recips=test)
 
     # Location Settings
     # LONGITUDE = config["location"]["longitude"]
@@ -30,15 +30,9 @@ def main(run_email: bool = True, test: bool = False) -> None:
     STATION_ID = config["noaa"]["station_id"]
 
     # NOTE: This is an unnecessary step because it is already formated
-    if test:
-        TEST_RECIPIENTS = config["email"].get("test_recipients", "")
-        BCC_RECIPIENTS = [
-            email.strip() for email in TEST_RECIPIENTS.split(",") if email.strip()
-        ]
-    else:
-        BCC_RECIPIENTS = [
-            email.strip() for email in BCC_RECIPIENTS_RAW.split(",") if email.strip()
-        ]
+    BCC_RECIPIENTS = [
+        email.strip() for email in BCC_RECIPIENTS_RAW.split(",") if email.strip()
+    ]
 
     # Date
     today = datetime.now().strftime("%Y%m%d")

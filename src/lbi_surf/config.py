@@ -10,7 +10,8 @@ config = utils.load_config_with_env_substitution(constants.CONFIG_PATH)
 
 
 # Path to the configuration file
-GITHUB_GIST_URL = os.getenv("BCC_URL")
+RECIPIENTS_GIST_URL = os.getenv("RECIP_GIST_URL")
+TEST_RECIPIENTS_GIST_URL = os.getenv("RECIP_GIST_URL")
 
 
 # NOAA Station ID
