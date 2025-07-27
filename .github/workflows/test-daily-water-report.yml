@@ -27,6 +27,7 @@ jobs:
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
           BCC_URL: ${{ secrets.BCC_URL }}
+          TEST_RECIPIENTS: ${{ secrets.TEST_RECIPIENTS }}
         run: |
           python -c "import lbi_surf; lbi_surf.hello(); lbi_surf.main(run_email=True, test=True)"
       - name: Check for errors
