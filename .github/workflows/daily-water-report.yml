@@ -35,5 +35,6 @@ jobs:
           LATITUDE: ${{ secrets.LATITUDE }}
           RECIPIENTS_GIST_URL: ${{ secrets.RECIPIENTS_GIST_URL }}
           TEST_RECIPIENTS_GIST_URL: ${{ secrets.TEST_RECIPIENTS_GIST_URL }}
+          BEACH_ORIENTATION_DEGREES: ${{ secrets.BEACH_ORIENTATION_DEGREES || '140' }} # Default to 0 if not set
         run: |
           python -m ocean_report.main

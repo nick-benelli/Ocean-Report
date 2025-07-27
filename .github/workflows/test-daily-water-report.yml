@@ -25,13 +25,14 @@ jobs:
         env:
           EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-          EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
+          EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS || '' }}
           BCC_URL: ${{ secrets.BCC_URL }}
           TEST_RECIPIENTS: ${{ secrets.TEST_RECIPIENTS }}
           LONGITUDE: ${{ secrets.LONGITUDE }}
           LATITUDE: ${{ secrets.LATITUDE }}
           RECIPIENTS_GIST_URL: ${{ secrets.RECIPIENTS_GIST_URL }}
           TEST_RECIPIENTS_GIST_URL: ${{ secrets.TEST_RECIPIENTS_GIST_URL }}
+          BEACH_ORIENTATION_DEGREES: ${{ secrets.BEACH_ORIENTATION_DEGREES || '140' }} # Default to 140 if not set
 
         run: |
           python -c "import ocean_report; ocean_report.hello(); ocean_report.main(run_email=True, test=True)"
