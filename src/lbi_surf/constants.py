@@ -1,12 +1,5 @@
-# NOAA Station ID
-STATION_ID = "8534720"
-BARNEGAT_BUOY_ID = "44091"
+import os
+from dotenv import find_dotenv
 
-# Sender email
-EMAIL_SENDER = "nbenelli.waterreport@gmail.com"
-EMAIL_RECIPIENT = "nick.benelli12@gmail.com"
-
-
-# Longitude and Latitude
-LONGITUDE = -74.22461197107408
-LATITUDE = 39.5789544215873
+PROJECT_DIR = os.path.dirname(find_dotenv("pyproject.toml")) or os.getcwd()
+CONFIG_PATH = os.path.join(PROJECT_DIR, "config.yaml")

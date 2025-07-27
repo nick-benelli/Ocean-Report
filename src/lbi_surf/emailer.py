@@ -2,11 +2,11 @@ import smtplib
 from email.mime.text import MIMEText
 from email.message import EmailMessage
 from typing import Optional, List
+from .config import config
 
 # Email configuration constants
-SMTP_SERVER = "smtp.gmail.com"
-SMTP_PORT = 587
-EMAIL_SENDER = "nbenelli.waterreport@gmail.com"
+SMTP_SERVER = config["email"]["smtp_server"]
+SMTP_PORT = config["email"]["smtp_port"]
 
 
 def send_email(

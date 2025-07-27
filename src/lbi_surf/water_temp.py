@@ -1,6 +1,6 @@
 import requests
 from typing import Optional
-from .constants import STATION_ID
+from .config import STATION_ID
 
 
 def fetch_water_temp(station_id: str = STATION_ID) -> Optional[float]:

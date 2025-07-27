@@ -1,28 +1,47 @@
 # src/lbi_surf/main.py
-import os
 from datetime import datetime
 from dotenv import load_dotenv
-from . import constants, tide, water_temp, emailer, wind, email_formatter as formatter
-import logging
-
-
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
+from . import tide, water_temp, emailer, wind, email_formatter as formatter
+from .config import (
+    config,
 )
-logger = logging.getLogger(__name__)
+from .logger import logger
+from .address_fetcher import get_recipients
 
 
-def main(run_email: bool = True):
+def main(run_email: bool = True, test: bool = False) -> None:
+    """
+    Main function to fetch tide, water temperature, and wind data,
+    format it, and send an email report.
+    Args:
+        run_email (bool): If True, send the email. If False, just print the email content.
+        test (bool): If True, use test email settings.
+    """
     load_dotenv()
 
     # Env Variables
-    EMAIL_SENDER = os.getenv("EMAIL_SENDER")
-    EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-    EMAIL_RECIPIENT = os.getenv("EMAIL_RECIPIENT")
-    BCC_RECIPIENTS_RAW = os.getenv("BCC_RECIPIENTS", "")
-    BCC_RECIPIENTS = [
-        email.strip() for email in BCC_RECIPIENTS_RAW.split(",") if email.strip()
-    ]
+    # Email Settings
+    EMAIL_SENDER = config["email"]["sender"]
+    EMAIL_PASSWORD = config["email"]["password"]
+    EMAIL_RECIPIENT = config["email"]["recipient"]
+    BCC_RECIPIENTS_RAW = get_recipients()
+
+    # Location Settings
+    LONGITUDE = config["location"]["longitude"]
+    LATITUDE = config["location"]["latitude"]
+    STATION_ID = config["noaa"]["station_id"]
+
+    # NOTE: This is an unnecessary step because it is already formated
+    if test:
+        BCC_RECIPIENTS = [
+            config["email"].get("test_recipient")
+            for email in BCC_RECIPIENTS_RAW.split(",")
+            if email.strip()
+        ]
+    else:
+        BCC_RECIPIENTS = [
+            email.strip() for email in BCC_RECIPIENTS_RAW.split(",") if email.strip()
+        ]
 
     # Date
     today = datetime.now().strftime("%Y%m%d")
@@ -30,20 +49,20 @@ def main(run_email: bool = True):
 
     # Get tides
     logger.info("Fetching tide data...")
-    tides = tide.fetch_tide_data(date=today)
+    tides = tide.fetch_tide_data(station_id=STATION_ID, date=today)
     daytime_tides = tide.filter_daytime_tides(tides)
     tide_text = formatter.format_tide_for_email(daytime_tides)
 
     # Get water temperature
     logger.info("Fetching water temp data...")
-    h20_temp = water_temp.fetch_water_temp(station_id=constants.STATION_ID)
+    h20_temp = water_temp.fetch_water_temp(station_id=STATION_ID)
     h20_temp_str = formatter.format_water_temp(h20_temp)
 
     # Get wind data
     logger.info("Fetching wind data...")
     wind_data = wind.get_daily_wind_data(
-        latitude=constants.LATITUDE,
-        longitude=constants.LONGITUDE,
+        latitude=LATITUDE,
+        longitude=LONGITUDE,
         times_to_get={"08:00", "12:00", "15:00", "18:00"},
     )
     wind_text = formatter.format_wind_forecast_email(wind_data)
@@ -66,7 +85,7 @@ def main(run_email: bool = True):
             email_password=EMAIL_PASSWORD,
         )
 
-        print("Email sent successfully!")
+        print("Email sent!")
     else:
         print("Email sending is disabled.")
         print(

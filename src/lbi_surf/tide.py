@@ -1,14 +1,8 @@
 import requests
-import logging
 from datetime import datetime, time
 from typing import List, Dict, Any
-from .constants import STATION_ID
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
-)
-logger = logging.getLogger(__name__)
+from .config import STATION_ID
+from .logger import logger
 
 
 def fetch_tide_data(

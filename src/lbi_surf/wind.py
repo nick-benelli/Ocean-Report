@@ -1,10 +1,9 @@
-# lbi_surf/wind.py
+# src/lbi_surf/wind.py
 import requests
 from datetime import datetime
 import json
 from typing import Set, List, Dict, Any
-
-from .constants import LONGITUDE as LONG, LATITUDE as LAT
+from .config import LONGITUDE as LONG, LATITUDE as LAT
 
 
 def get_daily_wind_data(
