@@ -1,6 +1,6 @@
 # Ocean-Report: Daily Surf Wind Forecast Emailer 🌊
 
-[![GitHub Actions Status](https://github.com/nick-benelli/ocean-report/actions/workflows/main.yml/badge.svg)](https://github.com/nick-benelli/ocean-report/actions)
+[![GitHub Actions Status](https://github.com/nick-benelli/ocean-report/actions/workflows/daily-water-report.yml/badge.svg)](https://github.com/nick-benelli/ocean-report/actions)
 
 Automated daily surf wind and water temperature forecast for Long Beach Island, NJ, delivered by email.
 
