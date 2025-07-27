@@ -10,8 +10,8 @@ config = utils.load_config_with_env_substitution(constants.CONFIG_PATH)
 
 
 # Path to the configuration file
-RECIPIENTS_GIST_URL = os.getenv("RECIP_GIST_URL")
-TEST_RECIPIENTS_GIST_URL = os.getenv("RECIP_GIST_TEST_URL")
+RECIPIENTS_GIST_URL = os.getenv("RECIPIENTS_GIST_URL")
+TEST_RECIPIENTS_GIST_URL = os.getenv("TEST_RECIPIENTS_GIST_URL")
 
 
 # NOAA Station ID
