@@ -24,8 +24,10 @@ BUOY_ID = config["noaa"].get("buoy_id", EXAMPLE_BUOY_ID)
 EXAMPLE_LONGITUDE = -74.2
 EXAMPLE_LATITUDE = 39.5
 EXAMPLE_BEACH_ORIENTATION_DEGREES = 140  # Approximate orientation of beach in degrees
-BEACH_ORIENTATION_DEGREES = config["location"].get(
-    "beach_orientation_degrees", EXAMPLE_BEACH_ORIENTATION_DEGREES
+BEACH_ORIENTATION_DEGREES = float(
+    config["location"].get(
+        "beach_orientation_degrees", EXAMPLE_BEACH_ORIENTATION_DEGREES
+    )
 )
 LONGITUDE = float(config["location"].get("longitude", EXAMPLE_LONGITUDE))
 LATITUDE = float(config["location"].get("latitude", EXAMPLE_LATITUDE))
