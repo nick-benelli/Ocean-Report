@@ -1,39 +1,38 @@
 # Ocean-Report: Daily Surf Wind Forecast Emailer 🌊
 
-Ocean conditions, wind, and water temperature.
+[![GitHub Actions Status](https://github.com/nick-benelli/ocean-report/actions/workflows/main.yml/badge.svg)](https://github.com/nick-benelli/ocean-report/actions)
 
-This project automatically fetches the wind forecast near Long Beach Island, NJ each morning and emails it to a list of recipients. It uses data from [Open-Meteo](https://open-meteo.com/) and is scheduled via GitHub Actions.
+Automated daily surf wind and water temperature forecast for Long Beach Island, NJ, delivered by email.
+
+This project fetches the wind forecast each morning and emails it to a list of recipients. It uses [NOAA](https://tidesandcurrents.noaa.gov/) for water and [Open-Meteo](https://open-meteo.com/) wind data and is scheduled via GitHub Actions.
 
 ## ✨ Features
 
-- ✅ Fetches wind speed and direction from Open-Meteo
-- ✅ Converts wind data to mph and cardinal direction (e.g. NW, SE)
-- ✅ Labels wind as **Offshore**, **Onshore**, or **Cross-shore** based on your beach orientation
-- ✅ Formats the forecast into a clean, readable email
-- ✅ Emails the forecast daily at 6:45 AM Eastern
-- ✅ Only runs between **June 1** and **October 1**
+- Fetches wind speed and direction from Open-Meteo
+- Converts wind data to mph and cardinal direction (e.g. NW, SE)
+- Labels wind as **Offshore**, **Onshore**, or **Cross-shore** based on beach orientation
+- Formats the forecast into a clean, readable email
+- Emails the forecast daily at 6:45 AM Eastern
 
 ## 📍 Location
 
-The forecast is centered on:
-
 - **Latitude**: `39.58`
 - **Longitude**: `-74.22`
-- Approximate orientation of beach: `140°` (southeast-facing)
-- _Note: Location is approximate and can be adjusted for your local beach_
+- **Beach orientation**: `140°` (southeast-facing)
+- _Location is approximate and can be adjusted for your local beach_
 
 ## 🛠️ Setup
 
-### 1. Clone the repo
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/your-username/ocean-report.git
 cd ocean-report
 ```
 
-### 2. Add environment variables
+### 2. Configure environment variables
 
-Create a `.env` file in the root of the repo (example values shown):
+Create a `.env` file in the root directory (copy from `.env.template`). Example:
 
 ```ini
 EMAIL_HOST=smtp.example.com
@@ -50,14 +49,14 @@ TEST_RECIPIENTS=your_test@email.com                        # optional
 TEST_RECIPIENTS_GIST_URL=https://gist.github.com/your-test-gist-url  # optional
 ```
 
-- ✅ Use an App Password if using Gmail or another provider with 2FA.
-- _Do not use real email addresses in public repositories. Use environment variables or secrets for sensitive data._
+- Use an App Password if your email provider requires 2FA.
+- **Never commit real credentials to public repositories.**
 
-### 🔐 3. Configure GitHub Secrets
+### 3. Add GitHub Secrets
 
-Store the same values from your `.env` file as **GitHub Secrets** in your repository. These are used securely by the GitHub Actions workflow to send the email.
+Store the same values from your `.env` file as **GitHub Secrets** for use in Actions workflows.
 
-You'll need to add the following secrets:
+Required secrets:
 
 - `EMAIL_HOST`
 - `EMAIL_PORT`
@@ -68,22 +67,22 @@ You'll need to add the following secrets:
 - `LATITUDE`
 - `LONGITUDE`
 - `BEACH_ORIENTATION_DEGREES`
-- `RECIPIENTS_GIST_URL` # (optional, for dynamic recipient lists)
-- `TEST_RECIPIENTS` # (optional, for testing)
-- `TEST_RECIPIENTS_GIST_URL` # (optional, for testing)
 
-> 🛡️ Go to your repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
+Optional/test secrets:
+
+- `RECIPIENTS_GIST_URL`
+- `TEST_RECIPIENTS`
+- `TEST_RECIPIENTS_GIST_URL`
+
+> Go to **Settings → Secrets and variables → Actions → New repository secret**
 
 ---
 
 ### ⏰ Schedule & Workflow
 
-- The email is sent **daily at 6:45 AM Eastern Time** (which is **10:45 UTC**).
-- The workflow **only runs between June 1 and October 1**.
-- You can also **manually trigger the workflow** for testing:
-  - Go to the **Actions** tab
-  - Select **Daily Surf Wind Forecast**
-  - Click **Run workflow**
+- **Daily at 6:45 AM Eastern Time** (10:45 UTC)
+- Runs only between **June 1 and October 1**
+- **Manual run:** Actions tab → Daily Surf Wind Forecast → Run workflow
 
 ### 📨 Email Preview
 
@@ -94,25 +93,30 @@ Example output:
 - 12 PM:  4.0 mph from NNW (333°) → Offshore
 - 3 PM: 11.9 mph from ENE ( 68°) → Cross-shore
 - 6 PM:  7.5 mph from ESE (113°) → Onshore/Cross-shore
-
 ```
 
 ### 📦 Dependencies
 
-- python 3.11
-- `uv`
+- Python 3.11+
+- [`uv`](https://github.com/astral-sh/uv) (fast Python package installer)
 
-Install via:
+Install dependencies:
 
 ```bash
 uv pip install -e .
 ```
 
-or
+### 🚀 Running the Project
+
+**Command line:**
 
 ```bash
-uv build
+uv run -m ocean_report.main
 ```
+
+**Jupyter Notebook:**
+
+Open `notebooks/run.ipynb` and run the cells.
 
 ### 📂 Project Structure
 
@@ -150,23 +154,22 @@ uv build
 │   ├── test_open_meto.py
 │   └── test_wind.py
 └── uv.lock
-
 ```
 
 ### 🙏 Credits
 
 - Open-Meteo API
 - NOAA Tides & Currents
-- Wind direction naming logic adapted from NWS/NOAA standards
+- Wind direction logic adapted from NWS/NOAA standards
 
 ### 🧼 License
 
 MIT License. Use and adapt freely.
 
-```yaml
-Let me know if you'd like to include deployment instructions, a screenshots section, or a badge for GitHub Actions status.
-```
+---
+
+Let me know if you'd like to add deployment instructions, screenshots, or additional badges.
 
 ### Questions
 
-Questions? Please email Nick Benelli at [nick.benelli12@gmail.com](mailto:nick.benelli12@gmail.com)
+Questions? Email Nick Benelli: [nick.benelli12@gmail.com](mailto:nick.benelli12@gmail.com)
