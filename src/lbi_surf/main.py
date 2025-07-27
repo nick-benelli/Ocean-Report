@@ -25,8 +25,8 @@ def main(run_email: bool = True, test: bool = False) -> None:
     BCC_RECIPIENTS_RAW = get_recipients(test_recips=test)
 
     # Location Settings
-    # LONGITUDE = config["location"]["longitude"]
-    # LATITUDE = config["location"]["latitude"]
+    # LONGITUDE = config["location"].get("longitude")
+    # LATITUDE = config["location"].get("latitude")
     STATION_ID = config["noaa"]["station_id"]
 
     # NOTE: This is an unnecessary step because it is already formated
