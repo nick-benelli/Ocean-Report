@@ -2,7 +2,12 @@
 
 [![GitHub Actions Status](https://github.com/nick-benelli/ocean-report/actions/workflows/daily-water-report.yml/badge.svg)](https://github.com/nick-benelli/ocean-report/actions)
 
-Automated daily surf wind and water temperature forecast for Long Beach Island, NJ, delivered by email.
+Automated daily surf, wind, and water temperature forecast originally designed for Long Beach Island, NJ.  
+This tool can be adapted to any coastal location by updating the following parameters:
+- **Longitude**
+- **Latitude**
+- **NOAA Station ID**
+- **Beach Orientation (in degrees — the direction the beach faces, e.g. 140° for southeast-facing beaches)**
 
 This project fetches the wind forecast each morning and emails it to a list of recipients. It uses [NOAA](https://tidesandcurrents.noaa.gov/) for water and [Open-Meteo](https://open-meteo.com/) wind data and is scheduled via GitHub Actions.
 
