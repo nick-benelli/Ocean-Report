@@ -1,6 +1,11 @@
 # Python files
 notebooks/run.ipynb
 
+# DS_Store files
+#  These files are created by macOS to store custom attributes of a folder, such as
+.DS_Store
+*/.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
