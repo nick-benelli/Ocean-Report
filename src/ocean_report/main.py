@@ -7,7 +7,7 @@ from .config import config, LONGITUDE, LATITUDE, BEACH_ORIENTATION_DEGREES
 from .logger import logger
 from .address_fetcher import get_recipients
 
-# Whether to use the recipients URL for email or environment varaible
+# Whether to use the recipients URL for email or environment variable
 USE_RECIP_URL = True
 
 
