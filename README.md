@@ -169,7 +169,7 @@ Open `notebooks/run.ipynb` and run the cells.
 
 ### 🧼 License
 
-MIT License. Use and adapt freely.
+Non-Commercial License (Modified MIT)
 
 ---
 
