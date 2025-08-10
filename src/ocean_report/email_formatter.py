@@ -16,7 +16,8 @@ def generate_email_body(sections: List[str]) -> str:
     today = datetime.now().strftime("%A, %B %d, %Y")
     headings = [f"Daily Water Report – {today} \n\n"]
     trailer = [
-        "\n\nTide & water temp from NOAA (Atlantic City Station 8534720) | Wind by Open-Meteo"
+        "\n--------",
+        "\nTide & water temp from NOAA (Atlantic City Station 8534720) | Wind by Open-Meteo",
     ]
     body_list = headings + sections + trailer
     return "".join(body_list)
