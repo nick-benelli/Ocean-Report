@@ -26,15 +26,24 @@ jobs:
 
       - name: Run water report
         env:
+          # Email Creds
           EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          
+          # Location
+          LONGITUDE: ${{ secrets.LONGITUDE }}
+          LATITUDE: ${{ secrets.LATITUDE }}
+          BEACH_ORIENTATION_DEGREES: ${{ secrets.BEACH_ORIENTATION_DEGREES || '140' }} # Default to 0 if not set
+
+
+          # Recipients
           EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
           BCC_URL: ${{ secrets.BCC_URL }}
           TEST_RECIPIENTS: ${{ secrets.TEST_RECIPIENTS }}
-          LONGITUDE: ${{ secrets.LONGITUDE }}
-          LATITUDE: ${{ secrets.LATITUDE }}
+
+          # Gist Recipient URL
           RECIPIENTS_GIST_URL: ${{ secrets.RECIPIENTS_GIST_URL }}
           TEST_RECIPIENTS_GIST_URL: ${{ secrets.TEST_RECIPIENTS_GIST_URL }}
-          BEACH_ORIENTATION_DEGREES: ${{ secrets.BEACH_ORIENTATION_DEGREES || '140' }} # Default to 0 if not set
+          OFFSEASON_RECIPIENTS_GIST_URL: ${{ secrets.OFFSEASON_RECIPIENTS_GIST_URL }}
         run: |
           python -m ocean_report.main
