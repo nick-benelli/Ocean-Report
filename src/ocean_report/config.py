@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-import os
+# import os
 from . import constants, utils
 
 # Load environment variables from .env file
@@ -10,8 +10,12 @@ config = utils.load_config_with_env_substitution(constants.CONFIG_PATH)
 
 
 # Path to the configuration file
-RECIPIENTS_GIST_URL = os.getenv("RECIPIENTS_GIST_URL")
-TEST_RECIPIENTS_GIST_URL = os.getenv("TEST_RECIPIENTS_GIST_URL")
+
+RECIPIENTS_GIST_URL = config["email"]["recipient_urls"].get("main", "")
+OFFSEASON_RECIPIENTS_GIST_URL = config["email"]["recipient_urls"].get("offseason", "")
+TEST_RECIPIENTS_GIST_URL = config["email"]["recipient_urls"].get("test", "")
+# RECIPIENTS_GIST_URL = os.getenv("RECIPIENTS_GIST_URL")
+# TEST_RECIPIENTS_GIST_URL = os.getenv("TEST_RECIPIENTS_GIST_URL")
 
 
 # NOAA Station ID

@@ -1,7 +1,8 @@
 import requests
 import json
 from typing import Optional
-from .config import RECIPIENTS_GIST_URL, TEST_RECIPIENTS_GIST_URL
+import datetime as dt
+from .config import RECIPIENTS_GIST_URL, TEST_RECIPIENTS_GIST_URL, OFFSEASON_RECIPIENTS_GIST_URL
 
 
 def get_recipients(verbose: bool = False, test_recips: bool = False) -> str:
@@ -14,10 +15,24 @@ def get_recipients(verbose: bool = False, test_recips: bool = False) -> str:
     Returns:
         str: Cleaned, comma-separated string of email addresses.
     """
+    current_month = dt.datetime.now().month
+    is_summer = current_month >= 6 and current_month <= 9
+
+    if is_summer:
+        print("It's summer!")
+    else:
+        print("It's winter!")
+
     if test_recips:
+        print("Using test recipients.")
         url = TEST_RECIPIENTS_GIST_URL
     else:
-        url = RECIPIENTS_GIST_URL
+        if is_summer:
+            print("Using regular recipients URL.")
+            url = RECIPIENTS_GIST_URL
+        else:
+            print("Using offseason recipients URL.")
+            url = OFFSEASON_RECIPIENTS_GIST_URL
 
     raw_text = fetch_recipients_from_gist(url=url)
     return parse_recipients(raw_text, verbose=verbose)

@@ -11,6 +11,10 @@ email:
   password: ${EMAIL_PASSWORD}
   recipients: ${EMAIL_RECIPIENTS}
   test_recipients: ${TEST_RECIPIENTS} # Optional for testing
+  recipient_urls:
+    main: ${RECIPIENTS_GIST_URL}
+    test: ${TEST_RECIPIENTS_GIST_URL}
+    offseason: ${OFFSEASON_RECIPIENTS_GIST_URL}
 
 # Location Coordinates
 location:
