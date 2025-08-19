@@ -46,6 +46,43 @@ def test_get_recipients_integration(monkeypatch):
         assert result == "a@example.com,b@example.com,c@example.com"
 
 
+
+def test_get_recipients_offseason(monkeypatch):
+    # Patch to simulate January (offseason)
+    class FakeDateTime:
+        @classmethod
+        def now(cls):
+            return type("dt", (), {"month": 1})()
+
+    monkeypatch.setattr("datetime.datetime", FakeDateTime)
+    monkeypatch.setattr(address_fetcher, "OFFSEASON_RECIPIENTS_GIST_URL", "https://example.com/offseason.txt")
+    with patch("requests.get") as mock_get:
+        mock_response = mock_get.return_value
+        mock_response.raise_for_status.return_value = None
+        mock_response.text = "off1@example.com, off2@example.com"
+        result = address_fetcher.get_recipients()
+        assert result == "off1@example.com,off2@example.com"
+        mock_get.assert_called_once_with("https://example.com/offseason.txt")
+
+
+def test_get_recipients_summer(monkeypatch):
+    # Patch to simulate July (summer)
+    class FakeDateTime:
+        @classmethod
+        def now(cls):
+            return type("dt", (), {"month": 7})()
+
+    monkeypatch.setattr("datetime.datetime", FakeDateTime)
+    monkeypatch.setattr(address_fetcher, "RECIPIENTS_GIST_URL", "https://example.com/summer.txt")
+    with patch("requests.get") as mock_get:
+        mock_response = mock_get.return_value
+        mock_response.raise_for_status.return_value = None
+        mock_response.text = "sum1@example.com, sum2@example.com"
+        result = address_fetcher.get_recipients()
+        assert result == "sum1@example.com,sum2@example.com"
+        mock_get.assert_called_once_with("https://example.com/summer.txt")
+
+
 if __name__ == "__main__":
     import pytest
 
