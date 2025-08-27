@@ -79,6 +79,7 @@ def deg_to_16_point_direction(deg: float) -> str:
     """
     Convert degrees into one of the 16 compass rose directions.
     """
+    # Ordered List of Compass Rose Directions
     directions = [
         "N",
         "NNE",
@@ -106,8 +107,15 @@ def classify_wind_relative_to_beach(
 ) -> str:
     """
     Classify wind direction relative to beach orientation.
+    Args:
+        wind_deg (float): Wind direction in degrees.
+        beach_facing_deg (float): Beach orientation in degrees.
+    Returns:
+        str: Classification of wind direction relative to beach orientation.
     """
+    # Difference between wind and beach orientation (absolute value)
     diff = abs(wind_deg - beach_facing_deg) % 360
+    # Adjust difference to be within 180 degrees
     if diff > 180:
         diff = 360 - diff
 
@@ -121,3 +129,40 @@ def classify_wind_relative_to_beach(
         return "Cross/Offshore"
     else:
         return "Offshore"
+
+
+def classify_wind_relative_to_beach_breakdown(
+    wind_deg: float, beach_facing_deg: float = 140.0
+) -> str:
+    """
+    Classify wind direction relative to beach orientation.
+    Labels:
+        - Onshore
+        - On/Cross-shore (leans more onshore than cross)
+        - Cross-shore
+        - Off/Cross-shore (leans more offshore than cross)
+        - Offshore
+    """
+    # Difference between wind and beach orientation
+    diff = abs(wind_deg - beach_facing_deg) % 360
+    if diff > 180:
+        diff = 360 - diff
+
+    if diff <= 22.5:
+        return "Onshore"
+    elif diff <= 45:
+        return "On/Cross-shore"  # closer to onshore
+    elif diff <= 67.5:
+        return "Cross/Onshore"   # closer to cross-shore
+    elif diff <= 90:
+        return "Cross-shore"
+    elif diff <= 112.5:
+        return "Cross/Offshore"  # closer to cross-shore
+    elif diff <= 135:
+        return "Off/Cross-shore" # closer to offshore
+    elif diff <= 157.5:
+        return "Cross/Offshore"  # leaning offshore but still cross-influenced
+    else:
+        return "Offshore"
+
+
