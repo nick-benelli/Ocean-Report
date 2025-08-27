@@ -46,7 +46,6 @@ def test_get_recipients_integration(monkeypatch):
         assert result == "a@example.com,b@example.com,c@example.com"
 
 
-
 def test_get_recipients_offseason(monkeypatch):
     # Patch to simulate January (offseason)
     class FakeDateTime:
@@ -55,7 +54,11 @@ def test_get_recipients_offseason(monkeypatch):
             return type("dt", (), {"month": 1})()
 
     monkeypatch.setattr("datetime.datetime", FakeDateTime)
-    monkeypatch.setattr(address_fetcher, "OFFSEASON_RECIPIENTS_GIST_URL", "https://example.com/offseason.txt")
+    monkeypatch.setattr(
+        address_fetcher,
+        "OFFSEASON_RECIPIENTS_GIST_URL",
+        "https://example.com/offseason.txt",
+    )
     with patch("requests.get") as mock_get:
         mock_response = mock_get.return_value
         mock_response.raise_for_status.return_value = None
@@ -73,7 +76,9 @@ def test_get_recipients_summer(monkeypatch):
             return type("dt", (), {"month": 7})()
 
     monkeypatch.setattr("datetime.datetime", FakeDateTime)
-    monkeypatch.setattr(address_fetcher, "RECIPIENTS_GIST_URL", "https://example.com/summer.txt")
+    monkeypatch.setattr(
+        address_fetcher, "RECIPIENTS_GIST_URL", "https://example.com/summer.txt"
+    )
     with patch("requests.get") as mock_get:
         mock_response = mock_get.return_value
         mock_response.raise_for_status.return_value = None

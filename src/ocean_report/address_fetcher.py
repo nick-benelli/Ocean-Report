@@ -2,7 +2,11 @@ import requests
 import json
 from typing import Optional
 import datetime as dt
-from .config import RECIPIENTS_GIST_URL, TEST_RECIPIENTS_GIST_URL, OFFSEASON_RECIPIENTS_GIST_URL
+from .config import (
+    RECIPIENTS_GIST_URL,
+    TEST_RECIPIENTS_GIST_URL,
+    OFFSEASON_RECIPIENTS_GIST_URL,
+)
 
 
 def get_recipients(verbose: bool = False, test_recips: bool = False) -> str:

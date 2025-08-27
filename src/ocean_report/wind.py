@@ -153,16 +153,14 @@ def classify_wind_relative_to_beach_breakdown(
     elif diff <= 45:
         return "On/Cross-shore"  # closer to onshore
     elif diff <= 67.5:
-        return "Cross/Onshore"   # closer to cross-shore
+        return "Cross/Onshore"  # closer to cross-shore
     elif diff <= 90:
         return "Cross-shore"
     elif diff <= 112.5:
         return "Cross/Offshore"  # closer to cross-shore
     elif diff <= 135:
-        return "Off/Cross-shore" # closer to offshore
+        return "Off/Cross-shore"  # closer to offshore
     elif diff <= 157.5:
         return "Cross/Offshore"  # leaning offshore but still cross-influenced
     else:
         return "Offshore"
-
-
