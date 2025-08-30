@@ -54,7 +54,7 @@ def fetch_tide_data(
 
 
 def filter_daytime_tides(
-    tides: List[Dict[str, Any]], start_hour: float = 7, end_hour: float = 19
+    tides: List[Dict[str, Any]], start_hour: float = 7, end_hour: float = 20
 ) -> List[Dict[str, str]]:
     """
     Filters tide events to only include those occurring between start_hour and end_hour.
