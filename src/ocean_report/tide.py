@@ -60,17 +60,27 @@ def filter_daytime_tides(
     Filters tide events to only include those occurring between start_hour and end_hour.
 
     Args:
-        tides (List[Dict[str, Any]]): List of tide predictions.
+        tides (List[Dict[str, Any]]): List of tide predictions with keys {"t": timestamp, ...}.
         start_hour (float): Start of the daytime window in 24-hour format (default: 7).
         end_hour (float): End of the daytime window in 24-hour format (default: 19).
 
     Returns:
         List[Dict[str, str]]: Filtered list of tide predictions within daytime hours.
     """
+
+    def hour_to_time(hour_float: float) -> time:
+        """Convert a float hour (e.g. 19.5) to a datetime.time object."""
+        h = int(hour_float)
+        m = int((hour_float - h) * 60)
+        return time(h, m)
+
+    start = hour_to_time(start_hour)
+    end = hour_to_time(end_hour)
+
     filtered = []
     for tide in tides:
         tide_time = datetime.strptime(tide["t"], "%Y-%m-%d %H:%M").time()
-        if time(int(start_hour)) <= tide_time <= time(int(end_hour)):
+        if start <= tide_time <= end:
             filtered.append(tide)
 
     return filtered
