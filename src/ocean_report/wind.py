@@ -2,9 +2,10 @@
 import requests
 from datetime import datetime
 import json
-from typing import Set, List, Dict, Any
+import certifi
+from typing import Set, List, Dict, Any, Optional
 from .config import LONGITUDE as LONG, LATITUDE as LAT
-
+from .logger import logger
 
 def get_daily_wind_data(
     latitude: float = LAT,
@@ -33,8 +34,15 @@ def get_daily_wind_data(
     }
 
     try:
-        response = requests.get("https://api.open-meteo.com/v1/forecast", params=params)
+        # response = requests.get(
+        #     "https://api.open-meteo.com/v1/forecast", 
+        #     params=params, 
+        #     verify=certifi.where()
+        # )
+        response = safe_get("https://api.open-meteo.com/v1/forecast", params=params, timeout=10)
         response.raise_for_status()
+        if response is None:
+            return None
         data = response.json()
         if verbose:
             print(json.dumps(data, indent=2))
@@ -164,3 +172,20 @@ def classify_wind_relative_to_beach_breakdown(
         return "Cross/Offshore"  # leaning offshore but still cross-influenced
     else:
         return "Offshore"
+
+
+
+def safe_get(url: str, **kwargs) -> Optional[requests.Response]:
+    """
+    Try to GET with certifi verification first. 
+    If SSL fails, retry with verify=False.
+    """
+    try:
+        return requests.get(url, verify=certifi.where(), **kwargs)
+    except requests.exceptions.SSLError as e:
+        logger.warning("SSL verification failed (%s). Retrying with verify=False.", e)
+        try:
+            return requests.get(url, verify=False, **kwargs)
+        except requests.exceptions.RequestException as e2:
+            logger.error("Request failed even with verify=False: %s", e2)
+            return None

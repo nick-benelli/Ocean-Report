@@ -102,16 +102,22 @@ def format_wind_forecast_email(wind_data: List[Dict[str, Any]]) -> str:
     ]
 
     for entry in wind_data:
-        time_str = entry["time"].rjust(5)  # e.g., '8 AM ' or '12 PM'
-        speed_str = f"{entry['speed_mph']:.1f}".rjust(
-            4
-        )  # right-align speeds like '13.0' or ' 4.0'
-        direction = entry["direction"].ljust(3)  # 'NW ', 'ENE', etc.
-        deg = f"({entry['direction_deg']}°)".rjust(6)  # Align degrees with parentheses
-        wind_type = entry["wind_type"]
+        try:
+            time_str = entry["time"].rjust(5)  # e.g., '8 AM ' or '12 PM'
+            speed_str = f"{entry['speed_mph']:.1f}".rjust(
+                4
+            )  # right-align speeds like '13.0' or ' 4.0'
+            direction = entry["direction"].ljust(3)  # 'NW ', 'ENE', etc.
+            deg = f"({entry['direction_deg']}°)".rjust(6)  # Align degrees with parentheses
+            wind_type = entry["wind_type"]
 
-        line = f"- {time_str}: {speed_str} mph {direction} {deg} → {wind_type}"
-        lines.append(line)
+            line = f"- {time_str}: {speed_str} mph {direction} {deg} → {wind_type}"
+            lines.append(line)
+        except (KeyError, TypeError, ValueError):
+            continue
+
+    if len(lines) < 3:
+        return "🌬️ Wind Forecast: unavailable\n\n"
 
     return "\n".join(lines) + "\n\n"
 
