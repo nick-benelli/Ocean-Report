@@ -43,8 +43,14 @@ jobs:
           TEST_RECIPIENTS_GIST_URL: ${{ secrets.TEST_RECIPIENTS_GIST_URL }}
           OFFSEASON_RECIPIENTS_GIST_URL: ${{ secrets.OFFSEASON_RECIPIENTS_GIST_URL }}
 
+          # Control variables for your script
+          RUN_EMAIL: "true"  # set to "false" if you want to skip sending email
+          TEST: "true"       # set to "false" to run in normal mode
+
+
         run: |
-          python -c "import ocean_report; ocean_report.hello(); ocean_report.main(run_email=True, test=True)"
+          # python -c "import ocean_report; ocean_report.hello(); ocean_report.main(run_email=True, test=True)"
+          python scripts/run-report.py
       - name: Check for errors
         run: |
           if [ $? -ne 0 ]; then
