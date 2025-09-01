@@ -1,6 +1,6 @@
 # ocean_report/email_formatter.py
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 
 def generate_email_body(sections: List[str]) -> str:
@@ -24,17 +24,29 @@ def generate_email_body(sections: List[str]) -> str:
 
 
 # NOTE ---- Water Temperature ----
-def format_water_temp(water_temperature: float) -> str:
+def format_water_temp(water_temperature: Optional[float]) -> str:
     """
-    Formats the water temperature for email display.
+    Format the water temperature for email display.
 
     Args:
-        water_temperature (float): Water temperature in Fahrenheit.
+        water_temperature (Optional[float]): Water temperature in Fahrenheit,
+            or None if unavailable.
 
     Returns:
         str: Formatted water temperature string.
     """
-    return f"🌡️ Water Temperature: {water_temperature:.1f} °F\n\n"
+    try:
+        if water_temperature is None or not isinstance(water_temperature, (int, float)):
+            return "🌡️ Water Temperature: unavailable\n\n"
+
+        # Handle NaN or infinite values
+        if water_temperature != water_temperature or abs(water_temperature) == float("inf"):
+            return "🌡️ Water Temperature: unavailable\n\n"
+
+        return f"🌡️ Water Temperature: {water_temperature:.1f} °F\n\n"
+
+    except Exception:
+        return "🌡️ Water Temperature: unavailable\n\n"
 
 
 # NOTE ---- Tide ----

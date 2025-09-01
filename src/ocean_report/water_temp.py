@@ -1,6 +1,7 @@
 import requests
 from typing import Optional
 from .config import STATION_ID
+from .logger import logger
 
 
 def fetch_water_temp(station_id: str = STATION_ID) -> Optional[float]:
@@ -26,12 +27,20 @@ def fetch_water_temp(station_id: str = STATION_ID) -> Optional[float]:
     }
 
     try:
-        response = requests.get(base_url, params=params)
+        logger.log("Fetching water temperature for station %s", station_id)
+        response = requests.get(base_url, params=params, timeout=10)
+        logger.log("Water temperature response status code: ", response.status_code)
         response.raise_for_status()
         data = response.json()
+
+        if "data" not in data or not data["data"]:
+            logger.error("No water temperature data returned for station %s", station_id)
+            return None
+
         return float(data["data"][0]["v"])
+
     except (requests.RequestException, KeyError, IndexError, ValueError) as e:
-        # Log the error or handle gracefully if needed
+        logger.error("Failed to fetch water temp: %s", e)
         return None
 
 
