@@ -2,6 +2,7 @@ import requests
 import json
 from typing import Optional
 import datetime as dt
+from .utils import safe_get
 from .config import (
     RECIPIENTS_GIST_URL,
     TEST_RECIPIENTS_GIST_URL,
@@ -60,8 +61,10 @@ def fetch_recipients_from_gist(url: Optional[str] = None) -> str:
     if not url:
         raise ValueError("Gist URL is not set.")
 
-    response = requests.get(url)
-    response.raise_for_status()
+    # response = requests.get(url)
+    response = safe_get(url)
+    if response is None:
+        raise requests.HTTPError("Failed to retrieve Gist")
     return response.text
 
 

@@ -1,7 +1,8 @@
 import ocean_report
+import os
 
-RUN_EMAIL = False
-TEST = False
+RUN_EMAIL = os.getenv("RUN_EMAIL", "False").lower() == "true"
+TEST = os.getenv("TEST", "False").lower() == "true"
 
 def main():
     """
