@@ -51,8 +51,8 @@ jobs:
           TEST: "false"       # set to "false" to run in normal mode
 
         run: |
-          # python -m ocean_report.main
           python scripts/run-report.py
+          # python -m ocean_report.main # Old report to run
       - name: Check for errors
         run: |
           if [ $? -ne 0 ]; then
