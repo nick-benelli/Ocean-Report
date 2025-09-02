@@ -103,4 +103,3 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
         logger.info("Email content printed to console.")
 
     return None
-
