@@ -89,15 +89,18 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
             bcc_list=bcc_recipients,
             email_password=email_password,
         )
+        logger.info("Email sent successfully.")
         print("Email sent!")
     else:
         print("Email sending is disabled.")
+        logger.info("Email sending is disabled. Printing email content instead.")
         print(
             f"\nTo: {email_recipients}\n",
             f"BCC: {', '.join(bcc_recipients)}\n",
             f"From: {email_sender}\n\n\n",
             f"{email_subject}\n\n{email_body}",
         )
+        logger.info("Email content printed to console.")
 
     return None
 

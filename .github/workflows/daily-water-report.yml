@@ -48,7 +48,7 @@ jobs:
 
           # Control variables for your script
           RUN_EMAIL: "true"  # set to "false" if you want to skip sending email
-          TEST: "true"       # set to "false" to run in normal mode
+          TEST: "false"       # set to "false" to run in normal mode
 
         run: |
           # python -m ocean_report.main
