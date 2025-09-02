@@ -2,12 +2,14 @@ import requests
 import json
 from typing import Optional
 import datetime as dt
-from .utils import safe_get
+from .utils import safe_get, determine_is_summer
 from .logger import logger
 from .config import (
     RECIPIENTS_GIST_URL,
     TEST_RECIPIENTS_GIST_URL,
     OFFSEASON_RECIPIENTS_GIST_URL,
+    SUMMER_MEMORIAL_DAY_OFFSET,
+    SUMMER_LABOR_DAY_OFFSET,
 )
 
 
@@ -21,8 +23,12 @@ def get_recipients(verbose: bool = False, test_recips: bool = False) -> str:
     Returns:
         str: Cleaned, comma-separated string of email addresses.
     """
-    current_month = dt.datetime.now().month
-    is_summer = current_month >= 6 and current_month <= 9
+    # current_month = dt.datetime.now().month
+    is_summer = determine_is_summer(
+        today=dt.date.today(),
+        memorial_day_offset=SUMMER_MEMORIAL_DAY_OFFSET,
+        labor_day_offset=SUMMER_LABOR_DAY_OFFSET
+    )
 
     if is_summer:
         logger.info("It's summer!")

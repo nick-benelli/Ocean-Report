@@ -41,3 +41,9 @@ LATITUDE = float(config["location"].get("latitude", EXAMPLE_LATITUDE))
 EMAIL_SENDER = config["email"].get("sender")
 EMAIL_SMTP_PORT = config["email"].get("smtp_port", 587)
 EMAIL_SMTP_SERVER = config["email"].get("smtp_server", "smtp.gmail.com")
+
+
+
+# Summer time
+SUMMER_MEMORIAL_DAY_OFFSET : int = config["summer"].get("memorial_day_offset", -4)
+SUMMER_LABOR_DAY_OFFSET : int = config["summer"].get("labor_day_offset", 7)
