@@ -1,5 +1,5 @@
 # src/ocean_report/main.py
-from datetime import datetime
+from datetime import datetime, date
 from dotenv import load_dotenv
 
 from . import tide, water_temp, emailer, wind, email_formatter as formatter
@@ -21,6 +21,9 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
     """
     print("Initiating Ocean Report Email Process...")
     logger.info("Starting Ocean Report Email Process...")
+
+    print(f"Today is {date.today().strftime('%A, %B %d, %Y')}")
+    logger.info(f"Today is {date.today().strftime('%A, %B %d, %Y')}")
 
     # Load environment variables
     load_dotenv()
