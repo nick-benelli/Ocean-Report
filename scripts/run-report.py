@@ -9,8 +9,11 @@ def main():
     """
     Run Ocean report email
     """
+    # Check to see if the package is installed
     ocean_report.hello()
-    ocean_report.main(run_email=RUN_EMAIL, test=TEST)
+
+    # Run Report
+    ocean_report.run_report(run_email=RUN_EMAIL, test=TEST)
     return None
 
 

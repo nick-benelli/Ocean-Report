@@ -45,5 +45,19 @@ jobs:
           RECIPIENTS_GIST_URL: ${{ secrets.RECIPIENTS_GIST_URL }}
           TEST_RECIPIENTS_GIST_URL: ${{ secrets.TEST_RECIPIENTS_GIST_URL }}
           OFFSEASON_RECIPIENTS_GIST_URL: ${{ secrets.OFFSEASON_RECIPIENTS_GIST_URL }}
+
+          # Control variables for your script
+          RUN_EMAIL: "true"  # set to "false" if you want to skip sending email
+          TEST: "true"       # set to "false" to run in normal mode
+
         run: |
-          python -m ocean_report.main
+          # python -m ocean_report.main
+          python scripts/run-report.py
+      - name: Check for errors
+        run: |
+          if [ $? -ne 0 ]; then
+            echo "Error occurred while running the water report."
+            exit 1
+          else
+            echo "Water report ran successfully."
+          fi

@@ -3,6 +3,7 @@ import json
 from typing import Optional
 import datetime as dt
 from .utils import safe_get
+from .logger import logger
 from .config import (
     RECIPIENTS_GIST_URL,
     TEST_RECIPIENTS_GIST_URL,
@@ -24,19 +25,19 @@ def get_recipients(verbose: bool = False, test_recips: bool = False) -> str:
     is_summer = current_month >= 6 and current_month <= 9
 
     if is_summer:
-        print("It's summer!")
+        logger.info("It's summer!")
     else:
-        print("It's winter!")
+        logger.info("It's winter!")
 
     if test_recips:
-        print("Using test recipients.")
+        logger.info("Using test recipients.")
         url = TEST_RECIPIENTS_GIST_URL
     else:
         if is_summer:
-            print("Using regular recipients URL.")
+            logger.info("Using regular recipients URL.")
             url = RECIPIENTS_GIST_URL
         else:
-            print("Using offseason recipients URL.")
+            logger.info("Using offseason recipients URL.")
             url = OFFSEASON_RECIPIENTS_GIST_URL
 
     raw_text = fetch_recipients_from_gist(url=url)

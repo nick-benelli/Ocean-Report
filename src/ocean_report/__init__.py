@@ -5,11 +5,11 @@ def hello() -> None:
 
 
 from . import config, emailer as emailer, tide, water_temp  # noqa: E402, F401
-from .main import main  # noqa: E402, F401
+from .main import run_report  # noqa: E402, F401
 
 __all__ = [
     "hello",
-    "main",
+    "run_report",
     "config",
     "emailer",
     "tide",

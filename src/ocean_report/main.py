@@ -11,7 +11,7 @@ from .address_fetcher import get_recipients
 USE_RECIP_URL = True
 
 
-def main(run_email: bool = True, test: bool = False) -> None:
+def run_report(run_email: bool = True, test: bool = False) -> None:
     """
     Fetch tide, water temperature, and wind data, format it, and send or print an email report.
 
@@ -101,6 +101,3 @@ def main(run_email: bool = True, test: bool = False) -> None:
 
     return None
 
-
-if __name__ == "__main__":
-    main()
