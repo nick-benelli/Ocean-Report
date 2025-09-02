@@ -19,6 +19,10 @@ def main(run_email: bool = True, test: bool = False) -> None:
         run_email (bool): If True, send the email. If False, print the email content.
         test (bool): If True, use test email settings.
     """
+    print("Initiating Ocean Report Email Process...")
+    logger.info("Starting Ocean Report Email Process...")
+
+    # Load environment variables
     load_dotenv()
 
     # --- Email Settings ---
