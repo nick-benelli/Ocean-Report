@@ -34,7 +34,9 @@ def fetch_water_temp(station_id: str = STATION_ID) -> Optional[float]:
         data = response.json()
 
         if "data" not in data or not data["data"]:
-            logger.error("No water temperature data returned for station: %s", station_id )
+            logger.error(
+                "No water temperature data returned for station: %s", station_id
+            )
             return None
 
         return float(data["data"][0]["v"])

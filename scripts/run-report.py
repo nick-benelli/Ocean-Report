@@ -4,6 +4,7 @@ import os
 RUN_EMAIL = os.getenv("RUN_EMAIL", "False").lower() == "true"
 TEST = os.getenv("TEST", "False").lower() == "true"
 
+
 def main():
     """
     Run Ocean report email

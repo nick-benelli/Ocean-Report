@@ -40,7 +40,9 @@ def format_water_temp(water_temperature: Optional[float]) -> str:
             return "🌡️ Water Temperature: unavailable\n\n"
 
         # Handle NaN or infinite values
-        if water_temperature != water_temperature or abs(water_temperature) == float("inf"):
+        if water_temperature != water_temperature or abs(water_temperature) == float(
+            "inf"
+        ):
             return "🌡️ Water Temperature: unavailable\n\n"
 
         return f"🌡️ Water Temperature: {water_temperature:.1f} °F\n\n"
@@ -108,7 +110,9 @@ def format_wind_forecast_email(wind_data: List[Dict[str, Any]]) -> str:
                 4
             )  # right-align speeds like '13.0' or ' 4.0'
             direction = entry["direction"].ljust(3)  # 'NW ', 'ENE', etc.
-            deg = f"({entry['direction_deg']}°)".rjust(6)  # Align degrees with parentheses
+            deg = f"({entry['direction_deg']}°)".rjust(
+                6
+            )  # Align degrees with parentheses
             wind_type = entry["wind_type"]
 
             line = f"- {time_str}: {speed_str} mph {direction} {deg} → {wind_type}"

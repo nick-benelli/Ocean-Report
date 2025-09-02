@@ -26,7 +26,7 @@ def load_config_with_env_substitution(path: str = CONFIG_PATH) -> dict:
 
 def safe_get(url: str, **kwargs) -> Optional[requests.Response]:
     """
-    Try to GET with certifi verification first. 
+    Try to GET with certifi verification first.
     If SSL fails, retry with verify=False.
     """
     try:

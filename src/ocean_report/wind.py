@@ -7,6 +7,7 @@ from typing import Set, List, Dict, Any, Optional
 from .config import LONGITUDE as LONG, LATITUDE as LAT
 from .logger import logger
 
+
 def get_daily_wind_data(
     latitude: float = LAT,
     longitude: float = LONG,
@@ -35,11 +36,13 @@ def get_daily_wind_data(
 
     try:
         # response = requests.get(
-        #     "https://api.open-meteo.com/v1/forecast", 
-        #     params=params, 
+        #     "https://api.open-meteo.com/v1/forecast",
+        #     params=params,
         #     verify=certifi.where()
         # )
-        response = safe_get("https://api.open-meteo.com/v1/forecast", params=params, timeout=10)
+        response = safe_get(
+            "https://api.open-meteo.com/v1/forecast", params=params, timeout=10
+        )
         response.raise_for_status()
         if response is None:
             return None
@@ -174,10 +177,9 @@ def classify_wind_relative_to_beach_breakdown(
         return "Offshore"
 
 
-
 def safe_get(url: str, **kwargs) -> Optional[requests.Response]:
     """
-    Try to GET with certifi verification first. 
+    Try to GET with certifi verification first.
     If SSL fails, retry with verify=False.
     """
     try:
