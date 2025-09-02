@@ -4,6 +4,7 @@
 
 Automated daily surf, wind, and water temperature forecast originally designed for Long Beach Island, NJ.  
 This tool can be adapted to any coastal location by updating the following parameters:
+
 - **Longitude**
 - **Latitude**
 - **NOAA Station ID**
@@ -116,7 +117,7 @@ uv pip install -e .
 **Command line:**
 
 ```bash
-uv run -m ocean_report.main
+uv run scripts/run-report.py
 ```
 
 **Jupyter Notebook:**
