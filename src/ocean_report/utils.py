@@ -39,7 +39,7 @@ def safe_get(url: str, **kwargs) -> Optional[requests.Response]:
         except requests.exceptions.RequestException as e2:
             logger.error("Request failed even with verify=False: %s", e2)
             return None
-        
+
 
 # ---- Get Dates ----
 def get_memorial_day(year: int) -> date:
@@ -76,7 +76,9 @@ def get_labor_day(year: int) -> date:
     return sept_first + timedelta(days=days_until_monday)
 
 
-def determine_is_summer(today: date | None = None, memorial_day_offset: int = -4, labor_day_offset: int = 7) -> bool:
+def determine_is_summer(
+    today: date | None = None, memorial_day_offset: int = -4, labor_day_offset: int = 7
+) -> bool:
     """
     Determine if a given date is in 'summer' season:
     - Starts 4 days before Memorial Day. The default is -4.
@@ -84,10 +86,9 @@ def determine_is_summer(today: date | None = None, memorial_day_offset: int = -4
     """
     if today is None:
         today = date.today()
-    
+
     year = today.year
     memorial_day = get_memorial_day(year) + timedelta(days=memorial_day_offset)
     labor_day = get_labor_day(year) + timedelta(days=labor_day_offset)
 
     return memorial_day <= today <= labor_day
-

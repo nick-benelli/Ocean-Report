@@ -27,7 +27,7 @@ def get_recipients(verbose: bool = False, test_recips: bool = False) -> str:
     is_summer = determine_is_summer(
         today=dt.date.today(),
         memorial_day_offset=SUMMER_MEMORIAL_DAY_OFFSET,
-        labor_day_offset=SUMMER_LABOR_DAY_OFFSET
+        labor_day_offset=SUMMER_LABOR_DAY_OFFSET,
     )
 
     if is_summer:
