@@ -51,18 +51,18 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
 
     # --- Fetch Data ---
     # Tide data
-    logger.info("Fetching tide data...")
+    logger.info("Adding tide data...")
     tides = tide.fetch_tide_data(station_id=station_id, date=today_str)
     daytime_tides = tide.filter_daytime_tides(tides)
     tide_text = formatter.format_tide_for_email(daytime_tides)
 
     # Water temperature data
-    logger.info("Fetching water temp data...")
+    logger.info("Adding water temp data...")
     h20_temp = water_temp.fetch_water_temp(station_id=station_id)
     h20_temp_str = formatter.format_water_temp(h20_temp)
 
     # Wind data
-    logger.info("Fetching wind data...")
+    logger.info("Adding wind data...")
     wind_data = wind.get_daily_wind_data(
         latitude=LATITUDE,
         longitude=LONGITUDE,
@@ -72,7 +72,7 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
     wind_text = formatter.format_wind_forecast_email(wind_data)
 
     # --- Format Email ---
-    logger.info("Generating email body...")
+    logger.info("Constructing email...")
     email_body = formatter.generate_email_body(
         sections=[h20_temp_str, tide_text, wind_text]
     )

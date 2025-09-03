@@ -27,18 +27,19 @@ def fetch_water_temp(station_id: str = STATION_ID) -> Optional[float]:
     }
 
     try:
-        logger.info("Fetching water temperature for station: %s", station_id)
+        logger.info("Fetching water temperature for station: %s...", station_id)
         response = requests.get(base_url, params=params, timeout=10)
-        logger.info("Water temperature response status code: %s", response.status_code)
+        logger.info("\tWater temperature response status code: %s", response.status_code)
         response.raise_for_status()
         data = response.json()
 
         if "data" not in data or not data["data"]:
             logger.error(
-                "No water temperature data returned for station: %s", station_id
+                "\tNo water temperature data returned for station: %s", station_id
             )
             return None
 
+        logger.info("...Water temperature fetched successfully.")
         return float(data["data"][0]["v"])
 
     except (requests.RequestException, KeyError, IndexError, ValueError) as e:

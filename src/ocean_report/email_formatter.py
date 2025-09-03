@@ -1,6 +1,7 @@
 # ocean_report/email_formatter.py
 from datetime import datetime
 from typing import List, Dict, Any, Optional
+from .logger import logger
 
 
 def generate_email_body(sections: List[str]) -> str:
@@ -13,6 +14,7 @@ def generate_email_body(sections: List[str]) -> str:
     Returns:
         str: Full formatted email body.
     """
+    logger.info("Generating email body...")
     today = datetime.now().strftime("%A, %B %d, %Y")
     headings = [f"Daily Water Report – {today} \n\n"]
     trailer = [

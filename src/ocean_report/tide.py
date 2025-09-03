@@ -35,11 +35,14 @@ def fetch_tide_data(
     }
 
     try:
+        logger.info("Fetching tide data for station: %s on date: %s...", station_id, date)
         response = requests.get(
             "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter", params=params
         )
+        logger.info("\tTide data response status code: %s", response.status_code)
         response.raise_for_status()
         data = response.json()
+        logger.info("...Tide data fetched successfully.")
         predictions = data.get("predictions", [])
 
         if not predictions:

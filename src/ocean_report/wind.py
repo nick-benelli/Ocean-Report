@@ -40,12 +40,15 @@ def get_daily_wind_data(
         #     params=params,
         #     verify=certifi.where()
         # )
+        logger.info("Fetching wind data from Open-Meteo for lat: %s, lon: %s...", latitude, longitude)
         response = safe_get(
             "https://api.open-meteo.com/v1/forecast", params=params, timeout=10
         )
+        logger.info("\tWind data response status code: %s", response.status_code if response else 'No Response')
         response.raise_for_status()
         if response is None:
             return None
+        logger.info("...Open-Meteo wind data fetched successfully.")
         data = response.json()
         if verbose:
             print(json.dumps(data, indent=2))
