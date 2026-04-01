@@ -6,6 +6,8 @@ from ocean_report.tide import fetch_tide_data
 def test_fetch_noaa_data(monkeypatch):
     def mock_get(*args, **kwargs):
         class MockResponse:
+            status_code = 200
+
             def json(self):
                 # Match the structure expected by fetch_water_temp
                 return {"data": [{"v": 74.2}]}
@@ -44,6 +46,8 @@ def test_fetch_tide_data(monkeypatch):
 
     def mock_get(*args, **kwargs):
         class MockResponse:
+            status_code = 200
+
             def json(self):
                 return mock_response
 

@@ -41,9 +41,7 @@ def get_daily_wind_data(
             latitude,
             longitude,
         )
-        response = safe_get(
-            "https://api.open-meteo.com/v1/forecast", params=params, timeout=10
-        )
+        response = safe_get("https://api.open-meteo.com/v1/forecast", params=params)
         logger.info(
             "\tWind data response status code: %s",
             response.status_code if response else "No Response",
