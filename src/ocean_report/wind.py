@@ -40,13 +40,22 @@ def get_daily_wind_data(
         #     params=params,
         #     verify=certifi.where()
         # )
-        logger.info("Fetching wind data from Open-Meteo for lat: %s, lon: %s...", latitude, longitude)
+        logger.info(
+            "Fetching wind data from Open-Meteo for lat: %s, lon: %s...",
+            latitude,
+            longitude,
+        )
         response = safe_get(
             "https://api.open-meteo.com/v1/forecast", params=params, timeout=10
         )
-        logger.info("\tWind data response status code: %s", response.status_code if response else 'No Response')
+        logger.info(
+            "\tWind data response status code: %s",
+            response.status_code if response else "No Response",
+        )
         if response is None:
-            raise RuntimeError("Failed to fetch wind data from Open-Meteo after SSL retries")
+            raise RuntimeError(
+                "Failed to fetch wind data from Open-Meteo after SSL retries"
+            )
         response.raise_for_status()
         logger.info("...Open-Meteo wind data fetched successfully.")
         data = response.json()

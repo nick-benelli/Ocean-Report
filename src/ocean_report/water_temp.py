@@ -29,7 +29,9 @@ def fetch_water_temp(station_id: str = STATION_ID) -> Optional[float]:
     try:
         logger.info("Fetching water temperature for station: %s...", station_id)
         response = requests.get(base_url, params=params, timeout=10)
-        logger.info("\tWater temperature response status code: %s", response.status_code)
+        logger.info(
+            "\tWater temperature response status code: %s", response.status_code
+        )
         response.raise_for_status()
         data = response.json()
 

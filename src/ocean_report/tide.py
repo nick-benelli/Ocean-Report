@@ -35,7 +35,9 @@ def fetch_tide_data(
     }
 
     try:
-        logger.info("Fetching tide data for station: %s on date: %s...", station_id, date)
+        logger.info(
+            "Fetching tide data for station: %s on date: %s...", station_id, date
+        )
         response = requests.get(
             "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter", params=params
         )
