@@ -1,7 +1,9 @@
+"""Email sending module for ocean report."""
+
 import smtplib
 from email.mime.text import MIMEText
-from email.message import EmailMessage
-from typing import Optional, List
+from typing import List, Optional
+
 from .config import config
 
 # Email configuration constants
@@ -14,22 +16,13 @@ def send_email(
     body: str = "Here is the daily water report.",
     sender_email: str = "from-person@example.com",
     recipient_email: str = "example-recipient@gmail.com",
-    bcc_list: List[str] = [],
+    bcc_list: Optional[List[str]] = None,
     email_password: Optional[str] = None,
 ) -> None:
-    """
-    Sends an email with the provided subject and body using SMTP.
+    """Send email using SMTP."""
+    if bcc_list is None:
+        bcc_list = []
 
-    Args:
-        subject (str): Subject of the email.
-        body (str): Body content of the email.
-        sender_email (str): Sender's email address.
-        recipient_email (str): Recipient's email address.
-        email_password (str): Password or app-specific password for the sender's email.
-
-    Returns:
-        None
-    """
     if email_password is None:
         raise ValueError("Email password must be provided.")
 
@@ -54,4 +47,3 @@ def send_email(
 
     # Optionally, log or print success message
     print("Email sent successfully.")
-    return None

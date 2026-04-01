@@ -1,31 +1,27 @@
-# src/ocean_report/wind.py
-import requests
-from datetime import datetime
+"""Wind data fetching module for ocean report."""
+
 import json
-import certifi
-from typing import Set, List, Dict, Any, Optional
-from .config import LONGITUDE as LONG, LATITUDE as LAT
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Set
+
+import requests
+
+from .config import LATITUDE as LAT
+from .config import LONGITUDE as LONG
 from .logger import logger
+from .utils import safe_get
 
 
 def get_daily_wind_data(
     latitude: float = LAT,
     longitude: float = LONG,
     beach_facing_deg: float = 140.0,
-    times_to_get: Set[str] = {"08:00", "12:00", "15:00", "18:00"},
+    times_to_get: Optional[Set[str]] = None,
 ) -> List[Dict[str, Any]]:
-    """
-    Retrieve hourly wind data and filter it for the specified times today.
-    Args:
-        latitude (float): Latitude of the location.
-        longitude (float): Longitude of the location.
-        beach_facing_deg (float): Orientation of the beach in degrees.
-        times_to_get (Set[str]): Set of times to filter the wind data.
-    Returns:
-        List[Dict[str, Any]]: List of dictionaries containing wind data for the specified times.
-    Raises:
-        RuntimeError: If there is an error fetching the wind data.
-    """
+    """Fetch daily wind data from Open-Meteo API."""
+    if times_to_get is None:
+        times_to_get = {"08:00", "12:00", "15:00", "18:00"}
+
     verbose = False
     params = {
         "latitude": latitude,
@@ -62,7 +58,8 @@ def get_daily_wind_data(
         if verbose:
             print(json.dumps(data, indent=2))
     except requests.RequestException as e:
-        raise RuntimeError(f"Error fetching wind data: {e}")
+        logger.error("Error fetching wind data: %s", e)
+        raise RuntimeError(f"Error fetching wind data: {e}") from e
 
     selected = []
     current_date = datetime.now().date()
@@ -144,14 +141,13 @@ def classify_wind_relative_to_beach(
 
     if diff <= 22.5:
         return "Onshore"
-    elif diff <= 67.5:
+    if diff <= 67.5:
         return "Cross/Onshore"
-    elif diff <= 112.5:
+    if diff <= 112.5:
         return "Cross-shore"
-    elif diff <= 157.5:
+    if diff <= 157.5:
         return "Cross/Offshore"
-    else:
-        return "Offshore"
+    return "Offshore"
 
 
 def classify_wind_relative_to_beach_breakdown(
@@ -173,33 +169,16 @@ def classify_wind_relative_to_beach_breakdown(
 
     if diff <= 22.5:
         return "Onshore"
-    elif diff <= 45:
+    if diff <= 45:
         return "On/Cross-shore"  # closer to onshore
-    elif diff <= 67.5:
+    if diff <= 67.5:
         return "Cross/Onshore"  # closer to cross-shore
-    elif diff <= 90:
+    if diff <= 90:
         return "Cross-shore"
-    elif diff <= 112.5:
+    if diff <= 112.5:
         return "Cross/Offshore"  # closer to cross-shore
-    elif diff <= 135:
+    if diff <= 135:
         return "Off/Cross-shore"  # closer to offshore
-    elif diff <= 157.5:
+    if diff <= 157.5:
         return "Cross/Offshore"  # leaning offshore but still cross-influenced
-    else:
-        return "Offshore"
-
-
-def safe_get(url: str, **kwargs) -> Optional[requests.Response]:
-    """
-    Try to GET with certifi verification first.
-    If SSL fails, retry with verify=False.
-    """
-    try:
-        return requests.get(url, verify=certifi.where(), **kwargs)
-    except requests.exceptions.SSLError as e:
-        logger.warning("SSL verification failed (%s). Retrying with verify=False.", e)
-        try:
-            return requests.get(url, verify=False, **kwargs)
-        except requests.exceptions.RequestException as e2:
-            logger.error("Request failed even with verify=False: %s", e2)
-            return None
+    return "Offshore"

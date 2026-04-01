@@ -1,15 +1,18 @@
-# ocean_report/email_formatter.py
+"""Email formatting module for ocean report."""
+
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from .logger import logger
 
 
 def generate_email_body(sections: List[str]) -> str:
     """
-    Generates the full email body including water temperature, tides, and optional wind data.
+    Generate the full email body including water temperature, tides, and wind data.
 
     Args:
-        sections (List[str]): Sections to add to emails. Example: ['🌡️ Water Temperature: 72.5°F', '🌊 Tides:\n...']
+        sections (List[str]): Sections to add to emails. Example:
+            ['🌡️ Water Temperature: 72.5°F', '🌊 Tides:\n...']
 
     Returns:
         str: Full formatted email body.
@@ -42,14 +45,12 @@ def format_water_temp(water_temperature: Optional[float]) -> str:
             return "🌡️ Water Temperature: unavailable\n\n"
 
         # Handle NaN or infinite values
-        if water_temperature != water_temperature or abs(water_temperature) == float(
-            "inf"
-        ):
+        if water_temperature is None or abs(water_temperature) == float("inf"):
             return "🌡️ Water Temperature: unavailable\n\n"
 
         return f"🌡️ Water Temperature: {water_temperature:.1f} °F\n\n"
 
-    except Exception:
+    except (TypeError, ValueError):
         return "🌡️ Water Temperature: unavailable\n\n"
 
 
@@ -92,10 +93,11 @@ def convert_wind_data_to_text(wind_data: List[Dict[str, Any]]) -> str:
 
 def format_wind_forecast_email(wind_data: List[Dict[str, Any]]) -> str:
     """
-    Formats wind forecast data as plain text for email.
+    Format wind forecast data as plain text for email.
 
     Args:
-        wind_data (List[Dict[str, Any]]): Wind forecast with keys 'time', 'speed_mph', 'direction', 'direction_deg', and 'wind_type'.
+        wind_data (List[Dict[str, Any]]): Wind forecast with keys 'time',
+            'speed_mph', 'direction', 'direction_deg', and 'wind_type'.
 
     Returns:
         str: Plain text wind forecast section.
@@ -130,10 +132,11 @@ def format_wind_forecast_email(wind_data: List[Dict[str, Any]]) -> str:
 
 def format_wind_forecast_html(wind_data: List[Dict[str, Any]]) -> str:
     """
-    Formats wind forecast data as HTML for email clients.
+    Format wind forecast data as HTML for email clients.
 
     Args:
-        wind_data (List[Dict[str, Any]]): Wind forecast with keys 'time', 'speed_mph', 'direction', 'direction_deg', and 'wind_type'.
+        wind_data (List[Dict[str, Any]]): Wind forecast with keys 'time', 'speed_mph',
+            'direction', 'direction_deg', and 'wind_type'.
 
     Returns:
         str: HTML string of wind forecast.

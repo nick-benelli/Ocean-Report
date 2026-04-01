@@ -1,3 +1,5 @@
+"""Configuration management for ocean report."""
+
 from dotenv import load_dotenv
 
 # import os

@@ -1,3 +1,5 @@
+"""Application constants for ocean report."""
+
 import os
 from dotenv import find_dotenv
 

@@ -1,11 +1,14 @@
-# src/ocean_report/main.py
-from datetime import datetime, date
+"""Main entry point for ocean report."""
+
+from datetime import date, datetime
+
 from dotenv import load_dotenv
 
-from . import tide, water_temp, emailer, wind, email_formatter as formatter
-from .config import config, LONGITUDE, LATITUDE, BEACH_ORIENTATION_DEGREES
-from .logger import logger
+from . import email_formatter as formatter
+from . import emailer, tide, water_temp, wind
 from .address_fetcher import get_recipients
+from .config import BEACH_ORIENTATION_DEGREES, LATITUDE, LONGITUDE, config
+from .logger import logger
 
 # Whether to use the recipients URL for email or environment variable
 USE_RECIP_URL = True
@@ -23,7 +26,7 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
     logger.info("Starting Ocean Report Email Process...")
 
     print(f"Today is {date.today().strftime('%A, %B %d, %Y')}")
-    logger.info(f"Today is {date.today().strftime('%A, %B %d, %Y')}")
+    logger.info("Today is %s", date.today().strftime("%A, %B %d, %Y"))
 
     # Load environment variables
     load_dotenv()
@@ -104,5 +107,3 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
             f"{email_subject}\n\n{email_body}",
         )
         logger.info("Email content printed to console.")
-
-    return None

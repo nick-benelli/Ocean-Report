@@ -1,5 +1,8 @@
-import requests
+"""Water temperature data fetching module for ocean report."""
+
 from typing import Optional
+
+import requests
 from .config import STATION_ID
 from .logger import logger
 

@@ -1,16 +1,20 @@
-import requests
+"""Address fetcher module for ocean report."""
+
+import datetime as dt
 import json
 from typing import Optional
-import datetime as dt
-from .utils import safe_get, determine_is_summer
-from .logger import logger
+
+import requests
+
 from .config import (
-    RECIPIENTS_GIST_URL,
-    TEST_RECIPIENTS_GIST_URL,
     OFFSEASON_RECIPIENTS_GIST_URL,
-    SUMMER_MEMORIAL_DAY_OFFSET,
+    RECIPIENTS_GIST_URL,
     SUMMER_LABOR_DAY_OFFSET,
+    SUMMER_MEMORIAL_DAY_OFFSET,
+    TEST_RECIPIENTS_GIST_URL,
 )
+from .logger import logger
+from .utils import determine_is_summer, safe_get
 
 
 def get_recipients(verbose: bool = False, test_recips: bool = False) -> str:
