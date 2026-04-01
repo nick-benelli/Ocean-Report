@@ -1,4 +1,5 @@
-# src/ocean_report/logger.py
+"""Logging configuration for ocean report."""
+
 import logging
 
 # Configure logging for Lambda

@@ -1,3 +1,5 @@
+"""Configuration management for ocean report."""
+
 from dotenv import load_dotenv
 
 # import os
@@ -29,13 +31,31 @@ BUOY_ID = config["noaa"].get("buoy_id", EXAMPLE_BUOY_ID)
 EXAMPLE_LONGITUDE = -74.2
 EXAMPLE_LATITUDE = 39.5
 EXAMPLE_BEACH_ORIENTATION_DEGREES = 140  # Approximate orientation of beach in degrees
-BEACH_ORIENTATION_DEGREES = float(
+
+
+# Helper function to safely convert string to float with fallback to default
+def _safe_float_conversion(value, default):
+    """Convert value to float, returning default if value contains unsubstituted variables."""
+    try:
+        if isinstance(value, str) and value.startswith("${"):
+            return default
+        return float(value)
+    except (ValueError, TypeError):
+        return default
+
+
+BEACH_ORIENTATION_DEGREES = _safe_float_conversion(
     config["location"].get(
         "beach_orientation_degrees", EXAMPLE_BEACH_ORIENTATION_DEGREES
-    )
+    ),
+    EXAMPLE_BEACH_ORIENTATION_DEGREES,
 )
-LONGITUDE = float(config["location"].get("longitude", EXAMPLE_LONGITUDE))
-LATITUDE = float(config["location"].get("latitude", EXAMPLE_LATITUDE))
+LONGITUDE = _safe_float_conversion(
+    config["location"].get("longitude", EXAMPLE_LONGITUDE), EXAMPLE_LONGITUDE
+)
+LATITUDE = _safe_float_conversion(
+    config["location"].get("latitude", EXAMPLE_LATITUDE), EXAMPLE_LATITUDE
+)
 
 # Email Settings
 EMAIL_SENDER = config["email"].get("sender")

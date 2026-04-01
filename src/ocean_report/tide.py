@@ -1,6 +1,10 @@
-import requests
+"""Tide data fetching module for ocean report."""
+
 from datetime import datetime, time
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
+import requests
+
 from .config import STATION_ID
 from .logger import logger
 
@@ -16,7 +20,8 @@ def fetch_tide_data(
         date (str, optional): Date for predictions in YYYYMMDD format. Defaults to today.
 
     Returns:
-        List[Dict[str, str]]: A list of tide predictions, each containing time ('t'), value ('v'), and type ('type').
+        List[Dict[str, str]]: A list of tide predictions, each containing time
+            ('t'), value ('v'), and type ('type').
     """
     if date is None:
         date = datetime.now().strftime("%Y%m%d")
@@ -35,9 +40,13 @@ def fetch_tide_data(
     }
 
     try:
-        logger.info("Fetching tide data for station: %s on date: %s...", station_id, date)
+        logger.info(
+            "Fetching tide data for station: %s on date: %s...", station_id, date
+        )
         response = requests.get(
-            "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter", params=params
+            "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter",
+            params=params,
+            timeout=10,
         )
         logger.info("\tTide data response status code: %s", response.status_code)
         response.raise_for_status()
@@ -52,7 +61,7 @@ def fetch_tide_data(
         return predictions
 
     except requests.RequestException as e:
-        logger.error(f"Failed to fetch tide data: {e}")
+        logger.error("Failed to fetch tide data: %s", e)
         return []
 
 

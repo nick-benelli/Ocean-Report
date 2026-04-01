@@ -22,6 +22,8 @@ def mock_open_meteo(monkeypatch):
 
     def mock_get(*args, **kwargs):
         class MockResponse:
+            status_code = 200
+
             def json(self):
                 return mock_response
 
@@ -56,6 +58,8 @@ def test_get_daily_wind_data_empty(monkeypatch):
     # Simulate empty API response
     def mock_get(*args, **kwargs):
         class MockResponse:
+            status_code = 200
+
             def json(self):
                 return {
                     "hourly": {

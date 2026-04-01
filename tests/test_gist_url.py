@@ -25,7 +25,11 @@ def test_fetch_recipients_from_gist_success():
         mock_response.text = "test@example.com\nfoo@bar.com"
         result = address_fetcher.fetch_recipients_from_gist(url)
         assert result == "test@example.com\nfoo@bar.com"
-        mock_get.assert_called_once_with(url)
+        mock_get.assert_called_once()
+        args, kwargs = mock_get.call_args
+        assert args[0] == url
+        assert "verify" in kwargs
+        assert "timeout" in kwargs
 
 
 def test_fetch_recipients_from_gist_no_url():
@@ -47,13 +51,10 @@ def test_get_recipients_integration(monkeypatch):
 
 
 def test_get_recipients_offseason(monkeypatch):
-    # Patch to simulate January (offseason)
-    class FakeDateTime:
-        @classmethod
-        def now(cls):
-            return type("dt", (), {"month": 1})()
-
-    monkeypatch.setattr("datetime.datetime", FakeDateTime)
+    # Patch to simulate January (offseason) by patching determine_is_summer
+    monkeypatch.setattr(
+        "ocean_report.address_fetcher.determine_is_summer", lambda **kw: False
+    )
     monkeypatch.setattr(
         address_fetcher,
         "OFFSEASON_RECIPIENTS_GIST_URL",
@@ -65,17 +66,18 @@ def test_get_recipients_offseason(monkeypatch):
         mock_response.text = "off1@example.com, off2@example.com"
         result = address_fetcher.get_recipients()
         assert result == "off1@example.com,off2@example.com"
-        mock_get.assert_called_once_with("https://example.com/offseason.txt")
+        mock_get.assert_called_once()
+        args, kwargs = mock_get.call_args
+        assert args[0] == "https://example.com/offseason.txt"
+        assert "verify" in kwargs
+        assert "timeout" in kwargs
 
 
 def test_get_recipients_summer(monkeypatch):
-    # Patch to simulate July (summer)
-    class FakeDateTime:
-        @classmethod
-        def now(cls):
-            return type("dt", (), {"month": 7})()
-
-    monkeypatch.setattr("datetime.datetime", FakeDateTime)
+    # Patch to simulate July (summer) by patching determine_is_summer
+    monkeypatch.setattr(
+        "ocean_report.address_fetcher.determine_is_summer", lambda **kw: True
+    )
     monkeypatch.setattr(
         address_fetcher, "RECIPIENTS_GIST_URL", "https://example.com/summer.txt"
     )
@@ -85,7 +87,11 @@ def test_get_recipients_summer(monkeypatch):
         mock_response.text = "sum1@example.com, sum2@example.com"
         result = address_fetcher.get_recipients()
         assert result == "sum1@example.com,sum2@example.com"
-        mock_get.assert_called_once_with("https://example.com/summer.txt")
+        mock_get.assert_called_once()
+        args, kwargs = mock_get.call_args
+        assert args[0] == "https://example.com/summer.txt"
+        assert "verify" in kwargs
+        assert "timeout" in kwargs
 
 
 if __name__ == "__main__":
