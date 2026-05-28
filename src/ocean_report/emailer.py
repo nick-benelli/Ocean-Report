@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from email.mime.text import MIMEText
 from typing import List, Optional
 
-from .config import config
+from .config_loader import config
 
 # Email configuration constants
 SMTP_SERVER = config["email"].get("smtp_server")

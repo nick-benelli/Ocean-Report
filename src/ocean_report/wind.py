@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional, Set
 
 import requests
 
-from .config import LATITUDE as LAT
-from .config import LONGITUDE as LONG
+from .config_loader import LATITUDE as LAT
+from .config_loader import LONGITUDE as LONG
 from .logger import logger
 from .utils import safe_get
 

@@ -3,7 +3,7 @@
 from typing import Optional
 
 import requests
-from .config import STATION_ID
+from .config_loader import STATION_ID
 from .logger import logger
 
 

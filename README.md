@@ -103,7 +103,7 @@ Example output:
 
 ### 📦 Dependencies
 
-- Python 3.11+
+- Python 3.12+
 - [`uv`](https://github.com/astral-sh/uv) (fast Python package installer)
 
 Install dependencies:

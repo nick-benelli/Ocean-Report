@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 
 import requests
 
-from .config import STATION_ID
+from .config_loader import STATION_ID
 from .logger import logger
 
 

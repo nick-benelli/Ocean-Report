@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from . import email_formatter as formatter
 from . import emailer, tide, water_temp, wind
 from .address_fetcher import get_recipients
-from .config import BEACH_ORIENTATION_DEGREES, LATITUDE, LONGITUDE, config
+from .config_loader import BEACH_ORIENTATION_DEGREES, LATITUDE, LONGITUDE, config
 from .logger import logger
 
 # Whether to use the recipients URL for email or environment variable

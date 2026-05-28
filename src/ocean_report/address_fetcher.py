@@ -6,7 +6,7 @@ from typing import Optional
 
 import requests
 
-from .config import (
+from .config_loader import (
     OFFSEASON_RECIPIENTS_GIST_URL,
     RECIPIENTS_GIST_URL,
     SUMMER_LABOR_DAY_OFFSET,
