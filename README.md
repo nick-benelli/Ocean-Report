@@ -124,6 +124,10 @@ uv run scripts/run-report.py
 
 Open `notebooks/run.ipynb` and run the cells.
 
+### 🧭 Documentation
+
+- [Architecture](resources/docs/architecture.md)
+
 ### 📂 Project Structure
 
 ```pgsql
