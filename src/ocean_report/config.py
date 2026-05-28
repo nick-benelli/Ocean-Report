@@ -1,5 +1,6 @@
 """Configuration management for ocean report."""
 
+from typing import Any, Dict
 from dotenv import load_dotenv
 
 # import os
@@ -9,7 +10,7 @@ from . import constants, utils
 load_dotenv()
 
 # Load configuration with environment variable substitution
-config = utils.load_config_with_env_substitution(constants.CONFIG_PATH)
+config: Dict[str, Any] = utils.load_config_with_env_substitution(constants.CONFIG_PATH)
 
 
 # Path to the configuration file

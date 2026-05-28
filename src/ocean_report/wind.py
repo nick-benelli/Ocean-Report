@@ -1,6 +1,5 @@
 """Wind data fetching module for ocean report."""
 
-import json
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
 
@@ -12,17 +11,8 @@ from .logger import logger
 from .utils import safe_get
 
 
-def get_daily_wind_data(
-    latitude: float = LAT,
-    longitude: float = LONG,
-    beach_facing_deg: float = 140.0,
-    times_to_get: Optional[Set[str]] = None,
-) -> List[Dict[str, Any]]:
-    """Fetch daily wind data from Open-Meteo API."""
-    if times_to_get is None:
-        times_to_get = {"08:00", "12:00", "15:00", "18:00"}
-
-    verbose = False
+def _fetch_wind_payload(latitude: float, longitude: float) -> Dict[str, Any]:
+    """Fetch hourly wind payload from Open-Meteo."""
     params = {
         "latitude": latitude,
         "longitude": longitude,
@@ -31,11 +21,6 @@ def get_daily_wind_data(
     }
 
     try:
-        # response = requests.get(
-        #     "https://api.open-meteo.com/v1/forecast",
-        #     params=params,
-        #     verify=certifi.where()
-        # )
         logger.info(
             "Fetching wind data from Open-Meteo for lat: %s, lon: %s...",
             latitude,
@@ -52,35 +37,66 @@ def get_daily_wind_data(
             )
         response.raise_for_status()
         logger.info("...Open-Meteo wind data fetched successfully.")
-        data = response.json()
-        if verbose:
-            print(json.dumps(data, indent=2))
-    except requests.RequestException as e:
-        logger.error("Error fetching wind data: %s", e)
-        raise RuntimeError(f"Error fetching wind data: {e}") from e
+        return response.json()
+    except requests.RequestException as exc:
+        logger.error("Error fetching wind data: %s", exc)
+        raise RuntimeError(f"Error fetching wind data: {exc}") from exc
+
+
+def _build_wind_entry(
+    timestamp: str, speed_kmh: float, direction_deg: float, beach_facing_deg: float
+) -> Dict[str, Any]:
+    """Normalize one hourly wind forecast entry."""
+    forecast_time = datetime.fromisoformat(timestamp)
+    return {
+        "time": forecast_time.strftime("%-I %p"),
+        "speed_kmh": speed_kmh,
+        "direction_deg": direction_deg,
+        "speed_mph": kmh_to_mph(speed_kmh),
+        "direction": deg_to_16_point_direction(direction_deg),
+        "wind_type": classify_wind_relative_to_beach(
+            direction_deg, beach_facing_deg=beach_facing_deg
+        ),
+    }
+
+
+def _relative_angle_difference(wind_deg: float, beach_facing_deg: float) -> float:
+    """Return the smallest angular difference between wind and beach orientation."""
+    diff = abs(wind_deg - beach_facing_deg) % 360
+    if diff > 180:
+        return 360 - diff
+    return diff
+
+
+def get_daily_wind_data(
+    latitude: float = LAT,
+    longitude: float = LONG,
+    beach_facing_deg: float = 140.0,
+    times_to_get: Optional[Set[str]] = None,
+) -> List[Dict[str, Any]]:
+    """Fetch daily wind data from Open-Meteo API."""
+    if times_to_get is None:
+        times_to_get = {"08:00", "12:00", "15:00", "18:00"}
+
+    data = _fetch_wind_payload(latitude=latitude, longitude=longitude)
 
     selected = []
     current_date = datetime.now().date()
 
-    for t, speed, direction in zip(
+    for timestamp, speed_kmh, direction_deg in zip(
         data["hourly"]["time"],
         data["hourly"]["wind_speed_10m"],
         data["hourly"]["wind_direction_10m"],
     ):
-        dt = datetime.fromisoformat(t)
-        if dt.strftime("%H:%M") in times_to_get and dt.date() == current_date:
-            deg = direction
+        forecast_time = datetime.fromisoformat(timestamp)
+        if forecast_time.strftime("%H:%M") in times_to_get and forecast_time.date() == current_date:
             selected.append(
-                {
-                    "time": dt.strftime("%-I %p"),
-                    "speed_kmh": speed,
-                    "direction_deg": deg,
-                    "speed_mph": kmh_to_mph(speed),
-                    "direction": deg_to_16_point_direction(deg),
-                    "wind_type": classify_wind_relative_to_beach(
-                        deg, beach_facing_deg=beach_facing_deg
-                    ),
-                }
+                _build_wind_entry(
+                    timestamp=timestamp,
+                    speed_kmh=speed_kmh,
+                    direction_deg=direction_deg,
+                    beach_facing_deg=beach_facing_deg,
+                )
             )
 
     return selected
@@ -131,11 +147,7 @@ def classify_wind_relative_to_beach(
     Returns:
         str: Classification of wind direction relative to beach orientation.
     """
-    # Difference between wind and beach orientation (absolute value)
-    diff = abs(wind_deg - beach_facing_deg) % 360
-    # Adjust difference to be within 180 degrees
-    if diff > 180:
-        diff = 360 - diff
+    diff = _relative_angle_difference(wind_deg, beach_facing_deg)
 
     if diff <= 22.5:
         return "Onshore"
@@ -160,23 +172,18 @@ def classify_wind_relative_to_beach_breakdown(
         - Off/Cross-shore (leans more offshore than cross)
         - Offshore
     """
-    # Difference between wind and beach orientation
-    diff = abs(wind_deg - beach_facing_deg) % 360
-    if diff > 180:
-        diff = 360 - diff
+    diff = _relative_angle_difference(wind_deg, beach_facing_deg)
+    thresholds = [
+        (22.5, "Onshore"),
+        (45, "On/Cross-shore"),
+        (67.5, "Cross/Onshore"),
+        (90, "Cross-shore"),
+        (112.5, "Cross/Offshore"),
+        (135, "Off/Cross-shore"),
+        (157.5, "Cross/Offshore"),
+    ]
 
-    if diff <= 22.5:
-        return "Onshore"
-    if diff <= 45:
-        return "On/Cross-shore"  # closer to onshore
-    if diff <= 67.5:
-        return "Cross/Onshore"  # closer to cross-shore
-    if diff <= 90:
-        return "Cross-shore"
-    if diff <= 112.5:
-        return "Cross/Offshore"  # closer to cross-shore
-    if diff <= 135:
-        return "Off/Cross-shore"  # closer to offshore
-    if diff <= 157.5:
-        return "Cross/Offshore"  # leaning offshore but still cross-influenced
+    for threshold, label in thresholds:
+        if diff <= threshold:
+            return label
     return "Offshore"

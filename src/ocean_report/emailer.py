@@ -1,6 +1,7 @@
 """Email sending module for ocean report."""
 
 import smtplib
+from dataclasses import dataclass, field
 from email.mime.text import MIMEText
 from typing import List, Optional
 
@@ -11,32 +12,39 @@ SMTP_SERVER = config["email"].get("smtp_server")
 SMTP_PORT = config["email"].get("smtp_port")
 
 
+@dataclass(frozen=True)
+class EmailRecipients:
+    """Container for primary and BCC recipients."""
+
+    to_email: str = ""
+    bcc_list: List[str] = field(default_factory=list)
+
+
 def send_email(
     subject: str = "🌊 Daily Water Report",
     body: str = "Here is the daily water report.",
     sender_email: str = "from-person@example.com",
-    recipient_email: str = "example-recipient@gmail.com",
-    bcc_list: Optional[List[str]] = None,
     email_password: Optional[str] = None,
+    recipients: Optional[EmailRecipients] = None,
 ) -> None:
     """Send email using SMTP."""
-    if bcc_list is None:
-        bcc_list = []
-
     if email_password is None:
         raise ValueError("Email password must be provided.")
 
-    if recipient_email == "example-recipient@gmail.com" or recipient_email is None:
-        recipient_email = ""
+    to_email = "" if recipients is None else recipients.to_email
+    bcc_list = [] if recipients is None else recipients.bcc_list
 
-    if bcc_list == []:
+    if to_email == "example-recipient@gmail.com" or to_email is None:
+        to_email = ""
+
+    if not bcc_list:
         bcc_list = [""]
 
     # Construct the email message
     msg = MIMEText(body)
     msg["Subject"] = subject
     msg["From"] = sender_email
-    msg["To"] = recipient_email
+    msg["To"] = to_email
     msg["Bcc"] = ", ".join(bcc_list)  # ✅ Use commas per RFC 5322
 
     # Connect to the SMTP server and send the email

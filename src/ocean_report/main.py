@@ -37,12 +37,14 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
     email_recipients = config["email"].get("recipients", "")
 
     # --- Recipients (BCC) ---
-    if USE_RECIP_URL:
-        bcc_recipients_raw = get_recipients(test_recips=test)
-    else:
-        bcc_recipients_raw = config["email"].get("recipients", "")
     bcc_recipients = [
-        email.strip() for email in bcc_recipients_raw.split(",") if email.strip()
+        email.strip()
+        for email in (
+            get_recipients(test_recips=test)
+            if USE_RECIP_URL
+            else config["email"].get("recipients", "")
+        ).split(",")
+        if email.strip()
     ]
 
     # --- Location/Station Settings ---
@@ -55,24 +57,28 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
     # --- Fetch Data ---
     # Tide data
     logger.info("Adding tide data...")
-    tides = tide.fetch_tide_data(station_id=station_id, date=today_str)
-    daytime_tides = tide.filter_daytime_tides(tides)
-    tide_text = formatter.format_tide_for_email(daytime_tides)
+    tide_text = formatter.format_tide_for_email(
+        tide.filter_daytime_tides(
+            tide.fetch_tide_data(station_id=station_id, date=today_str)
+        )
+    )
 
     # Water temperature data
     logger.info("Adding water temp data...")
-    h20_temp = water_temp.fetch_water_temp(station_id=station_id)
-    h20_temp_str = formatter.format_water_temp(h20_temp)
+    h20_temp_str = formatter.format_water_temp(
+        water_temp.fetch_water_temp(station_id=station_id)
+    )
 
     # Wind data
     logger.info("Adding wind data...")
-    wind_data = wind.get_daily_wind_data(
-        latitude=LATITUDE,
-        longitude=LONGITUDE,
-        beach_facing_deg=BEACH_ORIENTATION_DEGREES,
-        times_to_get={"08:00", "12:00", "15:00", "18:00"},
+    wind_text = formatter.format_wind_forecast_email(
+        wind.get_daily_wind_data(
+            latitude=LATITUDE,
+            longitude=LONGITUDE,
+            beach_facing_deg=BEACH_ORIENTATION_DEGREES,
+            times_to_get={"08:00", "12:00", "15:00", "18:00"},
+        )
     )
-    wind_text = formatter.format_wind_forecast_email(wind_data)
 
     # --- Format Email ---
     logger.info("Constructing email...")
@@ -91,9 +97,11 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
             subject=email_subject,
             body=email_body,
             sender_email=email_sender,
-            recipient_email=email_recipients,
-            bcc_list=bcc_recipients,
             email_password=email_password,
+            recipients=emailer.EmailRecipients(
+                to_email=email_recipients,
+                bcc_list=bcc_recipients,
+            ),
         )
         logger.info("Email sent successfully.")
         print("Email sent!")
