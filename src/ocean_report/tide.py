@@ -5,12 +5,12 @@ from typing import Any, Dict, List
 
 import requests
 
-from .config_loader import STATION_ID
+from .config import get_settings
 from .logger import logger
 
 
 def fetch_tide_data(
-    station_id: str = STATION_ID, date: str = None
+    station_id: str | None = None, date: str | None = None
 ) -> List[Dict[str, str]]:
     """
     Fetch tide prediction data from the NOAA API for a given station and date.
@@ -23,6 +23,9 @@ def fetch_tide_data(
         List[Dict[str, str]]: A list of tide predictions, each containing time
             ('t'), value ('v'), and type ('type').
     """
+    if station_id is None:
+        station_id = get_settings().noaa.station_id
+
     if date is None:
         date = datetime.now().strftime("%Y%m%d")
 

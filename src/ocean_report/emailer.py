@@ -5,11 +5,7 @@ from dataclasses import dataclass, field
 from email.mime.text import MIMEText
 from typing import List, Optional
 
-from .config_loader import config
-
-# Email configuration constants
-SMTP_SERVER = config["email"].get("smtp_server")
-SMTP_PORT = config["email"].get("smtp_port")
+from .config import get_settings
 
 
 @dataclass(frozen=True)
@@ -31,6 +27,10 @@ def send_email(
     if email_password is None:
         raise ValueError("Email password must be provided.")
 
+    settings = get_settings()
+    smtp_server = settings.email.smtp_server
+    smtp_port = settings.email.smtp_port
+
     to_email = "" if recipients is None else recipients.to_email
     bcc_list = [] if recipients is None else recipients.bcc_list
 
@@ -48,7 +48,7 @@ def send_email(
     msg["Bcc"] = ", ".join(bcc_list)  # ✅ Use commas per RFC 5322
 
     # Connect to the SMTP server and send the email
-    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+    with smtplib.SMTP(smtp_server, smtp_port) as server:
         server.starttls()  # Upgrade the connection to secure
         server.login(sender_email, email_password)
         server.send_message(msg)  # Send the message

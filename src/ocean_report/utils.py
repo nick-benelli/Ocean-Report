@@ -1,33 +1,11 @@
 """Utility functions for ocean report."""
 
-import os
 from datetime import date, timedelta
-from string import Template
 from typing import Optional
 
 import certifi
 import requests
-import yaml
-from dotenv import load_dotenv
-
-from .constants import CONFIG_PATH
 from .logger import logger
-
-
-def load_config_with_env_substitution(path: str = CONFIG_PATH) -> dict:
-    """Load YAML config and substitute environment variables."""
-    # Load .env file into environment
-    load_dotenv()
-
-    with open(path, encoding="utf-8") as f:
-        content = f.read()
-
-    # Replace ${VAR_NAME} with environment variable values
-    # Use safe_substitute to avoid KeyError for missing variables (e.g., in tests)
-    template = Template(content)
-    substituted = template.safe_substitute(os.environ)
-
-    return yaml.safe_load(substituted)
 
 
 def safe_get(url: str, **kwargs) -> Optional[requests.Response]:

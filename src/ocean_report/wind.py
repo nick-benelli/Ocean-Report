@@ -5,8 +5,7 @@ from typing import Any, Dict, List, Optional, Set
 
 import requests
 
-from .config_loader import LATITUDE as LAT
-from .config_loader import LONGITUDE as LONG
+from .config import get_settings
 from .logger import logger
 from .utils import safe_get
 
@@ -69,14 +68,21 @@ def _relative_angle_difference(wind_deg: float, beach_facing_deg: float) -> floa
 
 
 def get_daily_wind_data(
-    latitude: float = LAT,
-    longitude: float = LONG,
-    beach_facing_deg: float = 140.0,
+    latitude: float | None = None,
+    longitude: float | None = None,
+    beach_facing_deg: float | None = None,
     times_to_get: Optional[Set[str]] = None,
 ) -> List[Dict[str, Any]]:
     """Fetch daily wind data from Open-Meteo API."""
     if times_to_get is None:
         times_to_get = {"08:00", "12:00", "15:00", "18:00"}
+
+    if latitude is None or longitude is None or beach_facing_deg is None:
+        settings = get_settings()
+        latitude = settings.location.latitude if latitude is None else latitude
+        longitude = settings.location.longitude if longitude is None else longitude
+        if beach_facing_deg is None:
+            beach_facing_deg = settings.location.beach_orientation_degrees
 
     data = _fetch_wind_payload(latitude=latitude, longitude=longitude)
 

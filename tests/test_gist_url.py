@@ -1,6 +1,32 @@
 import pytest
 from unittest.mock import patch
 from ocean_report import address_fetcher
+from ocean_report.config.schemas import OceanReportConfig
+
+
+def _build_settings(
+    *,
+    main_url: str = "",
+    offseason_url: str = "",
+    test_url: str = "",
+    memorial_day_offset: int = -4,
+    labor_day_offset: int = 7,
+) -> OceanReportConfig:
+    return OceanReportConfig.model_validate(
+        {
+            "email": {
+                "recipient_urls": {
+                    "main": main_url,
+                    "offseason": offseason_url,
+                    "test": test_url,
+                }
+            },
+            "summer": {
+                "memorial_day_offset": memorial_day_offset,
+                "labor_day_offset": labor_day_offset,
+            },
+        }
+    )
 
 
 def test_parse_recipients_basic():
@@ -38,9 +64,13 @@ def test_fetch_recipients_from_gist_no_url():
 
 
 def test_get_recipients_integration(monkeypatch):
-    # Patch the RECIPIENTS_GIST_URL and requests.get
     monkeypatch.setattr(
-        address_fetcher, "RECIPIENTS_GIST_URL", "https://example.com/gist.txt"
+        "ocean_report.address_fetcher.determine_is_summer", lambda **kw: True
+    )
+    monkeypatch.setattr(
+        address_fetcher,
+        "get_settings",
+        lambda: _build_settings(main_url="https://example.com/gist.txt"),
     )
     with patch("requests.get") as mock_get:
         mock_response = mock_get.return_value
@@ -51,14 +81,13 @@ def test_get_recipients_integration(monkeypatch):
 
 
 def test_get_recipients_offseason(monkeypatch):
-    # Patch to simulate January (offseason) by patching determine_is_summer
     monkeypatch.setattr(
         "ocean_report.address_fetcher.determine_is_summer", lambda **kw: False
     )
     monkeypatch.setattr(
         address_fetcher,
-        "OFFSEASON_RECIPIENTS_GIST_URL",
-        "https://example.com/offseason.txt",
+        "get_settings",
+        lambda: _build_settings(offseason_url="https://example.com/offseason.txt"),
     )
     with patch("requests.get") as mock_get:
         mock_response = mock_get.return_value
@@ -74,12 +103,13 @@ def test_get_recipients_offseason(monkeypatch):
 
 
 def test_get_recipients_summer(monkeypatch):
-    # Patch to simulate July (summer) by patching determine_is_summer
     monkeypatch.setattr(
         "ocean_report.address_fetcher.determine_is_summer", lambda **kw: True
     )
     monkeypatch.setattr(
-        address_fetcher, "RECIPIENTS_GIST_URL", "https://example.com/summer.txt"
+        address_fetcher,
+        "get_settings",
+        lambda: _build_settings(main_url="https://example.com/summer.txt"),
     )
     with patch("requests.get") as mock_get:
         mock_response = mock_get.return_value

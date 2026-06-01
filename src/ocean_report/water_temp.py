@@ -3,11 +3,12 @@
 from typing import Optional
 
 import requests
-from .config_loader import STATION_ID
+
+from .config import get_settings
 from .logger import logger
 
 
-def fetch_water_temp(station_id: str = STATION_ID) -> Optional[float]:
+def fetch_water_temp(station_id: str | None = None) -> Optional[float]:
     """
     Fetch the latest water temperature in Fahrenheit from NOAA API.
 
@@ -17,6 +18,9 @@ def fetch_water_temp(station_id: str = STATION_ID) -> Optional[float]:
     Returns:
         Optional[float]: Latest recorded water temperature in Fahrenheit, or None if fetch fails.
     """
+    if station_id is None:
+        station_id = get_settings().noaa.station_id
+
     base_url = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
 
     params = {

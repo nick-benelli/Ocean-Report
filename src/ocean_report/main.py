@@ -2,12 +2,10 @@
 
 from datetime import date, datetime
 
-from dotenv import load_dotenv
-
 from . import email_formatter as formatter
 from . import emailer, tide, water_temp, wind
 from .address_fetcher import get_recipients
-from .config_loader import BEACH_ORIENTATION_DEGREES, LATITUDE, LONGITUDE, config
+from .config import get_settings
 from .logger import logger
 
 # Whether to use the recipients URL for email or environment variable
@@ -28,13 +26,12 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
     print(f"Today is {date.today().strftime('%A, %B %d, %Y')}")
     logger.info("Today is %s", date.today().strftime("%A, %B %d, %Y"))
 
-    # Load environment variables
-    load_dotenv()
+    settings = get_settings()
 
     # --- Email Settings ---
-    email_sender = config["email"].get("sender", "sender@example.com")
-    email_password = config["email"].get("password", "password1234")
-    email_recipients = config["email"].get("recipients", "")
+    email_sender = settings.email.sender or "sender@example.com"
+    email_password = settings.email.password or "password1234"
+    email_recipients = settings.email.recipients or ""
 
     # --- Recipients (BCC) ---
     bcc_recipients = [
@@ -42,13 +39,13 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
         for email in (
             get_recipients(test_recips=test)
             if USE_RECIP_URL
-            else config["email"].get("recipients", "")
+            else (settings.email.recipients or "")
         ).split(",")
         if email.strip()
     ]
 
     # --- Location/Station Settings ---
-    station_id = config["noaa"]["station_id"]
+    station_id = settings.noaa.station_id
 
     # --- Date ---
     today_str = datetime.now().strftime("%Y%m%d")
@@ -73,9 +70,9 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
     logger.info("Adding wind data...")
     wind_text = formatter.format_wind_forecast_email(
         wind.get_daily_wind_data(
-            latitude=LATITUDE,
-            longitude=LONGITUDE,
-            beach_facing_deg=BEACH_ORIENTATION_DEGREES,
+            latitude=settings.location.latitude,
+            longitude=settings.location.longitude,
+            beach_facing_deg=settings.location.beach_orientation_degrees,
             times_to_get={"08:00", "12:00", "15:00", "18:00"},
         )
     )
