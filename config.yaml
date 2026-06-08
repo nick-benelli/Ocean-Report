@@ -26,3 +26,11 @@ location:
 summer:
   memorial_day_offset: -4   # days before Memorial Day (negative = before, positive = after)
   labor_day_offset: 7       # days after Labor Day
+
+# API Client Settings
+api:
+  verify_ssl: true # Enable/disable TLS certificate verification
+  timeout_seconds: 30.0 # Request timeout in seconds
+  retry_insecure_on_ssl_error: true
+  max_retries: 3 # Retry attempts after the initial request
+  backoff_seconds: 0.8 # Base exponential backoff delay in seconds

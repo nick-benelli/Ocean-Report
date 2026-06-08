@@ -2,8 +2,10 @@
 
 from datetime import date, datetime
 
+from .api_client.endpoints import tide, water_temp, wind
+
 from . import email_formatter as formatter
-from . import emailer, tide, water_temp, wind
+from . import emailer
 from .address_fetcher import get_recipients
 from .config import get_settings
 from .logger import logger

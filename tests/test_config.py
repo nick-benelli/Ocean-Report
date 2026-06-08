@@ -1,6 +1,6 @@
 import os
 import tempfile
-from ocean_report.config.schemas import OceanReportConfig
+from ocean_report.config.schemas import AppConfig
 from ocean_report.config.loader import get_config, get_settings, load_config_with_env_substitution
 
 
@@ -75,7 +75,7 @@ summer:
 
     try:
         raw_config = load_config_with_env_substitution(tmp_path)
-        settings = OceanReportConfig.model_validate(raw_config)
+        settings = AppConfig.model_validate(raw_config)
         dumped_config = settings.model_dump(exclude_none=True)
 
         assert settings.noaa.station_id == "8534720"
@@ -106,6 +106,11 @@ location:
   longitude: -73.999
 summer:
   labor_day_offset: 10
+api:
+  verify_ssl: false
+  timeout_seconds: 5
+  max_retries: 4
+  backoff_seconds: 0.2
 """
 
     with tempfile.NamedTemporaryFile("w+", delete=False) as tmp:
@@ -129,6 +134,11 @@ summer:
         assert settings.location.latitude == 39.5
         assert settings.summer.memorial_day_offset == -4
         assert settings.summer.labor_day_offset == 10
+        assert settings.api.verify_ssl is False
+        assert settings.api.timeout_seconds == 5
+        assert settings.api.retry_insecure_on_ssl_error is True
+        assert settings.api.max_retries == 4
+        assert settings.api.backoff_seconds == 0.2
         assert dumped_config["email"]["smtp_server"] == "smtp.example.com"
         assert "sender" not in dumped_config["email"]
     finally:

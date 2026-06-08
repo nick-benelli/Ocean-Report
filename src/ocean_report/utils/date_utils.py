@@ -1,27 +1,5 @@
-"""Utility functions for ocean report."""
 
 from datetime import date, timedelta
-from typing import Optional
-
-import certifi
-import requests
-from .logger import logger
-
-
-def safe_get(url: str, **kwargs) -> Optional[requests.Response]:
-    """
-    Try to GET with certifi verification first.
-    If SSL fails, retry with verify=False.
-    """
-    try:
-        return requests.get(url, verify=certifi.where(), timeout=10, **kwargs)
-    except requests.exceptions.SSLError as e:
-        logger.warning("SSL verification failed (%s). Retrying with verify=False.", e)
-        try:
-            return requests.get(url, verify=False, timeout=10, **kwargs)
-        except requests.exceptions.RequestException as e2:
-            logger.error("Request failed even with verify=False: %s", e2)
-            return None
 
 
 # ---- Get Dates ----

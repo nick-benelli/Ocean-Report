@@ -14,6 +14,12 @@ def _is_unresolved_env_placeholder(value: Any) -> bool:
     return isinstance(value, str) and bool(_ENV_PLACEHOLDER_PATTERN.fullmatch(value))
 
 
+def _field_default(model_cls: type[BaseModel], field_name: str) -> Any:
+    """Return a model field default in a type-checker-friendly way."""
+
+    return model_cls.__pydantic_fields__[field_name].default
+
+
 class StrictModel(BaseModel):
     """Base model that rejects unknown config keys."""
 
@@ -29,12 +35,12 @@ class NoaaConfig(StrictModel):
     @field_validator("station_id", "buoy_id", mode="before")
     @classmethod
     def apply_default_station_values(cls, value: Any, info: Any) -> str:
-        defaults = {
-            "station_id": "8534720",
-            "buoy_id": "44091",
-        }
+        """
+        If the value is None or an unresolved env placeholder, return the default.
+        This allows users to set env vars to empty or leave them unset to use defaults.
+        """
         if value is None or _is_unresolved_env_placeholder(value):
-            return defaults[info.field_name]
+            return _field_default(cls, info.field_name)
         return str(value)
 
 
@@ -48,6 +54,10 @@ class RecipientUrlsConfig(StrictModel):
     @field_validator("main", "test", "offseason", mode="before")
     @classmethod
     def normalize_urls(cls, value: Any) -> str:
+        """
+        If the value is None or an unresolved env placeholder, return an empty string.
+        This allows users to set env vars to empty or leave them unset to disable URL sources.
+        """
         if value is None or _is_unresolved_env_placeholder(value):
             return ""
         return str(value)
@@ -67,15 +77,23 @@ class EmailConfig(StrictModel):
     @field_validator("smtp_server", mode="before")
     @classmethod
     def normalize_smtp_server(cls, value: Any) -> str:
+        """
+        If the value is None or an unresolved env placeholder, return the default.
+        This allows users to set env vars to empty or leave them unset to use defaults.
+        """
         if value is None or _is_unresolved_env_placeholder(value):
-            return "smtp.gmail.com"
+            return _field_default(cls, "smtp_server")
         return str(value)
 
     @field_validator("smtp_port", mode="before")
     @classmethod
     def normalize_smtp_port(cls, value: Any) -> int:
+        """
+        If the value is None or an unresolved env placeholder, return the default.
+        This allows users to set env vars to empty or leave them unset to use defaults.
+        """
         if value is None or _is_unresolved_env_placeholder(value):
-            return 587
+            return _field_default(cls, "smtp_port")
         return int(value)
 
     @field_validator(
@@ -87,6 +105,10 @@ class EmailConfig(StrictModel):
     )
     @classmethod
     def normalize_optional_strings(cls, value: Any) -> str | None:
+        """
+        If the value is None or an unresolved env placeholder, return None.
+        This allows users to set env vars to empty or leave them unset to disable optional strings.
+        """
         if value is None or _is_unresolved_env_placeholder(value):
             return None
         return str(value)
@@ -102,13 +124,12 @@ class LocationConfig(StrictModel):
     @field_validator("longitude", "latitude", "beach_orientation_degrees", mode="before")
     @classmethod
     def normalize_float_defaults(cls, value: Any, info: Any) -> float:
-        defaults = {
-            "longitude": -74.2,
-            "latitude": 39.5,
-            "beach_orientation_degrees": 140,
-        }
+        """
+        If the value is None or an unresolved env placeholder, return the default.
+        This allows users to set env vars to empty or leave them unset to use defaults.
+        """
         if value is None or _is_unresolved_env_placeholder(value):
-            return defaults[info.field_name]
+            return _field_default(cls, info.field_name)
         return float(value)
 
 
@@ -121,19 +142,91 @@ class SummerConfig(StrictModel):
     @field_validator("memorial_day_offset", "labor_day_offset", mode="before")
     @classmethod
     def normalize_int_defaults(cls, value: Any, info: Any) -> int:
-        defaults = {
-            "memorial_day_offset": -4,
-            "labor_day_offset": 7,
-        }
+        """
+        If the value is None or an unresolved env placeholder, return the default.
+        This allows users to set env vars to empty or leave them unset to use defaults.
+        """
         if value is None or _is_unresolved_env_placeholder(value):
-            return defaults[info.field_name]
+            return _field_default(cls, info.field_name)
         return int(value)
 
 
-class OceanReportConfig(StrictModel):
+class ApiConfig(StrictModel):
+    """HTTP client behavior configuration."""
+
+    verify_ssl: bool = True
+    timeout_seconds: float = 10.0
+    retry_insecure_on_ssl_error: bool = True
+    max_retries: int = 3
+    backoff_seconds: float = 0.8
+
+    @field_validator("verify_ssl", "retry_insecure_on_ssl_error", mode="before")
+    @classmethod
+    def normalize_bool_defaults(cls, value: Any, info: Any) -> bool:
+        """
+        If the value is None or an unresolved env placeholder, return the default.
+        This allows users to set env vars to empty or leave them unset to use defaults.
+        """
+        if value is None or _is_unresolved_env_placeholder(value):
+            return _field_default(cls, info.field_name)
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in {"true", "1", "yes", "on"}:
+                return True
+            if normalized in {"false", "0", "no", "off"}:
+                return False
+        return bool(value)
+
+    @field_validator("timeout_seconds", mode="before")
+    @classmethod
+    def normalize_timeout(cls, value: Any) -> float:
+        """
+        If the value is None or an unresolved env placeholder, return the default.
+        This allows users to set env vars to empty or leave them unset to use defaults.
+        """
+        if value is None or _is_unresolved_env_placeholder(value):
+            return _field_default(cls, "timeout_seconds")
+        timeout = float(value)
+        if timeout <= 0:
+            raise ValueError("api.timeout_seconds must be greater than zero")
+        return timeout
+
+    @field_validator("max_retries", mode="before")
+    @classmethod
+    def normalize_max_retries(cls, value: Any) -> int:
+        """
+        If the value is None or an unresolved env placeholder, return the default.
+        This allows users to set env vars to empty or leave them unset to use defaults.
+        """
+        if value is None or _is_unresolved_env_placeholder(value):
+            return _field_default(cls, "max_retries")
+        retries = int(value)
+        if retries < 0:
+            raise ValueError("api.max_retries must be greater than or equal to zero")
+        return retries
+
+    @field_validator("backoff_seconds", mode="before")
+    @classmethod
+    def normalize_backoff_seconds(cls, value: Any) -> float:
+        """
+        If the value is None or an unresolved env placeholder, return the default.
+        This allows users to set env vars to empty or leave them unset to use defaults.
+        """
+        if value is None or _is_unresolved_env_placeholder(value):
+            return _field_default(cls, "backoff_seconds")
+        backoff = float(value)
+        if backoff < 0:
+            raise ValueError("api.backoff_seconds must be greater than or equal to zero")
+        return backoff
+
+
+class AppConfig(StrictModel):
     """Validated config root model."""
 
     noaa: NoaaConfig = Field(default_factory=NoaaConfig)
     email: EmailConfig = Field(default_factory=EmailConfig)
     location: LocationConfig = Field(default_factory=LocationConfig)
     summer: SummerConfig = Field(default_factory=SummerConfig)
+    api: ApiConfig = Field(default_factory=ApiConfig)

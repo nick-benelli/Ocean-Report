@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
 from ocean_report import address_fetcher
-from ocean_report.config.schemas import OceanReportConfig
+from ocean_report.config.schemas import AppConfig
 
 
 def _build_settings(
@@ -11,8 +11,8 @@ def _build_settings(
     test_url: str = "",
     memorial_day_offset: int = -4,
     labor_day_offset: int = 7,
-) -> OceanReportConfig:
-    return OceanReportConfig.model_validate(
+) -> AppConfig:
+    return AppConfig.model_validate(
         {
             "email": {
                 "recipient_urls": {

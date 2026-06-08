@@ -4,8 +4,9 @@ from typing import Optional
 
 import requests
 
-from .config import get_settings
-from .logger import logger
+from .. import get_api_client
+from ...config import get_settings
+from ...logger import logger
 
 
 def fetch_water_temp(station_id: str | None = None) -> Optional[float]:
@@ -35,7 +36,10 @@ def fetch_water_temp(station_id: str | None = None) -> Optional[float]:
 
     try:
         logger.info("Fetching water temperature for station: %s...", station_id)
-        response = requests.get(base_url, params=params, timeout=10)
+        response = get_api_client().get(base_url, params=params)
+        if response is None:
+            logger.error("No response returned while fetching water temperature.")
+            return None
         logger.info(
             "\tWater temperature response status code: %s", response.status_code
         )

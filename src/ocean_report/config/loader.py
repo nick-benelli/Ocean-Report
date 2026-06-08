@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from functools import lru_cache
 import os
+from functools import lru_cache
 from os import PathLike
 from string import Template
 from typing import Any
@@ -12,22 +12,23 @@ import yaml
 from dotenv import load_dotenv
 
 from .. import constants
-from .schemas import OceanReportConfig
+from .schemas import AppConfig
 
 
-def _resolve_config_path(path: str | PathLike[str] | None = None) -> str:
-    """Resolve the config path, defaulting to the project config file."""
+def get_config_path(path: str | PathLike[str] | None = None) -> str:
+    """Return the absolute config path, defaulting to the project config file."""
 
-    return str(path or constants.CONFIG_PATH)
+    candidate = str(path or constants.CONFIG_PATH)
+    return os.path.abspath(os.path.expanduser(candidate))
 
 
 def load_config_with_env_substitution(
     path: str | PathLike[str] | None = None,
 ) -> dict[str, Any]:
-    """Load YAML config and substitute environment variables."""
+    """Read YAML config and apply ${VAR} substitutions from environment variables."""
 
     load_dotenv()
-    resolved_path = _resolve_config_path(path)
+    resolved_path = get_config_path(path)
 
     with open(resolved_path, encoding="utf-8") as config_file:
         content = config_file.read()
@@ -36,40 +37,43 @@ def load_config_with_env_substitution(
     return yaml.safe_load(substituted) or {}
 
 
-def load_settings(path: str | PathLike[str] | None = None) -> OceanReportConfig:
-    """Load and validate config data without using the cache."""
+def load_settings(path: str | PathLike[str] | None = None) -> AppConfig:
+    """Load and validate settings directly from disk (no cache)."""
 
     raw_config = load_config_with_env_substitution(path)
-    return OceanReportConfig.model_validate(raw_config)
+    return AppConfig.model_validate(raw_config)
 
 
-@lru_cache(maxsize=None)
-def _get_settings_cached(resolved_path: str) -> OceanReportConfig:
-    """Cache validated settings by resolved config path."""
-
-    return load_settings(resolved_path)
-
-
-def get_settings(path: str | PathLike[str] | None = None) -> OceanReportConfig:
+def get_settings(path: str | PathLike[str] | None = None) -> AppConfig:
     """Return cached validated settings for the requested config path."""
 
-    return _get_settings_cached(_resolve_config_path(path))
+    resolved_path = get_config_path(path)
+    return _load_settings_cached(resolved_path)
 
 
 def get_config(path: str | PathLike[str] | None = None) -> dict[str, Any]:
-    """Return the validated config as a plain dict."""
+    """Return validated settings as a plain dictionary."""
 
     return get_settings(path).model_dump(exclude_none=True)
 
 
-def reload_settings(path: str | PathLike[str] | None = None) -> OceanReportConfig:
-    """Clear the settings cache and reload the requested config path."""
+def reload_settings(path: str | PathLike[str] | None = None) -> AppConfig:
+    """Clear the settings cache and reload validated settings from disk."""
 
-    _get_settings_cached.cache_clear()
+    _load_settings_cached.cache_clear()
     return get_settings(path)
 
 
+@lru_cache(maxsize=None)
+def _load_settings_cached(resolved_path: str) -> AppConfig:
+    """Load and cache validated settings by resolved config path."""
+
+    return load_settings(resolved_path)
+
+
+
 __all__ = [
+    "get_config_path",
     "get_config",
     "get_settings",
     "load_config_with_env_substitution",

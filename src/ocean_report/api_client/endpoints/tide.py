@@ -5,8 +5,9 @@ from typing import Any, Dict, List
 
 import requests
 
-from .config import get_settings
-from .logger import logger
+from .. import get_api_client
+from ...config import get_settings
+from ...logger import logger
 
 
 def fetch_tide_data(
@@ -46,11 +47,13 @@ def fetch_tide_data(
         logger.info(
             "Fetching tide data for station: %s on date: %s...", station_id, date
         )
-        response = requests.get(
+        response = get_api_client().get(
             "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter",
             params=params,
-            timeout=10,
         )
+        if response is None:
+            logger.error("No response returned while fetching tide data.")
+            return []
         logger.info("\tTide data response status code: %s", response.status_code)
         response.raise_for_status()
         data = response.json()

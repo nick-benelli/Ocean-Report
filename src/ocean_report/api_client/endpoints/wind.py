@@ -5,9 +5,9 @@ from typing import Any, Dict, List, Optional, Set
 
 import requests
 
-from .config import get_settings
-from .logger import logger
-from .utils import safe_get
+from .. import get_api_client
+from ...config import get_settings
+from ...logger import logger
 
 
 def _fetch_wind_payload(latitude: float, longitude: float) -> Dict[str, Any]:
@@ -25,7 +25,9 @@ def _fetch_wind_payload(latitude: float, longitude: float) -> Dict[str, Any]:
             latitude,
             longitude,
         )
-        response = safe_get("https://api.open-meteo.com/v1/forecast", params=params)
+        response = get_api_client().get(
+            "https://api.open-meteo.com/v1/forecast", params=params
+        )
         logger.info(
             "\tWind data response status code: %s",
             response.status_code if response else "No Response",
