@@ -11,6 +11,8 @@ if TYPE_CHECKING:
     from ..config.schemas import AppConfig
 
 
+
+
 def get_api_client_from_config(settings: AppConfig | None = None) -> ApiClient:
     """Build an API client from config settings.
 
