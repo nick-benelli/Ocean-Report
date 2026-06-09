@@ -1,9 +1,15 @@
 from unittest.mock import Mock, patch
 
+import pytest
 import requests
 
+from ocean_report.api_client.context import ApiContext
 from ocean_report.api_client.client import ApiClient
-from ocean_report.api_client.factory import get_api_client, get_api_client_from_config
+from ocean_report.api_client.factory import (
+    get_api_client,
+    get_api_client_from_config,
+    get_api_context,
+)
 from ocean_report.config.schemas import AppConfig
 
 
@@ -85,9 +91,76 @@ def test_get_api_client_alias_uses_factory():
         }
     )
 
-    with patch("ocean_report.api_client.factory.get_settings", return_value=settings):
+    with patch("ocean_report.api_client.context.get_settings", return_value=settings):
         client = get_api_client()
 
     assert client.timeout == 3
     assert client.verify_ssl is True
     assert client.retry_insecure_on_ssl_error is True
+
+
+def test_get_api_context_from_config_uses_passed_settings():
+    settings = AppConfig.model_validate(
+        {
+            "api": {
+                "timeout_seconds": 4.5,
+                "verify_ssl": True,
+                "retry_insecure_on_ssl_error": False,
+                "max_retries": 2,
+                "backoff_seconds": 0.1,
+            }
+        }
+    )
+
+    context = get_api_context(settings)
+
+    assert isinstance(context, ApiContext)
+    assert context.config is settings
+    assert context.client.timeout == 4.5
+    assert context.client.verify_ssl is True
+    assert context.client.retry_insecure_on_ssl_error is False
+
+
+def test_api_context_resolve_returns_same_context_instance():
+    settings = AppConfig.model_validate({"api": {"timeout_seconds": 2.0}})
+    existing = ApiContext.from_config(settings)
+
+    resolved = ApiContext.resolve(context=existing)
+
+    assert resolved is existing
+
+
+def test_api_context_resolve_from_config_builds_client():
+    settings = AppConfig.model_validate(
+        {
+            "api": {
+                "timeout_seconds": 8.0,
+                "verify_ssl": False,
+                "retry_insecure_on_ssl_error": False,
+            }
+        }
+    )
+
+    resolved = ApiContext.resolve(config=settings)
+
+    assert resolved.config is settings
+    assert resolved.client.timeout == 8.0
+    assert resolved.client.verify_ssl is False
+    assert resolved.client.retry_insecure_on_ssl_error is False
+
+
+def test_api_context_resolve_from_config_path_loads_settings():
+    settings = AppConfig.model_validate({"api": {"timeout_seconds": 9.0}})
+
+    with patch("ocean_report.api_client.context.get_settings", return_value=settings):
+        resolved = ApiContext.resolve(config_path="/tmp/test-config.yaml")
+
+    assert resolved.config is settings
+    assert resolved.client.timeout == 9.0
+
+
+def test_api_context_resolve_rejects_client_without_config_source():
+    custom_client = ApiClient(timeout=12.0)
+
+    with pytest.raises(ValueError, match="client requires config or config_path"):
+        ApiContext.resolve(client=custom_client)
