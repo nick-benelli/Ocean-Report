@@ -4,7 +4,7 @@ from typing import Optional
 
 import requests
 
-from .api_client import get_api_client
+from .api_client import ApiClientError, get_api_client
 from .config import get_settings
 from .logger import logger
 
@@ -37,13 +37,9 @@ def fetch_water_temp(station_id: str | None = None) -> Optional[float]:
     try:
         logger.info("Fetching water temperature for station: %s...", station_id)
         response = get_api_client().get(base_url, params=params)
-        if response is None:
-            logger.error("No response returned while fetching water temperature.")
-            return None
         logger.info(
             "\tWater temperature response status code: %s", response.status_code
         )
-        response.raise_for_status()
         data = response.json()
 
         if "data" not in data or not data["data"]:
@@ -55,7 +51,7 @@ def fetch_water_temp(station_id: str | None = None) -> Optional[float]:
         logger.info("...Water temperature fetched successfully.")
         return float(data["data"][0]["v"])
 
-    except (requests.RequestException, KeyError, IndexError, ValueError) as e:
+    except (ApiClientError, requests.RequestException, KeyError, IndexError, ValueError) as e:
         logger.error("Failed to fetch water temp: %s", e)
         return None
 

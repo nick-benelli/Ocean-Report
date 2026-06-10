@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 
 import requests
 
-from .api_client import get_api_client
+from .api_client import ApiClientError, get_api_client
 from .config import get_settings
 from .logger import logger
 
@@ -51,11 +51,7 @@ def fetch_tide_data(
             "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter",
             params=params,
         )
-        if response is None:
-            logger.error("No response returned while fetching tide data.")
-            return []
         logger.info("\tTide data response status code: %s", response.status_code)
-        response.raise_for_status()
         data = response.json()
         logger.info("...Tide data fetched successfully.")
         predictions = data.get("predictions", [])
@@ -66,7 +62,7 @@ def fetch_tide_data(
 
         return predictions
 
-    except requests.RequestException as e:
+    except (ApiClientError, requests.RequestException) as e:
         logger.error("Failed to fetch tide data: %s", e)
         return []
 

@@ -4,7 +4,12 @@ import pytest
 import requests
 
 from ocean_report.api_client.context import ApiContext
-from ocean_report.api_client.client import ApiClient
+from ocean_report.api_client.client import (
+    ApiClient,
+    ApiConnectionError,
+    ApiResponseError,
+    ApiSslError,
+)
 from ocean_report.api_client.factory import (
     get_api_client,
     get_api_client_from_config,
@@ -47,7 +52,7 @@ def test_api_client_retries_without_ssl_on_ssl_error():
         assert second_kwargs["verify"] is False
 
 
-def test_api_client_returns_none_when_retry_fails():
+def test_api_client_raises_connection_error_when_retry_fails():
     with patch("requests.sessions.Session.get") as mock_get:
         mock_get.side_effect = [
             requests.exceptions.SSLError("bad cert"),
@@ -55,7 +60,37 @@ def test_api_client_returns_none_when_retry_fails():
         ]
 
         client = ApiClient(timeout=10, verify_ssl=True, retry_insecure_on_ssl_error=True)
-        assert client.get("https://example.com/data") is None
+        with pytest.raises(ApiConnectionError):
+            client.get("https://example.com/data")
+
+
+def test_api_client_raises_ssl_error_when_ssl_retry_disabled():
+    with patch("requests.sessions.Session.get") as mock_get:
+        mock_get.side_effect = requests.exceptions.SSLError("bad cert")
+
+        client = ApiClient(timeout=10, verify_ssl=True, retry_insecure_on_ssl_error=False)
+        with pytest.raises(ApiSslError):
+            client.get("https://example.com/data")
+
+
+def test_api_client_raises_response_error_for_http_status_failure():
+    with patch("requests.sessions.Session.get") as mock_get:
+        response = Mock()
+        response.status_code = 503
+        response.raise_for_status.side_effect = requests.HTTPError("service unavailable")
+        mock_get.return_value = response
+
+        client = ApiClient(timeout=10, verify_ssl=True)
+        with pytest.raises(ApiResponseError):
+            client.get("https://example.com/data")
+
+
+def test_api_client_closes_session_on_context_exit():
+    session = Mock()
+    with ApiClient(session=session) as client:
+        assert client.session is session
+
+    session.close.assert_called_once()
 
 
 def test_api_client_mounts_retry_adapter_from_init_settings():

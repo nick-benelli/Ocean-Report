@@ -1,14 +1,11 @@
 """Wind data fetching module for ocean report."""
 
 from dataclasses import dataclass
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict
 
 import requests
 
-from ...api_client import get_api_client
-from ...api_client.client import ApiClient
-from ...config import get_settings
+from ...api_client.client import ApiClient, ApiClientError
 from ...logger import logger
 
 
@@ -32,7 +29,7 @@ class OpenMeteoWindParams:
         }
 
 
-def fetch_wind_payload_with_client(
+def get_wind_from_open_meteo(
     api_client: ApiClient,
     latitude: float,
     longitude: float,
@@ -55,15 +52,10 @@ def fetch_wind_payload_with_client(
         )
         logger.info(
             "\tWind data response status code: %s",
-            response.status_code if response else "No Response",
+            response.status_code,
         )
-        if response is None:
-            raise RuntimeError(
-                "Failed to fetch wind data from Open-Meteo after SSL retries"
-            )
-        response.raise_for_status()
         logger.info("...Open-Meteo wind data fetched successfully.")
         return response.json()
-    except requests.RequestException as exc:
+    except (ApiClientError, requests.RequestException) as exc:
         logger.error("Error fetching wind data: %s", exc)
         raise RuntimeError(f"Error fetching wind data: {exc}") from exc

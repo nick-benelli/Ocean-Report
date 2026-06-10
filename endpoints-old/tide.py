@@ -5,7 +5,7 @@ from datetime import datetime
 import requests
 from typing import Dict, List
 
-from ...api_client import get_api_client
+from ...api_client import ApiClientError, get_api_client
 from ...api_client.client import ApiClient
 from ...config import get_settings
 from ...logger import logger
@@ -41,7 +41,7 @@ class NoaaTideParams:
         }
 
 
-def fetch_tide_data(
+def get_noaa_tide_data(
     station_id: str | None = None,
     date: str | None = None,
     api_client: ApiClient | None = None,
@@ -81,11 +81,7 @@ def fetch_tide_data(
             "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter",
             params=params,
         )
-        if response is None:
-            logger.error("No response returned while fetching tide data.")
-            return []
         logger.info("\tTide data response status code: %s", response.status_code)
-        response.raise_for_status()
         data = response.json()
         logger.info("...Tide data fetched successfully.")
         predictions = data.get("predictions", [])
@@ -96,6 +92,6 @@ def fetch_tide_data(
 
         return predictions
 
-    except requests.RequestException as e:
+    except (ApiClientError, requests.RequestException) as e:
         logger.error("Failed to fetch tide data: %s", e)
         return []
