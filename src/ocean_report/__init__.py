@@ -2,8 +2,8 @@
 
 from . import config  # noqa: F401
 from . import emailer  # noqa: F401
-from .api_client.endpoints import tide  # noqa: F401
-from .api_client.endpoints import water_temp  # noqa: F401
+from . import tide  # noqa: F401
+from . import water_temp  # noqa: F401
 from .main import run_report  # noqa: F401
 
 

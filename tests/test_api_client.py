@@ -14,7 +14,7 @@ from ocean_report.config.schemas import AppConfig
 
 
 def test_api_client_uses_timeout_and_ssl_settings():
-    with patch("requests.get") as mock_get:
+    with patch("requests.sessions.Session.get") as mock_get:
         response = Mock()
         mock_get.return_value = response
 
@@ -31,7 +31,7 @@ def test_api_client_uses_timeout_and_ssl_settings():
 
 
 def test_api_client_retries_without_ssl_on_ssl_error():
-    with patch("requests.get") as mock_get:
+    with patch("requests.sessions.Session.get") as mock_get:
         first_exc = requests.exceptions.SSLError("bad cert")
         success_response = Mock()
         mock_get.side_effect = [first_exc, success_response]
@@ -48,7 +48,7 @@ def test_api_client_retries_without_ssl_on_ssl_error():
 
 
 def test_api_client_returns_none_when_retry_fails():
-    with patch("requests.get") as mock_get:
+    with patch("requests.sessions.Session.get") as mock_get:
         mock_get.side_effect = [
             requests.exceptions.SSLError("bad cert"),
             requests.exceptions.RequestException("network down"),
@@ -56,6 +56,18 @@ def test_api_client_returns_none_when_retry_fails():
 
         client = ApiClient(timeout=10, verify_ssl=True, retry_insecure_on_ssl_error=True)
         assert client.get("https://example.com/data") is None
+
+
+def test_api_client_mounts_retry_adapter_from_init_settings():
+    client = ApiClient(max_retries=5, backoff_seconds=0.25)
+
+    https_retry = client.session.adapters["https://"].max_retries
+    http_retry = client.session.adapters["http://"].max_retries
+
+    assert https_retry.total == 5
+    assert https_retry.backoff_factor == 0.25
+    assert http_retry.total == 5
+    assert http_retry.backoff_factor == 0.25
 
 
 def test_get_api_client_from_config_uses_passed_settings():

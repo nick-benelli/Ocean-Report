@@ -1,6 +1,6 @@
 import requests
-from ocean_report.api_client.endpoints.water_temp import fetch_water_temp
-from ocean_report.api_client.endpoints.tide import fetch_tide_data
+from ocean_report.water_temp import fetch_water_temp
+from ocean_report.tide import fetch_tide_data
 
 
 def test_fetch_noaa_data(monkeypatch):
