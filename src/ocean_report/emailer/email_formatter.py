@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from .logger import logger
+from ..logger import logger
 
 
 def generate_email_body(sections: List[str]) -> str:

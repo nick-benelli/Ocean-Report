@@ -1,4 +1,4 @@
-from ocean_report.email_formatter import format_wind_forecast_email
+from ocean_report.emailer.email_formatter import format_wind_forecast_email
 
 
 def test_format_wind_forecast_output():

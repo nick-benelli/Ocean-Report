@@ -1,5 +1,5 @@
 
-from ocean_report.wind import deg_to_16_point_direction, classify_wind_relative_to_beach
+from ocean_report.services.wind_service import deg_to_16_point_direction, classify_wind_relative_to_beach
 
 
 def test_deg_to_16_point_direction():

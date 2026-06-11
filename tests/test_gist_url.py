@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from ocean_report import address_fetcher
+from ocean_report.emailer import address_fetcher
 from ocean_report.config.schemas import AppConfig
 
 

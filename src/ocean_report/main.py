@@ -2,11 +2,14 @@
 
 from datetime import date, datetime
 
-from . import wind
+from .use_cases import tides as tides_use_case
+from .use_cases import water_temperature as water_temp_use_case
+from .use_cases import wind as wind_use_case
 
-from . import email_formatter as formatter, tide, water_temp
+from .emailer import email_formatter as formatter
 from . import emailer
-from .address_fetcher import get_recipients
+from .emailer.address_fetcher import get_recipients
+from .application.factory import create_application_context
 from .config import get_settings
 from .logger import logger
 
@@ -53,31 +56,37 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
     today_str = datetime.now().strftime("%Y%m%d")
     today_date_str = datetime.today().strftime("%Y-%m-%d")
 
+    # --- Initialize Application Context ---
+    context = create_application_context()
+
     # --- Fetch Data ---
-    # Tide data
-    logger.info("Adding tide data...")
-    tide_text = formatter.format_tide_for_email(
-        tide.filter_daytime_tides(
-            tide.fetch_tide_data(station_id=station_id, date=today_str)
-        )
+    # Tide data - using orchestration layer
+    logger.info("Fetching daytime tide data...")
+    daytime_tides = tides_use_case.get_daytime_tides_for_date(
+        context=context,
+        station_id=station_id,
+        date=today_str,
     )
+    tide_text = formatter.format_tide_for_email(daytime_tides)
 
-    # Water temperature data
-    logger.info("Adding water temp data...")
-    h20_temp_str = formatter.format_water_temp(
-        water_temp.fetch_water_temp(station_id=station_id)
+    # Water temperature data - using orchestration layer
+    logger.info("Fetching latest water temperature...")
+    water_temp = water_temp_use_case.get_latest_water_temp(
+        context=context,
+        station_id=station_id,
     )
+    h20_temp_str = formatter.format_water_temp(water_temp)
 
-    # Wind data
-    logger.info("Adding wind data...")
-    wind_text = formatter.format_wind_forecast_email(
-        wind.get_daily_wind_data(
-            latitude=settings.location.latitude,
-            longitude=settings.location.longitude,
-            beach_facing_deg=settings.location.beach_orientation_degrees,
-            times_to_get={"08:00", "12:00", "15:00", "18:00"},
-        )
+    # Wind data - using orchestration layer
+    logger.info("Fetching daily wind forecast...")
+    wind_forecast = wind_use_case.get_daily_wind_forecast(
+        context=context,
+        latitude=settings.location.latitude,
+        longitude=settings.location.longitude,
+        beach_facing_deg=settings.location.beach_orientation_degrees,
+        times_to_get={"08:00", "12:00", "15:00", "18:00"},
     )
+    wind_text = formatter.format_wind_forecast_email(wind_forecast)
 
     # --- Format Email ---
     logger.info("Constructing email...")

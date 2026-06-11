@@ -1,10 +1,14 @@
-"""Configuration loading helpers for ocean report."""
+"""Configuration loading and validation for ocean report.
+
+Provides a clean separation between path resolution, raw config loading,
+validation, and caching. Uses pathlib for modern path handling.
+"""
 
 from __future__ import annotations
 
 import os
 from functools import lru_cache
-from os import PathLike
+from pathlib import Path
 from string import Template
 from typing import Any
 
@@ -15,68 +19,62 @@ from .. import constants
 from .schemas import AppConfig
 
 
-def get_config_path(path: str | PathLike[str] | None = None) -> str:
-    """Return the absolute config path, defaulting to the project config file."""
+def resolve_config_path(path: str | Path | None = None) -> Path:
+    """Resolve config path to absolute Path, defaulting to project config."""
+    candidate = path if path is not None else constants.CONFIG_PATH
+    return Path(candidate).expanduser().resolve()
 
-    candidate = str(path or constants.CONFIG_PATH)
-    return os.path.abspath(os.path.expanduser(candidate))
 
-
-def load_config_with_env_substitution(
-    path: str | PathLike[str] | None = None,
-) -> dict[str, Any]:
-    """Read YAML config and apply ${VAR} substitutions from environment variables."""
-
+def load_raw_config(path: str | Path | None = None) -> dict[str, Any]:
+    """Load YAML config with ${VAR} substitution from environment."""
     load_dotenv()
-    resolved_path = get_config_path(path)
 
-    with open(resolved_path, encoding="utf-8") as config_file:
-        content = config_file.read()
-
+    config_path = resolve_config_path(path)
+    content = config_path.read_text(encoding="utf-8")
     substituted = Template(content).safe_substitute(os.environ)
     return yaml.safe_load(substituted) or {}
 
 
-def load_settings(path: str | PathLike[str] | None = None) -> AppConfig:
-    """Load and validate settings directly from disk (no cache)."""
-
-    raw_config = load_config_with_env_substitution(path)
+def load_app_config(path: str | Path | None = None) -> AppConfig:
+    """Load and validate config from disk (uncached)."""
+    raw_config = load_raw_config(path)
     return AppConfig.model_validate(raw_config)
 
 
-def get_settings(path: str | PathLike[str] | None = None) -> AppConfig:
-    """Return cached validated settings for the requested config path."""
+def get_settings(path: str | Path | None = None) -> AppConfig:
+    """Return cached validated application settings."""
+    resolved = resolve_config_path(path)
+    return _cached_load(resolved)
 
-    resolved_path = get_config_path(path)
-    return _load_settings_cached(resolved_path)
 
-
-def get_config(path: str | PathLike[str] | None = None) -> dict[str, Any]:
-    """Return validated settings as a plain dictionary."""
-
+def get_config_dict(path: str | Path | None = None) -> dict[str, Any]:
+    """Get cached config as a dictionary."""
     return get_settings(path).model_dump(exclude_none=True)
 
 
-def reload_settings(path: str | PathLike[str] | None = None) -> AppConfig:
-    """Clear the settings cache and reload validated settings from disk."""
+def clear_config_cache() -> None:
+    """Clear the cache, forcing next get_settings() to reload from disk."""
+    _cached_load.cache_clear()
 
-    _load_settings_cached.cache_clear()
+
+def reload_config(path: str | Path | None = None) -> AppConfig:
+    """Clear cache and reload config from disk."""
+    clear_config_cache()
     return get_settings(path)
 
 
 @lru_cache(maxsize=None)
-def _load_settings_cached(resolved_path: str) -> AppConfig:
-    """Load and cache validated settings by resolved config path."""
-
-    return load_settings(resolved_path)
-
+def _cached_load(resolved_path: Path) -> AppConfig:
+    """Internal cached loader."""
+    return load_app_config(resolved_path)
 
 
 __all__ = [
-    "get_config_path",
-    "get_config",
     "get_settings",
-    "load_config_with_env_substitution",
-    "load_settings",
-    "reload_settings",
+    "load_app_config",
+    "load_raw_config",
+    "clear_config_cache",
+    "reload_config",
+    "resolve_config_path",
+    "get_config_dict",
 ]

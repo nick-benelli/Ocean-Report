@@ -1,57 +1,51 @@
-"""Factories for building API contexts and clients from app config."""
+"""Factory for creating configured ApiClient instances.
+
+This module provides a clean factory function that constructs ApiClient instances
+from validated configuration objects. The factory promotes dependency injection
+by accepting AppConfig rather than loading configuration itself.
+"""
 
 from __future__ import annotations
 
-from os import PathLike
-from typing import TYPE_CHECKING
+import requests
 
-from .context import ApiContext
-
-if TYPE_CHECKING:
-    from .client import ApiClient
-    from ..config.schemas import AppConfig
+from .client import ApiClient
+from ..config.schemas import AppConfig
 
 
-def get_api_context(settings: AppConfig | None = None) -> ApiContext:
-    """Build an API context from config settings.
+def create_api_client(
+    config: AppConfig,
+    session: requests.Session | None = None,
+) -> ApiClient:
+    """Create a fully configured ApiClient from validated application config.
 
-    If settings are not passed, this function loads default validated settings.
+    This factory extracts HTTP client settings from AppConfig.api and constructs
+    an ApiClient with proper timeout, SSL verification, retry behavior, and
+    backoff configuration.
+
+    The factory is pure and stateless - it does not load configuration from disk
+    or maintain any global state. All behavior is controlled by the provided config.
+
+    Args:
+        config: Validated application configuration containing API client settings.
+        session: Optional pre-configured requests.Session. If None, the ApiClient
+            will create its own session with retry adapters. Useful for testing
+            or when sharing a session pool across multiple clients.
+
+    Returns:
+        Configured ApiClient ready for making HTTP requests.
+
+    Example:
+        >>> from ocean_report.config.loader import load_config
+        >>> config = load_config("config.yaml")
+        >>> client = create_api_client(config)
+        >>> response = client.get("https://api.example.com/data")
     """
-
-    return ApiContext.resolve(config=settings)
-
-
-def get_api_context_from_config_path(config_path: str | PathLike[str]) -> ApiContext:
-    """Build an API context from a specific config path."""
-
-    return ApiContext.resolve(config_path=config_path)
-
-
-def get_api_client_from_config(settings: AppConfig | None = None) -> ApiClient:
-    """Build an API client from config settings.
-
-    If settings are not passed, this function loads default validated settings.
-    """
-
-    return get_api_context(settings).client
-
-
-def get_api_client_from_config_path(config_path: str | PathLike[str]) -> ApiClient:
-    """Build an API client from a specific config path."""
-
-    return get_api_context_from_config_path(config_path).client
-
-
-def get_api_client() -> ApiClient:
-    """Backward-compatible alias for the config-backed API client factory."""
-
-    return get_api_context().client
-
-
-__all__ = [
-    "get_api_context",
-    "get_api_context_from_config_path",
-    "get_api_client",
-    "get_api_client_from_config",
-    "get_api_client_from_config_path",
-]
+    return ApiClient(
+        timeout=config.api.timeout_seconds,
+        verify_ssl=config.api.verify_ssl,
+        retry_insecure_on_ssl_error=config.api.retry_insecure_on_ssl_error,
+        max_retries=config.api.max_retries,
+        backoff_seconds=config.api.backoff_seconds,
+        session=session,
+    )

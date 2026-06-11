@@ -1,10 +1,10 @@
 import os
 import tempfile
 from ocean_report.config.schemas import AppConfig
-from ocean_report.config.loader import get_config, get_settings, load_config_with_env_substitution
+from ocean_report.config.loader import get_config_dict, get_cached_settings, load_raw_config
 
 
-def test_load_config_with_env_substitution(monkeypatch):
+def test_load_raw_config(monkeypatch):
     # Set environment variables for substitution
     monkeypatch.setenv("EMAIL_SENDER", "test_sender@example.com")
     monkeypatch.setenv("EMAIL_RECIPIENTS", "test_recipient@example.com")
@@ -30,14 +30,14 @@ location:
         tmp_path = tmp.name
 
     try:
-        config = load_config_with_env_substitution(tmp_path)
+        config = load_raw_config(tmp_path)
         assert config["email"]["sender"] == "test_sender@example.com"
         assert config["email"]["recipients"] == "test_recipient@example.com"
         assert float(config["location"]["longitude"]) == -74.1234
         assert float(config["location"]["latitude"]) == 39.5678
         assert config["noaa"]["station_id"] == "8534720"
         assert config["noaa"]["buoy_id"] == "44091"
-        print("test_load_config_with_env_substitution: PASS")
+        print("test_load_raw_config: PASS")
     finally:
         os.remove(tmp_path)
 
@@ -74,7 +74,7 @@ summer:
         tmp_path = tmp.name
 
     try:
-        raw_config = load_config_with_env_substitution(tmp_path)
+        raw_config = load_raw_config(tmp_path)
         settings = AppConfig.model_validate(raw_config)
         dumped_config = settings.model_dump(exclude_none=True)
 
@@ -119,7 +119,7 @@ api:
 
     try:
         monkeypatch.delenv("MISSING_LOADER_SENDER", raising=False)
-        settings = get_settings(tmp_path)
+        settings = get_cached_settings(tmp_path)
         dumped_config = get_config(tmp_path)
 
         assert settings.noaa.station_id == "9999999"

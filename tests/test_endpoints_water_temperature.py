@@ -3,9 +3,11 @@ from unittest.mock import Mock
 import pytest
 from pydantic import ValidationError
 
-from ocean_report.endpoints.noaa.water_temperature import (
-    NoaaWaterTempParams,
+from ocean_report.models.noaa.water_temperature import (
+    NoaaWaterTemperatureParams,
     NoaaWaterTemperatureResponse,
+)
+from ocean_report.endpoints.noaa.water_temperature import (
     WaterTemperatureEndpoint,
 )
 
@@ -20,7 +22,7 @@ def test_water_temperature_endpoint_uses_injected_client() -> None:
     }
 
     endpoint = WaterTemperatureEndpoint(mock_client)
-    params = NoaaWaterTempParams(station="8534720")
+    params = NoaaWaterTemperatureParams(station="8534720")
 
     response = endpoint.get(params)
 
@@ -44,4 +46,4 @@ def test_water_temperature_endpoint_uses_injected_client() -> None:
 
 def test_noaa_water_temp_params_station_validation() -> None:
     with pytest.raises(ValidationError):
-        NoaaWaterTempParams(station="123")
+        NoaaWaterTemperatureParams(station="123")

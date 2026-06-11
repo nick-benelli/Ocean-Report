@@ -1,22 +1,37 @@
 """NOAA endpoint exports."""
 
-from .base import NoaaEndpoint
-from .stations import NoaaStationsEndpoint
-from .tides import NoaaTideParams, NoaaTidesEndpoint
-from .water_temperature import (
+from ...models.noaa import (
+    NoaaStation,
+    NoaaStationsParams,
+    NoaaStationsResponse,
+    NoaaTideParams,
+    NoaaTidePredictionRecord,
+    NoaaTideResponse,
     NoaaWaterTempParams,
     NoaaWaterTemperatureDatum,
+    NoaaWaterTemperatureParams,
+    NoaaWaterTemperatureRecord,
     NoaaWaterTemperatureResponse,
-    WaterTemperatureEndpoint,
 )
+from .base import NoaaEndpoint
+from .stations import NoaaStationsEndpoint
+from .tides import NoaaTidesEndpoint
+from .water_temperature import WaterTemperatureEndpoint
 
 __all__ = [
     "NoaaEndpoint",
+    "NoaaStation",
     "NoaaStationsEndpoint",
+    "NoaaStationsParams",
+    "NoaaStationsResponse",
     "NoaaTideParams",
+    "NoaaTidePredictionRecord",
+    "NoaaTideResponse",
     "NoaaTidesEndpoint",
     "NoaaWaterTempParams",
     "NoaaWaterTemperatureDatum",
+    "NoaaWaterTemperatureParams",
+    "NoaaWaterTemperatureRecord",
     "NoaaWaterTemperatureResponse",
     "WaterTemperatureEndpoint",
 ]

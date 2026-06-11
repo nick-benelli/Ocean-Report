@@ -6,9 +6,9 @@ from typing import Optional
 
 import requests
 
-from .config import get_settings
-from .logger import logger
-from .utils import determine_is_summer, safe_get
+from ..config import get_settings
+from ..logger import logger
+from ..utils import determine_is_summer, safe_get
 
 
 def get_recipients(verbose: bool = False, test_recips: bool = False) -> str:

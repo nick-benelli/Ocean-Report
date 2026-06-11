@@ -2,8 +2,8 @@
 
 from . import config  # noqa: F401
 from . import emailer  # noqa: F401
-from . import tide  # noqa: F401
-from . import water_temp  # noqa: F401
+from .services import tide_service  # noqa: F401
+from .services import water_temp_service  # noqa: F401
 from .main import run_report  # noqa: F401
 
 
@@ -17,6 +17,6 @@ __all__ = [
     "run_report",
     "config",
     "emailer",
-    "tide",
-    "water_temp",
+    "tide_service",
+    "water_temp_service",
 ]
