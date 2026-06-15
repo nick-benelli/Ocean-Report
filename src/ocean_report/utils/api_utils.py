@@ -4,7 +4,9 @@
 from collections.abc import Mapping
 
 import requests
-from ..api_client import ApiClientError, get_api_client
+from ..api_client.factory import create_api_client
+from ..api_client.exceptions import ApiClientError
+
 from ..logger import logger
 
 
@@ -21,7 +23,7 @@ def safe_get(
     Perform a GET request using the shared API client configuration.
     """
     try:
-        return get_api_client().get(
+        return create_api_client().get(
             url,
             params=params,
             headers=headers,
