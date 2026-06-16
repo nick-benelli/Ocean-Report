@@ -73,6 +73,7 @@ class EmailConfig(StrictModel):
     recipients: str | None = None
     test_recipients: str | None = None
     recipient_urls: RecipientUrlsConfig = Field(default_factory=RecipientUrlsConfig)
+    use_recipient_url: bool = True
 
     @field_validator("smtp_server", mode="before")
     @classmethod
@@ -112,6 +113,25 @@ class EmailConfig(StrictModel):
         if value is None or _is_unresolved_env_placeholder(value):
             return None
         return str(value)
+
+    @field_validator("use_recipient_url", mode="before")
+    @classmethod
+    def normalize_use_recipient_url(cls, value: Any) -> bool:
+        """
+        If the value is None or an unresolved env placeholder, return the default.
+        This allows users to set env vars to empty or leave them unset to use defaults.
+        """
+        if value is None or _is_unresolved_env_placeholder(value):
+            return _field_default(cls, "use_recipient_url")
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in {"true", "1", "yes", "on"}:
+                return True
+            if normalized in {"false", "0", "no", "off"}:
+                return False
+        return bool(value)
 
 
 class LocationConfig(StrictModel):

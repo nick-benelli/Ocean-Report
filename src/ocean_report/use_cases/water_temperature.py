@@ -1,6 +1,7 @@
 """Water temperature use cases - orchestration layer for water temperature workflows."""
 
-from typing import Optional
+from datetime import datetime
+from typing import Optional, Tuple
 
 from ..application.factory import ApplicationContext
 from ..logger import logger
@@ -12,7 +13,7 @@ def get_latest_water_temp(
     *,
     context: ApplicationContext,
     station_id: str | None = None,
-) -> Optional[float]:
+) -> Tuple[Optional[float], datetime, Optional[str]]:
     """
     Get the latest water temperature for a station.
 
@@ -26,7 +27,10 @@ def get_latest_water_temp(
         station_id (str | None): NOAA station ID. If None, uses station from config.
 
     Returns:
-        Optional[float]: Latest water temperature in Fahrenheit, or None if no data available.
+        Tuple[Optional[float], datetime, Optional[str]]:
+            - Latest water temperature in Fahrenheit, or None if no data available
+            - Timestamp when data was retrieved
+            - Data timestamp from NOAA (when the measurement was taken)
 
     Raises:
         ApiClientError: If the NOAA API request fails.
@@ -42,18 +46,22 @@ def get_latest_water_temp(
         date="latest",  # Always fetch latest for water temp
     )
 
+    # Capture retrieval timestamp
+    retrieval_time = datetime.now()
+    
     # Fetch latest water temperature data (service layer - API only)
     logger.info("Fetching latest water temperature for station: %s", station_id)
     water_temp_record = fetch_water_temp(context=context, params=params)
 
     if water_temp_record is None:
         logger.warning("No water temperature data returned for station %s", station_id)
-        return None
+        return None, retrieval_time, None
 
     temperature = water_temp_record.temperature
-    logger.info("Latest water temperature: %.1f°F", temperature)
+    data_timestamp = water_temp_record.timestamp
+    logger.info("Latest water temperature: %.1f°F (measured at %s)", temperature, data_timestamp)
 
-    return temperature
+    return temperature, retrieval_time, data_timestamp
 
 
 def format_water_temp_with_unit(temp: float) -> str:

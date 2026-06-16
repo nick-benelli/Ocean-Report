@@ -1,7 +1,7 @@
 """Tide use cases - orchestration layer for tide-related workflows."""
 
 from datetime import datetime
-from typing import List
+from typing import List, Tuple
 
 from ..application.factory import ApplicationContext
 from ..logger import logger
@@ -14,7 +14,7 @@ def get_daytime_tides_for_date(
     context: ApplicationContext,
     station_id: str | None = None,
     date: str | None = None,
-) -> List[NoaaTidePredictionRecord]:
+) -> Tuple[List[NoaaTidePredictionRecord], datetime]:
     """
     Get filtered daytime tide predictions for a specific date.
 
@@ -30,7 +30,9 @@ def get_daytime_tides_for_date(
         date (str | None): Date for predictions in YYYYMMDD format. If None, uses today.
 
     Returns:
-        List[NoaaTidePredictionRecord]: Filtered list of daytime tide predictions.
+        Tuple[List[NoaaTidePredictionRecord], datetime]: 
+            - Filtered list of daytime tide predictions
+            - Timestamp when data was retrieved
 
     Raises:
         ApiClientError: If the NOAA API request fails.
@@ -51,6 +53,9 @@ def get_daytime_tides_for_date(
         station=station_id,
     )
 
+    # Capture retrieval timestamp
+    retrieval_time = datetime.now()
+    
     # Fetch raw tide data (service layer - API only)
     logger.info("Fetching tide data for station: %s on date: %s", station_id, date)
     raw_tides = fetch_tide_data(context=context, params=params)
@@ -65,7 +70,7 @@ def get_daytime_tides_for_date(
     daytime_tides = filter_daytime_tides(raw_tides)
     logger.info("Filtered to %d daytime tide predictions", len(daytime_tides))
 
-    return daytime_tides
+    return daytime_tides, retrieval_time
 
 
 __all__ = ["get_daytime_tides_for_date"]

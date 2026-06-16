@@ -1,5 +1,6 @@
 """Water temperature data fetching module for ocean report."""
 
+import time
 from typing import Optional
 
 from ..api_client.exceptions import ApiClientError
@@ -36,10 +37,15 @@ def fetch_water_temp(
     endpoint = WaterTemperatureEndpoint(context.client)
 
     try:
+        logger.debug("    → Making NOAA API request for water temperature (station: %s)", 
+                    params.station)
+        api_start = time.time()
         response = endpoint.fetch(params)
+        api_duration = time.time() - api_start
+        
         logger.info(
-            "Water temperature data fetched successfully for station %s. Found %d records.",
-            params.station,
+            "    ✓ NOAA Water Temperature API responded in %.2f seconds. Found %d records.",
+            api_duration,
             len(response.data),
         )
 

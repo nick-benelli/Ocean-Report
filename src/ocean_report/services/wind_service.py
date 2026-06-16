@@ -1,5 +1,6 @@
-"""Wind data fetching service for ocean report."""
+"""Wind forecast data fetching module for ocean report."""
 
+import time
 from ..api_client.exceptions import ApiClientError
 from ..application.factory import ApplicationContext
 from ..endpoints.openmeteo.forecast import OpenMeteoForecastEndpoint
@@ -34,11 +35,15 @@ def fetch_wind_forecast(
     endpoint = OpenMeteoForecastEndpoint(context.client)
 
     try:
+        logger.debug("    → Making Open-Meteo API request for wind forecast (lat: %.4f, lon: %.4f)", 
+                    params.latitude, params.longitude)
+        api_start = time.time()
         response = endpoint.fetch(params)
+        api_duration = time.time() - api_start
+        
         logger.info(
-            "Wind forecast data fetched successfully for lat: %.4f, lon: %.4f. Found %d hourly records.",
-            params.latitude,
-            params.longitude,
+            "    ✓ Open-Meteo Wind Forecast API responded in %.2f seconds. Found %d hourly records.",
+            api_duration,
             len(response.hourly.time),
         )
         return response

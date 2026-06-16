@@ -1,6 +1,7 @@
 """Tide data fetching module for ocean report."""
 
-from datetime import datetime, time
+import time
+from datetime import datetime, time as time_obj
 from typing import List
 
 from ..api_client.exceptions import ApiClientError
@@ -35,10 +36,15 @@ def fetch_tide_data(
     endpoint = NoaaTidesEndpoint(context.client)
 
     try:
+        logger.debug("    → Making NOAA API request for tides (station: %s, date: %s)", 
+                    params.station, params.begin_date)
+        api_start = time.time()
         response = endpoint.fetch(params)
+        api_duration = time.time() - api_start
+        
         logger.info(
-            "Tide data fetched successfully for station %s. Found %d predictions.",
-            params.station,
+            "    ✓ NOAA Tides API responded in %.2f seconds. Found %d predictions.",
+            api_duration,
             len(response.predictions),
         )
         return response.predictions
@@ -50,8 +56,8 @@ def fetch_tide_data(
 
 def filter_daytime_tides(
     tides: List[NoaaTidePredictionRecord],
-    start_time: time = time(6, 0),
-    end_time: time = time(20, 30),
+    start_time: time_obj = time_obj(6, 0),
+    end_time: time_obj = time_obj(20, 30),
 ) -> List[NoaaTidePredictionRecord]:
     """
     Filter tide events to only include those occurring during daytime hours.

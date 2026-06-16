@@ -2,6 +2,7 @@
 
 
 import json
+import time
 from ..api_client.client import ApiClient
 from ..logger import logger
 
@@ -27,8 +28,10 @@ def fetch_recipients_from_gist(
     if not url:
         raise ValueError("Gist URL is not set.")
 
-    logger.info("Fetching recipients from Gist: %s", url)
+    logger.debug("    → Fetching recipients from Gist: %s", url)
+    fetch_start = time.time()
     response = client.get(url)
+    logger.debug("    ✓ Recipients fetched from Gist in %.2f seconds", time.time() - fetch_start)
     return response.text
 
 

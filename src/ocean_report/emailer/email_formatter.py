@@ -6,13 +6,18 @@ from typing import Any, Dict, List, Optional
 from ..logger import logger
 
 
-def generate_email_body(sections: List[str]) -> str:
+def generate_email_body(
+    sections: List[str], 
+    retrieval_timestamps: Optional[Dict[str, datetime]] = None
+) -> str:
     """
     Generate the full email body including water temperature, tides, and wind data.
 
     Args:
         sections (List[str]): Sections to add to emails. Example:
             ['🌡️ Water Temperature: 72.5°F', '🌊 Tides:\n...']
+        retrieval_timestamps (Optional[Dict[str, datetime]]): Dictionary containing retrieval 
+            timestamps for each data source. Keys: 'water_temp', 'tides', 'wind', 'water_temp_data_time'
 
     Returns:
         str: Full formatted email body.
@@ -20,12 +25,54 @@ def generate_email_body(sections: List[str]) -> str:
     logger.info("Generating email body...")
     today = datetime.now().strftime("%A, %B %d, %Y")
     headings = [f"Daily Water Report – {today} \n\n"]
+    
+    # Add data retrieval timestamp section if provided
+    timestamp_section = []
+    if retrieval_timestamps:
+        timestamp_section.append(format_retrieval_timestamps(retrieval_timestamps))
+    
     trailer = [
         "--------",
         "\nTide & water temp from NOAA (Atlantic City Station 8534720) | Wind by Open-Meteo",
     ]
-    body_list = headings + sections + trailer
+    body_list = headings + timestamp_section + sections + trailer
     return "".join(body_list)
+
+
+def format_retrieval_timestamps(timestamps: Dict[str, datetime]) -> str:
+    """
+    Format data retrieval timestamps for email display.
+
+    Args:
+        timestamps (Dict[str, datetime]): Dictionary with keys 'water_temp', 'tides', 'wind'
+            and optionally 'water_temp_data_time' for the NOAA measurement timestamp
+
+    Returns:
+        str: Formatted timestamp section
+    """
+    lines = ["📊 Data Retrieved:\n"]
+    
+    # Format each timestamp
+    if 'water_temp' in timestamps:
+        time_str = timestamps['water_temp'].strftime("%-I:%M %p")
+        lines.append(f"  • Water Temperature: {time_str}")
+        
+        # Add the actual measurement time if available
+        if 'water_temp_data_time' in timestamps and timestamps['water_temp_data_time']:
+            data_time_str = timestamps['water_temp_data_time']
+            lines.append(f" (measured at {data_time_str})")
+        lines.append("\n")
+    
+    if 'tides' in timestamps:
+        time_str = timestamps['tides'].strftime("%-I:%M %p")
+        lines.append(f"  • Tide Predictions: {time_str}\n")
+    
+    if 'wind' in timestamps:
+        time_str = timestamps['wind'].strftime("%-I:%M %p")
+        lines.append(f"  • Wind Forecast: {time_str}\n")
+    
+    lines.append("\n")
+    return "".join(lines)
 
 
 # NOTE ---- Water Temperature ----

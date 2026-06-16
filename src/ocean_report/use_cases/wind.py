@@ -1,7 +1,7 @@
 """Wind use cases - orchestration layer for wind forecast workflows."""
 
 from datetime import datetime
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, Set, Tuple
 
 from ..application.factory import ApplicationContext
 from ..logger import logger
@@ -20,7 +20,7 @@ def get_daily_wind_forecast(
     longitude: float | None = None,
     beach_facing_deg: float | None = None,
     times_to_get: Set[str] | None = None,
-) -> List[Dict[str, Any]]:
+) -> Tuple[List[Dict[str, Any]], datetime]:
     """
     Get daily wind forecast for specified times.
 
@@ -40,7 +40,9 @@ def get_daily_wind_forecast(
             If None, defaults to {"08:00", "12:00", "15:00", "18:00"}.
 
     Returns:
-        List[Dict[str, Any]]: List of wind forecast entries for the specified times today.
+        Tuple[List[Dict[str, Any]], datetime]:
+            - List of wind forecast entries for the specified times today
+            - Timestamp when data was retrieved
 
     Raises:
         ApiClientError: If the Open-Meteo API request fails.
@@ -70,6 +72,9 @@ def get_daily_wind_forecast(
         timezone="America/New_York",
     )
 
+    # Capture retrieval timestamp
+    retrieval_time = datetime.now()
+    
     # Fetch raw wind forecast data (service layer - API only)
     logger.info("Fetching wind forecast for lat: %.4f, lon: %.4f", latitude, longitude)
     forecast_response = fetch_wind_forecast(context=context, params=params)
@@ -103,7 +108,7 @@ def get_daily_wind_forecast(
         len(selected_forecasts),
     )
 
-    return selected_forecasts
+    return selected_forecasts, retrieval_time
 
 
 
