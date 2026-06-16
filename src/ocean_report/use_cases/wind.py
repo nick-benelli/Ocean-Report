@@ -13,38 +13,6 @@ from ..utils.wind_utils import (
     kmh_to_mph,
 )
 
-
-def _build_wind_entry(
-    timestamp: str,
-    speed_kmh: float,
-    direction_deg: float,
-    beach_facing_deg: float,
-) -> Dict[str, Any]:
-    """
-    Build a normalized wind forecast entry with all derived fields.
-
-    Args:
-        timestamp (str): ISO format timestamp.
-        speed_kmh (float): Wind speed in km/h.
-        direction_deg (float): Wind direction in degrees.
-        beach_facing_deg (float): Beach orientation in degrees.
-
-    Returns:
-        Dict[str, Any]: Normalized wind entry with time, speeds, directions, and classification.
-    """
-    forecast_time = datetime.fromisoformat(timestamp)
-    return {
-        "time": forecast_time.strftime("%-I %p"),
-        "speed_kmh": speed_kmh,
-        "direction_deg": direction_deg,
-        "speed_mph": kmh_to_mph(speed_kmh),
-        "direction": deg_to_16_point_direction(direction_deg),
-        "wind_type": classify_wind_relative_to_beach(
-            direction_deg, beach_facing_deg=beach_facing_deg
-        ),
-    }
-
-
 def get_daily_wind_forecast(
     *,
     context: ApplicationContext,
@@ -136,6 +104,39 @@ def get_daily_wind_forecast(
     )
 
     return selected_forecasts
+
+
+
+def _build_wind_entry(
+    timestamp: str,
+    speed_kmh: float,
+    direction_deg: float,
+    beach_facing_deg: float,
+) -> Dict[str, Any]:
+    """
+    Build a normalized wind forecast entry with all derived fields.
+
+    Args:
+        timestamp (str): ISO format timestamp.
+        speed_kmh (float): Wind speed in km/h.
+        direction_deg (float): Wind direction in degrees.
+        beach_facing_deg (float): Beach orientation in degrees.
+
+    Returns:
+        Dict[str, Any]: Normalized wind entry with time, speeds, directions, and classification.
+    """
+    forecast_time = datetime.fromisoformat(timestamp)
+    return {
+        "time": forecast_time.strftime("%-I %p"),
+        "speed_kmh": speed_kmh,
+        "direction_deg": direction_deg,
+        "speed_mph": kmh_to_mph(speed_kmh),
+        "direction": deg_to_16_point_direction(direction_deg),
+        "wind_type": classify_wind_relative_to_beach(
+            direction_deg, beach_facing_deg=beach_facing_deg
+        ),
+    }
+
 
 
 __all__ = ["get_daily_wind_forecast"]

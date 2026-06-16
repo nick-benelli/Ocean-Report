@@ -4,8 +4,9 @@ import smtplib
 from dataclasses import dataclass, field
 from email.mime.text import MIMEText
 from typing import List, Optional
+# from ..application.context import ApplicationContext
 
-from .config import get_settings
+# from .config import get_settings
 
 
 @dataclass(frozen=True)
@@ -17,19 +18,21 @@ class EmailRecipients:
 
 
 def send_email(
+    *,
     subject: str = "🌊 Daily Water Report",
     body: str = "Here is the daily water report.",
     sender_email: str = "from-person@example.com",
     email_password: Optional[str] = None,
     recipients: Optional[EmailRecipients] = None,
+    smtp_server: Optional[str] = None,
+    smtp_port: Optional[int] = None,
 ) -> None:
     """Send email using SMTP."""
     if email_password is None:
         raise ValueError("Email password must be provided.")
 
-    settings = get_settings()
-    smtp_server = settings.email.smtp_server
-    smtp_port = settings.email.smtp_port
+    # smtp_server = context.config.email.smtp_server
+    # smtp_port = context.config.email.smtp_port
 
     to_email = "" if recipients is None else recipients.to_email
     bcc_list = [] if recipients is None else recipients.bcc_list

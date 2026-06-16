@@ -1,75 +1,34 @@
 """Address fetcher module for ocean report."""
 
-import datetime as dt
+
 import json
-from typing import Optional
-
-import requests
-
-from ..config import get_settings
+from ..api_client.client import ApiClient
 from ..logger import logger
-from ..utils import determine_is_summer, safe_get
 
-
-def get_recipients(verbose: bool = False, test_recips: bool = False) -> str:
-    """
-    Fetches and cleans a list of email recipients from the configured Gist.
-
-    Args:
-        verbose (bool): Whether to print parsed output for debugging.
-
-    Returns:
-        str: Cleaned, comma-separated string of email addresses.
-    """
-    settings = get_settings()
-    is_summer = determine_is_summer(
-        today=dt.date.today(),
-        memorial_day_offset=settings.summer.memorial_day_offset,
-        labor_day_offset=settings.summer.labor_day_offset,
-    )
-
-    if is_summer:
-        logger.info("It's summer!")
-    else:
-        logger.info("It's winter!")
-
-    if test_recips:
-        logger.info("Using test recipients.")
-        url = settings.email.recipient_urls.test
-    else:
-        if is_summer:
-            logger.info("Using regular recipients URL.")
-            url = settings.email.recipient_urls.main
-        else:
-            logger.info("Using offseason recipients URL.")
-            url = settings.email.recipient_urls.offseason
-
-    raw_text = fetch_recipients_from_gist(url=url)
-    return parse_recipients(raw_text, verbose=verbose)
-
-
-def fetch_recipients_from_gist(url: Optional[str] = None) -> str:
+def fetch_recipients_from_gist(
+    *,
+    client: ApiClient,
+    url: str,
+) -> str:
     """
     Fetches the raw email recipient list from a public Gist URL.
 
     Args:
-        url (str): URL to the Gist raw text file.
+        client: HTTP client for making the request.
+        url: URL to the Gist raw text file.
 
     Returns:
         str: Raw string content of the Gist.
 
     Raises:
-        ValueError: If the URL is not provided.
-        requests.HTTPError: If the request fails.
+        ValueError: If the URL is empty.
+        ApiClientError: If the request fails (connection, SSL, or HTTP error).
     """
-
     if not url:
         raise ValueError("Gist URL is not set.")
 
-    # response = requests.get(url)
-    response = safe_get(url)
-    if response is None:
-        raise requests.HTTPError("Failed to retrieve Gist")
+    logger.info("Fetching recipients from Gist: %s", url)
+    response = client.get(url)
     return response.text
 
 

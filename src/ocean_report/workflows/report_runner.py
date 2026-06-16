@@ -1,29 +1,35 @@
 """Main entry point for ocean report."""
 
 from datetime import date, datetime
+from pathlib import Path
+from typing import Union
 
-from .use_cases import tides as tides_use_case
-from .use_cases import water_temperature as water_temp_use_case
-from .use_cases import wind as wind_use_case
-
-from .emailer import email_formatter as formatter
-from . import emailer
-from .emailer.address_fetcher import get_recipients
-from .application.factory import create_application_context
-from .config import get_settings
-from .logger import logger
+from ..application.factory import create_application_context
+from ..emailer import email_formatter as formatter
+from ..emailer import sender as emailer
+from ..logger import logger
+from ..use_cases import tides as tides_use_case
+from ..use_cases import water_temperature as water_temp_use_case
+from ..use_cases import wind as wind_use_case
+from ..use_cases.email import get_email_recipients
 
 # Whether to use the recipients URL for email or environment variable
 USE_RECIP_URL = True
 
 
-def run_report(run_email: bool = True, test: bool = False) -> None:
+def run_report(
+    *,
+    cfg_path: Union[str, Path] = None,
+    run_email: bool = True,
+    test: bool = False
+) -> None:
     """
     Fetch tide, water temperature, and wind data, format it, and send or print an email report.
 
     Args:
-        run_email (bool): If True, send the email. If False, print the email content.
-        test (bool): If True, use test email settings.
+        cfg_path: Path to configuration file. If None, uses default config.
+        run_email: If True, send the email. If False, print the email content.
+        test: If True, use test email settings.
     """
     print("Initiating Ocean Report Email Process...")
     logger.info("Starting Ocean Report Email Process...")
@@ -31,10 +37,12 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
     print(f"Today is {date.today().strftime('%A, %B %d, %Y')}")
     logger.info("Today is %s", date.today().strftime("%A, %B %d, %Y"))
 
-    settings = get_settings()
+    # --- Initialize Application Context ---
+    app_cfg =  create_application_context(config_path=cfg_path)
+    settings = app_cfg.config
 
     # --- Email Settings ---
-    email_sender = settings.email.sender or "sender@example.com"
+    email_sender_address = settings.email.sender or "sender@example.com"
     email_password = settings.email.password or "password1234"
     email_recipients = settings.email.recipients or ""
 
@@ -42,7 +50,7 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
     bcc_recipients = [
         email.strip()
         for email in (
-            get_recipients(test_recips=test)
+            get_email_recipients(test_recips=test)
             if USE_RECIP_URL
             else (settings.email.recipients or "")
         ).split(",")
@@ -56,14 +64,12 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
     today_str = datetime.now().strftime("%Y%m%d")
     today_date_str = datetime.today().strftime("%Y-%m-%d")
 
-    # --- Initialize Application Context ---
-    context = create_application_context()
 
     # --- Fetch Data ---
     # Tide data - using orchestration layer
     logger.info("Fetching daytime tide data...")
     daytime_tides = tides_use_case.get_daytime_tides_for_date(
-        context=context,
+        context=app_cfg,
         station_id=station_id,
         date=today_str,
     )
@@ -72,7 +78,7 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
     # Water temperature data - using orchestration layer
     logger.info("Fetching latest water temperature...")
     water_temp = water_temp_use_case.get_latest_water_temp(
-        context=context,
+        context=app_cfg,
         station_id=station_id,
     )
     h20_temp_str = formatter.format_water_temp(water_temp)
@@ -80,7 +86,7 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
     # Wind data - using orchestration layer
     logger.info("Fetching daily wind forecast...")
     wind_forecast = wind_use_case.get_daily_wind_forecast(
-        context=context,
+        context=app_cfg,
         latitude=settings.location.latitude,
         longitude=settings.location.longitude,
         beach_facing_deg=settings.location.beach_orientation_degrees,
@@ -104,7 +110,7 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
         emailer.send_email(
             subject=email_subject,
             body=email_body,
-            sender_email=email_sender,
+            sender_email=email_sender_address,
             email_password=email_password,
             recipients=emailer.EmailRecipients(
                 to_email=email_recipients,
@@ -119,7 +125,16 @@ def run_report(run_email: bool = True, test: bool = False) -> None:
         print(
             f"\nTo: {email_recipients}\n",
             f"BCC: {', '.join(bcc_recipients)}\n",
-            f"From: {email_sender}\n\n\n",
+            f"From: {email_sender_address}\n\n\n",
             f"{email_subject}\n\n{email_body}",
         )
         logger.info("Email content printed to console.")
+
+
+
+def clean_recip_addresses():
+
+
+
+
+def _send_email(*, context, run_email)
