@@ -20,7 +20,7 @@ class EmailRecipients:
     bcc_list: List[str] = field(default_factory=list)
 
 
-def send_email(
+def send_email(  # pylint: disable=too-many-arguments,too-many-locals,too-many-statements
     *,
     subject: str = "🌊 Daily Water Report",
     body: str = "Here is the daily water report.",

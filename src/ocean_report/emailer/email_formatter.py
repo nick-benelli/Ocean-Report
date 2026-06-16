@@ -15,8 +15,9 @@ def generate_email_body(
     Args:
         sections (List[str]): Sections to add to emails. Example:
             ['🌡️ Water Temperature: 72.5°F', '🌊 Tides:\n...']
-        retrieval_timestamps (Optional[Dict[str, datetime]]): Dictionary containing retrieval
-            timestamps for each data source. Keys: 'water_temp', 'tides', 'wind', 'water_temp_data_time'
+        retrieval_timestamps (Optional[Dict[str, datetime]]):
+            Dictionary containing retrieval timestamps for each data source.
+            Keys: 'water_temp', 'tides', 'wind', 'water_temp_data_time'
 
     Returns:
         str: Full formatted email body.

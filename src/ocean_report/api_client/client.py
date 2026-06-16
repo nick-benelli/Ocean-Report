@@ -31,7 +31,7 @@ class ApiClient:
     behavior.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         timeout: float = 10.0,
         verify_ssl: bool = True,
@@ -92,7 +92,7 @@ class ApiClient:
                 response.status_code,
             )
 
-    def _send_get(
+    def _send_get(  # pylint: disable=too-many-arguments
         self,
         *,
         url: str,
@@ -128,7 +128,7 @@ class ApiClient:
             ) from exc
         return response
 
-    def get(
+    def get(  # pylint: disable=too-many-arguments
         self,
         url: str,
         *,
@@ -192,7 +192,7 @@ class ApiClient:
             logger.error("api.request_response_error method=GET url=%s", url)
             raise
 
-    def get_json(
+    def get_json(  # pylint: disable=too-many-arguments
         self,
         url: str,
         *,

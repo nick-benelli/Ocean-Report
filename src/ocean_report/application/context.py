@@ -1,3 +1,9 @@
+"""Application context for dependency management.
+
+This module defines the ApplicationContext dataclass that holds shared
+application dependencies including configuration and HTTP client instances.
+"""
+
 from dataclasses import dataclass
 from ..config.loader import AppConfig
 from ..api_client.client import ApiClient
