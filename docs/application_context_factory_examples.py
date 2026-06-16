@@ -30,6 +30,7 @@ context = create_application_context(config_path="config/production.yaml")
 
 # Or using Path object
 from pathlib import Path
+
 config_file = Path("config") / "staging.yaml"
 context = create_application_context(config_path=config_file)
 
@@ -54,12 +55,14 @@ context = create_application_context(config=config)
 # Create context once
 main_context = create_application_context()
 
+
 # Pass it through in functions that may or may not have a context
 # This is useful for dependency injection patterns
 def process_data(context: ApplicationContext | None = None):
     """Process data using provided or default context."""
     ctx = create_application_context(context=context)
     # Use ctx...
+
 
 # Call with existing context (no-op, returns same instance)
 process_data(context=main_context)
@@ -72,6 +75,7 @@ process_data()
 # Example 5: Application Initialization Pattern
 # =============================================================================
 
+
 def initialize_application(env: str = "default"):
     """Initialize application with environment-specific configuration."""
     if env == "default":
@@ -79,6 +83,7 @@ def initialize_application(env: str = "default"):
     else:
         config_path = f"config/{env}.yaml"
         return create_application_context(config_path=config_path)
+
 
 # Usage
 dev_context = initialize_application("dev")
@@ -92,6 +97,7 @@ default_context = initialize_application()
 
 import pytest
 from ocean_report.config.schemas import AppConfig, ApiConfig
+
 
 @pytest.fixture
 def test_context():
@@ -108,6 +114,7 @@ def test_context():
     )
     return create_application_context(config=test_config)
 
+
 def test_api_call(test_context):
     """Test using custom test context."""
     response = test_context.client.get("https://test.example.com")
@@ -118,22 +125,24 @@ def test_api_call(test_context):
 # Example 7: Singleton Pattern (if needed)
 # =============================================================================
 
+
 class ApplicationService:
     """Service that maintains a single application context."""
-    
+
     _context: ApplicationContext | None = None
-    
+
     @classmethod
     def get_context(cls) -> ApplicationContext:
         """Get or create the singleton application context."""
         if cls._context is None:
             cls._context = create_application_context()
         return cls._context
-    
+
     @classmethod
     def reset(cls) -> None:
         """Reset the singleton (useful for testing)."""
         cls._context = None
+
 
 # Usage
 context = ApplicationService.get_context()
@@ -150,7 +159,7 @@ try:
     config = get_settings()
     context = create_application_context(
         config=config,
-        config_path="other.yaml"  # ERROR: ambiguous source
+        config_path="other.yaml",  # ERROR: ambiguous source
     )
 except ValueError as e:
     print(f"Expected error: {e}")
@@ -167,9 +176,11 @@ from fastapi import FastAPI, Depends
 app = FastAPI()
 app_context = create_application_context()
 
+
 def get_context() -> ApplicationContext:
     """Dependency that provides the application context."""
     return app_context
+
 
 @app.get("/data")
 async def fetch_data(context: ApplicationContext = Depends(get_context)):
@@ -184,6 +195,7 @@ async def fetch_data(context: ApplicationContext = Depends(get_context)):
 
 from contextlib import contextmanager
 
+
 @contextmanager
 def application_context(config_path: str | None = None):
     """Context manager for application lifecycle."""
@@ -191,12 +203,13 @@ def application_context(config_path: str | None = None):
         context = create_application_context(config_path=config_path)
     else:
         context = create_application_context()
-    
+
     try:
         yield context
     finally:
         # Cleanup if needed (e.g., close connections)
         pass
+
 
 # Usage
 with application_context("config/prod.yaml") as ctx:

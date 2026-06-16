@@ -36,12 +36,15 @@ def fetch_tide_data(
     endpoint = NoaaTidesEndpoint(context.client)
 
     try:
-        logger.debug("    → Making NOAA API request for tides (station: %s, date: %s)", 
-                    params.station, params.begin_date)
+        logger.debug(
+            "    → Making NOAA API request for tides (station: %s, date: %s)",
+            params.station,
+            params.begin_date,
+        )
         api_start = time.time()
         response = endpoint.fetch(params)
         api_duration = time.time() - api_start
-        
+
         logger.info(
             "    ✓ NOAA Tides API responded in %.2f seconds. Found %d predictions.",
             api_duration,

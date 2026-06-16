@@ -37,12 +37,14 @@ def fetch_water_temp(
     endpoint = WaterTemperatureEndpoint(context.client)
 
     try:
-        logger.debug("    → Making NOAA API request for water temperature (station: %s)", 
-                    params.station)
+        logger.debug(
+            "    → Making NOAA API request for water temperature (station: %s)",
+            params.station,
+        )
         api_start = time.time()
         response = endpoint.fetch(params)
         api_duration = time.time() - api_start
-        
+
         logger.info(
             "    ✓ NOAA Water Temperature API responded in %.2f seconds. Found %d records.",
             api_duration,
@@ -50,7 +52,9 @@ def fetch_water_temp(
         )
 
         if not response.data:
-            logger.warning("No water temperature data returned for station %s", params.station)
+            logger.warning(
+                "No water temperature data returned for station %s", params.station
+            )
             return None
 
         return response.data[0]  # Return the latest record

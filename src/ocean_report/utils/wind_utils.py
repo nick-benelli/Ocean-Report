@@ -25,10 +25,22 @@ def deg_to_16_point_direction(deg: float) -> str:
         str: Compass direction (e.g., "N", "NE", "ENE", etc.).
     """
     directions = [
-        "N", "NNE", "NE", "ENE",
-        "E", "ESE", "SE", "SSE",
-        "S", "SSW", "SW", "WSW",
-        "W", "WNW", "NW", "NNW",
+        "N",
+        "NNE",
+        "NE",
+        "ENE",
+        "E",
+        "ESE",
+        "SE",
+        "SSE",
+        "S",
+        "SSW",
+        "SW",
+        "WSW",
+        "W",
+        "WNW",
+        "NW",
+        "NNW",
     ]
     index = round(deg / 22.5) % 16
     return directions[index]

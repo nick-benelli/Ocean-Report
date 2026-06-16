@@ -1,7 +1,11 @@
 import os
 import tempfile
 from ocean_report.config.schemas import AppConfig
-from ocean_report.config.loader import get_config_dict, get_cached_settings, load_raw_config
+from ocean_report.config.loader import (
+    get_config_dict,
+    get_cached_settings,
+    load_raw_config,
+)
 
 
 def test_load_raw_config(monkeypatch):

@@ -12,7 +12,12 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from ..logger import logger
-from .exceptions import ApiClientError, ApiConnectionError, ApiResponseError, ApiSslError
+from .exceptions import (
+    ApiClientError,
+    ApiConnectionError,
+    ApiResponseError,
+    ApiSslError,
+)
 
 
 RequestTimeout = float | tuple[float, float]

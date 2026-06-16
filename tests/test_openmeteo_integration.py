@@ -1,4 +1,5 @@
 """Integration test for Open-Meteo endpoints and models."""
+
 from unittest.mock import Mock
 
 from ocean_report.endpoints.openmeteo import OpenMeteoForecastEndpoint

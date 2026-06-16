@@ -141,7 +141,9 @@ class LocationConfig(StrictModel):
     latitude: float = 39.5
     beach_orientation_degrees: float = 140
 
-    @field_validator("longitude", "latitude", "beach_orientation_degrees", mode="before")
+    @field_validator(
+        "longitude", "latitude", "beach_orientation_degrees", mode="before"
+    )
     @classmethod
     def normalize_float_defaults(cls, value: Any, info: Any) -> float:
         """
@@ -238,7 +240,9 @@ class ApiConfig(StrictModel):
             return _field_default(cls, "backoff_seconds")
         backoff = float(value)
         if backoff < 0:
-            raise ValueError("api.backoff_seconds must be greater than or equal to zero")
+            raise ValueError(
+                "api.backoff_seconds must be greater than or equal to zero"
+            )
         return backoff
 
 

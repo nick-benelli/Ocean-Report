@@ -81,11 +81,13 @@ def create_application_context(
           get_settings() for optimal performance in production.
     """
     # Validate mutual exclusivity - only one parameter may be provided
-    provided_params = sum([
-        context is not None,
-        config is not None,
-        config_path is not None,
-    ])
+    provided_params = sum(
+        [
+            context is not None,
+            config is not None,
+            config_path is not None,
+        ]
+    )
 
     if provided_params > 1:
         raise ValueError(

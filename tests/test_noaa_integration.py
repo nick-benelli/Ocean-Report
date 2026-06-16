@@ -1,4 +1,5 @@
 """Integration test for all NOAA endpoints and models."""
+
 from unittest.mock import Mock
 
 from ocean_report.endpoints.noaa import (
@@ -25,7 +26,9 @@ def test_tides_endpoint_wired() -> None:
     }
 
     endpoint = NoaaTidesEndpoint(mock_client)
-    params = NoaaTideParams(begin_date="20250704", end_date="20250704", station="8534720")
+    params = NoaaTideParams(
+        begin_date="20250704", end_date="20250704", station="8534720"
+    )
 
     response = endpoint.get(params)
 

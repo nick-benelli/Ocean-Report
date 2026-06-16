@@ -35,12 +35,15 @@ def fetch_wind_forecast(
     endpoint = OpenMeteoForecastEndpoint(context.client)
 
     try:
-        logger.debug("    → Making Open-Meteo API request for wind forecast (lat: %.4f, lon: %.4f)", 
-                    params.latitude, params.longitude)
+        logger.debug(
+            "    → Making Open-Meteo API request for wind forecast (lat: %.4f, lon: %.4f)",
+            params.latitude,
+            params.longitude,
+        )
         api_start = time.time()
         response = endpoint.fetch(params)
         api_duration = time.time() - api_start
-        
+
         logger.info(
             "    ✓ Open-Meteo Wind Forecast API responded in %.2f seconds. Found %d hourly records.",
             api_duration,

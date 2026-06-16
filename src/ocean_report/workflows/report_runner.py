@@ -16,10 +16,7 @@ from ..use_cases.email import get_email_recipients
 
 
 def run_report(
-    *,
-    cfg_path: Union[str, Path] = None,
-    run_email: bool = True,
-    test: bool = False
+    *, cfg_path: Union[str, Path] = None, run_email: bool = True, test: bool = False
 ) -> None:
     """
     Fetch tide, water temperature, and wind data, format it, and send or print an email report.
@@ -30,11 +27,13 @@ def run_report(
         test: If True, use test email settings.
     """
     workflow_start_time = time.time()
-    logger.info("="*80)
+    logger.info("=" * 80)
     logger.info("Starting Ocean Report Email Process...")
     logger.info("Today is %s", date.today().strftime("%A, %B %d, %Y"))
-    logger.info("Run mode: %s | Send email: %s", "TEST" if test else "PRODUCTION", run_email)
-    logger.info("="*80)
+    logger.info(
+        "Run mode: %s | Send email: %s", "TEST" if test else "PRODUCTION", run_email
+    )
+    logger.info("=" * 80)
 
     # Load configuration
     logger.info("[STEP 1/5] Loading configuration...")
@@ -51,8 +50,11 @@ def run_report(
         use_url=settings.email.use_recipient_url,
         fallback_recipients=settings.email.recipients or "",
     )
-    logger.info("Recipients fetched in %.2f seconds (found %d recipients)", 
-                time.time() - step_start, len(bcc_recipients))
+    logger.info(
+        "Recipients fetched in %.2f seconds (found %d recipients)",
+        time.time() - step_start,
+        len(bcc_recipients),
+    )
 
     station_id = settings.noaa.station_id
     today_yyyymmdd = datetime.now().strftime("%Y%m%d")
@@ -71,10 +73,16 @@ def run_report(
             beach_facing_deg=settings.location.beach_orientation_degrees,
             forecast_times={"08:00", "12:00", "15:00", "18:00"},
         )
-        logger.info("All data fetched successfully in %.2f seconds", time.time() - step_start)
+        logger.info(
+            "All data fetched successfully in %.2f seconds", time.time() - step_start
+        )
     except Exception as e:
-        logger.error("Failed to fetch report data after %.2f seconds: %s", 
-                    time.time() - step_start, e, exc_info=True)
+        logger.error(
+            "Failed to fetch report data after %.2f seconds: %s",
+            time.time() - step_start,
+            e,
+            exc_info=True,
+        )
         raise
 
     # Format email
@@ -84,8 +92,11 @@ def run_report(
         sections=[water_temp_text, tide_text, wind_text],
         retrieval_timestamps=retrieval_times,
     )
-    logger.info("Email formatted in %.2f seconds (body length: %d chars)", 
-                time.time() - step_start, len(email_body))
+    logger.info(
+        "Email formatted in %.2f seconds (body length: %d chars)",
+        time.time() - step_start,
+        len(email_body),
+    )
 
     email_subject = f"🌊 LBI Daily Water Report: {today_display}"
     if test:
@@ -102,24 +113,33 @@ def run_report(
             email_body=email_body,
             bcc_recipients=bcc_recipients,
         )
-        logger.info("%s completed in %.2f seconds", 
-                   "Email sent" if run_email else "Email displayed", 
-                   time.time() - step_start)
+        logger.info(
+            "%s completed in %.2f seconds",
+            "Email sent" if run_email else "Email displayed",
+            time.time() - step_start,
+        )
     except Exception as e:
-        logger.error("Failed to %s email after %.2f seconds: %s", 
-                    "send" if run_email else "display",
-                    time.time() - step_start, e, exc_info=True)
+        logger.error(
+            "Failed to %s email after %.2f seconds: %s",
+            "send" if run_email else "display",
+            time.time() - step_start,
+            e,
+            exc_info=True,
+        )
         raise
-    
+
     # Final summary
     total_time = time.time() - workflow_start_time
-    logger.info("="*80)
+    logger.info("=" * 80)
     logger.info("Ocean Report workflow completed successfully!")
-    logger.info("Total execution time: %.2f seconds (%.1f minutes)", total_time, total_time / 60)
-    logger.info("="*80)
+    logger.info(
+        "Total execution time: %.2f seconds (%.1f minutes)", total_time, total_time / 60
+    )
+    logger.info("=" * 80)
 
 
 # Helper Functions
+
 
 def _fetch_report_data(
     *,
@@ -132,7 +152,7 @@ def _fetch_report_data(
     forecast_times: set[str],
 ) -> tuple[str, str, str, dict]:
     """Fetch and format all report data sections.
-    
+
     Args:
         context: Application context
         station_id: NOAA station ID
@@ -141,7 +161,7 @@ def _fetch_report_data(
         longitude: Location longitude
         beach_facing_deg: Beach orientation in degrees
         forecast_times: Set of times to fetch wind forecasts for (e.g., {"08:00", "12:00"})
-    
+
     Returns:
         Tuple of (tide_text, water_temp_text, wind_text, retrieval_timestamps)
     """
@@ -153,18 +173,26 @@ def _fetch_report_data(
         date=date_str,
     )
     tide_text = formatter.format_tide_for_email(daytime_tides)
-    logger.info("  ✓ Tide data fetched in %.2f seconds (%d events)", 
-                time.time() - fetch_start, len(daytime_tides))
+    logger.info(
+        "  ✓ Tide data fetched in %.2f seconds (%d events)",
+        time.time() - fetch_start,
+        len(daytime_tides),
+    )
 
     logger.info("  → Fetching water temperature from NOAA...")
     fetch_start = time.time()
-    water_temp, water_temp_retrieval_time, water_temp_data_time = water_temp_use_case.get_latest_water_temp(
-        context=context,
-        station_id=station_id,
+    water_temp, water_temp_retrieval_time, water_temp_data_time = (
+        water_temp_use_case.get_latest_water_temp(
+            context=context,
+            station_id=station_id,
+        )
     )
     water_temp_text = formatter.format_water_temp(water_temp)
-    logger.info("  ✓ Water temperature fetched in %.2f seconds (%.1f°F)", 
-                time.time() - fetch_start, water_temp if water_temp else 0.0)
+    logger.info(
+        "  ✓ Water temperature fetched in %.2f seconds (%.1f°F)",
+        time.time() - fetch_start,
+        water_temp if water_temp else 0.0,
+    )
 
     logger.info("  → Fetching wind forecast from Open-Meteo...")
     fetch_start = time.time()
@@ -176,27 +204,30 @@ def _fetch_report_data(
         times_to_get=forecast_times,
     )
     wind_text = formatter.format_wind_forecast_email(wind_forecast)
-    logger.info("  ✓ Wind forecast fetched in %.2f seconds (%d time slots)", 
-                time.time() - fetch_start, len(wind_forecast))
-    
+    logger.info(
+        "  ✓ Wind forecast fetched in %.2f seconds (%d time slots)",
+        time.time() - fetch_start,
+        len(wind_forecast),
+    )
+
     # Collect all retrieval timestamps
     retrieval_times = {
-        'tides': tide_retrieval_time,
-        'water_temp': water_temp_retrieval_time,
-        'water_temp_data_time': water_temp_data_time,
-        'wind': wind_retrieval_time,
+        "tides": tide_retrieval_time,
+        "water_temp": water_temp_retrieval_time,
+        "water_temp_data_time": water_temp_data_time,
+        "wind": wind_retrieval_time,
     }
-    
+
     return tide_text, water_temp_text, wind_text, retrieval_times
 
 
 def _validate_email_config(sender: str | None, password: str | None) -> None:
     """Validate that required email credentials are configured.
-    
+
     Args:
         sender: Email sender address
         password: Email password
-        
+
     Raises:
         ValueError: If required credentials are missing
     """
@@ -212,14 +243,16 @@ def _validate_email_config(sender: str | None, password: str | None) -> None:
         )
 
 
-def _get_bcc_recipients(*, test: bool, use_url: bool, fallback_recipients: str) -> list[str]:
+def _get_bcc_recipients(
+    *, test: bool, use_url: bool, fallback_recipients: str
+) -> list[str]:
     """Get and parse BCC recipient list from URL or config.
-    
+
     Args:
         test: Whether to use test recipients
         use_url: If True, fetch from URL; if False, use fallback
         fallback_recipients: Comma-separated fallback recipient string
-        
+
     Returns:
         List of cleaned email addresses
     """
@@ -227,17 +260,14 @@ def _get_bcc_recipients(*, test: bool, use_url: bool, fallback_recipients: str) 
         logger.debug("  → Fetching recipients from URL (test=%s)", test)
         fetch_start = time.time()
         recipients_str = get_email_recipients(test_recips=test)
-        logger.debug("  ✓ Recipients fetched from URL in %.2f seconds", time.time() - fetch_start)
+        logger.debug(
+            "  ✓ Recipients fetched from URL in %.2f seconds", time.time() - fetch_start
+        )
     else:
         logger.debug("  → Using fallback recipients from config")
         recipients_str = fallback_recipients or ""
-    
-    return [
-        email.strip()
-        for email in recipients_str.split(",")
-        if email.strip()
-    ]
 
+    return [email.strip() for email in recipients_str.split(",") if email.strip()]
 
 
 def _send_email(
@@ -249,7 +279,7 @@ def _send_email(
     bcc_recipients: list[str],
 ) -> None:
     """Send or print email report.
-    
+
     Args:
         context: Application context containing config
         run_email: If True, send via SMTP; if False, print to console
@@ -265,8 +295,11 @@ def _send_email(
         logger.info("  → Validating email configuration...")
         _validate_email_config(sender_email, email_password)
         logger.debug("  ✓ Email configuration validated")
-        
-        logger.info("  → Connecting to SMTP and sending to %d recipients...", len(bcc_recipients))
+
+        logger.info(
+            "  → Connecting to SMTP and sending to %d recipients...",
+            len(bcc_recipients),
+        )
         logger.debug("  → Sender: %s", sender_email)
         send_start = time.time()
         emailer.send_email(
@@ -279,7 +312,10 @@ def _send_email(
                 bcc_list=bcc_recipients,
             ),
         )
-        logger.info("  ✓ Email sent successfully via SMTP in %.2f seconds", time.time() - send_start)
+        logger.info(
+            "  ✓ Email sent successfully via SMTP in %.2f seconds",
+            time.time() - send_start,
+        )
     else:
         logger.info("  → Displaying email content (NOT sending):")
         print(

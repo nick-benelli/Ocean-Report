@@ -30,7 +30,7 @@ def get_daytime_tides_for_date(
         date (str | None): Date for predictions in YYYYMMDD format. If None, uses today.
 
     Returns:
-        Tuple[List[NoaaTidePredictionRecord], datetime]: 
+        Tuple[List[NoaaTidePredictionRecord], datetime]:
             - Filtered list of daytime tide predictions
             - Timestamp when data was retrieved
 
@@ -55,13 +55,15 @@ def get_daytime_tides_for_date(
 
     # Capture retrieval timestamp
     retrieval_time = datetime.now()
-    
+
     # Fetch raw tide data (service layer - API only)
     logger.info("Fetching tide data for station: %s on date: %s", station_id, date)
     raw_tides = fetch_tide_data(context=context, params=params)
 
     if not raw_tides:
-        logger.warning("No tide predictions returned for station %s on %s", station_id, date)
+        logger.warning(
+            "No tide predictions returned for station %s on %s", station_id, date
+        )
         return []
 
     logger.info("Fetched %d tide predictions", len(raw_tides))

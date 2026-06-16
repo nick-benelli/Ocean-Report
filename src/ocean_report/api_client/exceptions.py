@@ -1,6 +1,3 @@
-
-
-
 class ApiClientError(Exception):
     """Base exception for all HTTP transport errors raised by ApiClient."""
 
@@ -15,4 +12,3 @@ class ApiResponseError(ApiClientError):
 
 class ApiSslError(ApiConnectionError):
     """Raised when TLS/SSL negotiation or certificate validation fails."""
-

@@ -41,7 +41,9 @@ def test_api_client_retries_without_ssl_on_ssl_error():
         success_response = Mock()
         mock_get.side_effect = [first_exc, success_response]
 
-        client = ApiClient(timeout=10, verify_ssl=True, retry_insecure_on_ssl_error=True)
+        client = ApiClient(
+            timeout=10, verify_ssl=True, retry_insecure_on_ssl_error=True
+        )
         result = client.get("https://example.com/data")
 
         assert result is success_response
@@ -59,7 +61,9 @@ def test_api_client_raises_connection_error_when_retry_fails():
             requests.exceptions.RequestException("network down"),
         ]
 
-        client = ApiClient(timeout=10, verify_ssl=True, retry_insecure_on_ssl_error=True)
+        client = ApiClient(
+            timeout=10, verify_ssl=True, retry_insecure_on_ssl_error=True
+        )
         with pytest.raises(ApiConnectionError):
             client.get("https://example.com/data")
 
@@ -68,7 +72,9 @@ def test_api_client_raises_ssl_error_when_ssl_retry_disabled():
     with patch("requests.sessions.Session.get") as mock_get:
         mock_get.side_effect = requests.exceptions.SSLError("bad cert")
 
-        client = ApiClient(timeout=10, verify_ssl=True, retry_insecure_on_ssl_error=False)
+        client = ApiClient(
+            timeout=10, verify_ssl=True, retry_insecure_on_ssl_error=False
+        )
         with pytest.raises(ApiSslError):
             client.get("https://example.com/data")
 
@@ -77,7 +83,9 @@ def test_api_client_raises_response_error_for_http_status_failure():
     with patch("requests.sessions.Session.get") as mock_get:
         response = Mock()
         response.status_code = 503
-        response.raise_for_status.side_effect = requests.HTTPError("service unavailable")
+        response.raise_for_status.side_effect = requests.HTTPError(
+            "service unavailable"
+        )
         mock_get.return_value = response
 
         client = ApiClient(timeout=10, verify_ssl=True)

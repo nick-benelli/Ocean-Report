@@ -1,4 +1,5 @@
 """Integration test for NDBC endpoints and models."""
+
 from unittest.mock import Mock
 
 from ocean_report.endpoints.ndbc import NdbcObservationsEndpoint

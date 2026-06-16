@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 from ..config.loader import AppConfig
 from ..api_client.client import ApiClient
@@ -12,5 +11,6 @@ class ApplicationContext:
     Contains application configuration and infrastructure
     services that are reused throughout the project.
     """
+
     config: AppConfig
     client: ApiClient

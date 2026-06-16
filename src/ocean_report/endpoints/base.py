@@ -1,4 +1,3 @@
-
 """Shared endpoint abstractions for external API integrations."""
 
 from __future__ import annotations
@@ -37,7 +36,9 @@ class BaseEndpoint:
         return f"{self.base_url.rstrip('/')}/{path.lstrip('/')}"
 
     @staticmethod
-    def serialize_params(params: BaseModel | Mapping[str, object] | None) -> Mapping[str, object] | None:
+    def serialize_params(
+        params: BaseModel | Mapping[str, object] | None,
+    ) -> Mapping[str, object] | None:
         """Convert request params into query-ready mappings."""
 
         if params is None:

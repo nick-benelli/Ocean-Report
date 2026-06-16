@@ -48,7 +48,7 @@ def get_latest_water_temp(
 
     # Capture retrieval timestamp
     retrieval_time = datetime.now()
-    
+
     # Fetch latest water temperature data (service layer - API only)
     logger.info("Fetching latest water temperature for station: %s", station_id)
     water_temp_record = fetch_water_temp(context=context, params=params)
@@ -59,7 +59,9 @@ def get_latest_water_temp(
 
     temperature = water_temp_record.temperature
     data_timestamp = water_temp_record.timestamp
-    logger.info("Latest water temperature: %.1f°F (measured at %s)", temperature, data_timestamp)
+    logger.info(
+        "Latest water temperature: %.1f°F (measured at %s)", temperature, data_timestamp
+    )
 
     return temperature, retrieval_time, data_timestamp
 

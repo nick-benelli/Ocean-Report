@@ -1,19 +1,20 @@
-
 import datetime as dt
-from ocean_report.emailer.address_fetcher import fetch_recipients_from_gist, parse_recipients
+from ocean_report.emailer.address_fetcher import (
+    fetch_recipients_from_gist,
+    parse_recipients,
+)
 from ..application.context import ApplicationContext
 from ..application.factory import create_application_context
 from ..logger import logger
 from ..utils import determine_is_summer
 
 
-
-
 def get_email_recipients(
-        *, 
-        context: ApplicationContext | None = None,
-        test_recips: bool = False,
-        verbose: bool = False, ) -> str:
+    *,
+    context: ApplicationContext | None = None,
+    test_recips: bool = False,
+    verbose: bool = False,
+) -> str:
     """
     Fetches and cleans a list of email recipients from the configured Gist.
 

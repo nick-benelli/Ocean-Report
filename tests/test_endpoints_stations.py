@@ -12,8 +12,18 @@ def test_noaa_stations_endpoint_wired_to_models() -> None:
     mock_client = Mock()
     mock_client.get_json.return_value = {
         "stations": [
-            {"id": "8534720", "name": "Atlantic City", "latitude": 39.355, "longitude": -74.417},
-            {"id": "8545530", "name": "Cape May", "latitude": 38.969, "longitude": -74.961},
+            {
+                "id": "8534720",
+                "name": "Atlantic City",
+                "latitude": 39.355,
+                "longitude": -74.417,
+            },
+            {
+                "id": "8545530",
+                "name": "Cape May",
+                "latitude": 38.969,
+                "longitude": -74.961,
+            },
         ]
     }
 

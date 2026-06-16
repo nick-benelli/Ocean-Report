@@ -13,6 +13,7 @@ from ..utils.wind_utils import (
     kmh_to_mph,
 )
 
+
 def get_daily_wind_forecast(
     *,
     context: ApplicationContext,
@@ -74,7 +75,7 @@ def get_daily_wind_forecast(
 
     # Capture retrieval timestamp
     retrieval_time = datetime.now()
-    
+
     # Fetch raw wind forecast data (service layer - API only)
     logger.info("Fetching wind forecast for lat: %.4f, lon: %.4f", latitude, longitude)
     forecast_response = fetch_wind_forecast(context=context, params=params)
@@ -111,7 +112,6 @@ def get_daily_wind_forecast(
     return selected_forecasts, retrieval_time
 
 
-
 def _build_wind_entry(
     timestamp: str,
     speed_kmh: float,
@@ -141,7 +141,6 @@ def _build_wind_entry(
             direction_deg, beach_facing_deg=beach_facing_deg
         ),
     }
-
 
 
 __all__ = ["get_daily_wind_forecast"]
