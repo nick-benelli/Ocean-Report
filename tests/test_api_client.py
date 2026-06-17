@@ -3,18 +3,14 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 
-from ocean_report.api_client.context import ApiContext
 from ocean_report.api_client.client import (
     ApiClient,
     ApiConnectionError,
     ApiResponseError,
     ApiSslError,
 )
-from ocean_report.api_client.factory import (
-    get_api_client,
-    get_api_client_from_config,
-    get_api_context,
-)
+from ocean_report.api_client.exceptions import ApiClientError
+from ocean_report.api_client.factory import create_api_client
 from ocean_report.config.schemas import AppConfig
 
 
@@ -113,7 +109,8 @@ def test_api_client_mounts_retry_adapter_from_init_settings():
     assert http_retry.backoff_factor == 0.25
 
 
-def test_get_api_client_from_config_uses_passed_settings():
+def test_create_api_client_from_config_uses_passed_settings():
+    """Test that create_api_client factory uses config settings."""
     settings = AppConfig.model_validate(
         {
             "api": {
@@ -126,7 +123,7 @@ def test_get_api_client_from_config_uses_passed_settings():
         }
     )
 
-    client = get_api_client_from_config(settings)
+    client = create_api_client(settings)
 
     assert client.timeout == 7.5
     assert client.verify_ssl is False
@@ -135,87 +132,11 @@ def test_get_api_client_from_config_uses_passed_settings():
     assert client.backoff_seconds == 0.25
 
 
-def test_get_api_client_alias_uses_factory():
-    settings = AppConfig.model_validate(
-        {
-            "api": {
-                "timeout_seconds": 3,
-                "verify_ssl": True,
-                "retry_insecure_on_ssl_error": True,
-            }
-        }
-    )
+def test_create_api_client_with_custom_session():
+    """Test that create_api_client accepts custom session."""
+    settings = AppConfig()
+    mock_session = Mock(spec=requests.Session)
 
-    with patch("ocean_report.api_client.context.get_settings", return_value=settings):
-        client = get_api_client()
+    client = create_api_client(settings, session=mock_session)
 
-    assert client.timeout == 3
-    assert client.verify_ssl is True
-    assert client.retry_insecure_on_ssl_error is True
-
-
-def test_get_api_context_from_config_uses_passed_settings():
-    settings = AppConfig.model_validate(
-        {
-            "api": {
-                "timeout_seconds": 4.5,
-                "verify_ssl": True,
-                "retry_insecure_on_ssl_error": False,
-                "max_retries": 2,
-                "backoff_seconds": 0.1,
-            }
-        }
-    )
-
-    context = get_api_context(settings)
-
-    assert isinstance(context, ApiContext)
-    assert context.config is settings
-    assert context.client.timeout == 4.5
-    assert context.client.verify_ssl is True
-    assert context.client.retry_insecure_on_ssl_error is False
-
-
-def test_api_context_resolve_returns_same_context_instance():
-    settings = AppConfig.model_validate({"api": {"timeout_seconds": 2.0}})
-    existing = ApiContext.from_config(settings)
-
-    resolved = ApiContext.resolve(context=existing)
-
-    assert resolved is existing
-
-
-def test_api_context_resolve_from_config_builds_client():
-    settings = AppConfig.model_validate(
-        {
-            "api": {
-                "timeout_seconds": 8.0,
-                "verify_ssl": False,
-                "retry_insecure_on_ssl_error": False,
-            }
-        }
-    )
-
-    resolved = ApiContext.resolve(config=settings)
-
-    assert resolved.config is settings
-    assert resolved.client.timeout == 8.0
-    assert resolved.client.verify_ssl is False
-    assert resolved.client.retry_insecure_on_ssl_error is False
-
-
-def test_api_context_resolve_from_config_path_loads_settings():
-    settings = AppConfig.model_validate({"api": {"timeout_seconds": 9.0}})
-
-    with patch("ocean_report.api_client.context.get_settings", return_value=settings):
-        resolved = ApiContext.resolve(config_path="/tmp/test-config.yaml")
-
-    assert resolved.config is settings
-    assert resolved.client.timeout == 9.0
-
-
-def test_api_context_resolve_rejects_client_without_config_source():
-    custom_client = ApiClient(timeout=12.0)
-
-    with pytest.raises(ValueError, match="client requires config or config_path"):
-        ApiContext.resolve(client=custom_client)
+    assert client.session is mock_session

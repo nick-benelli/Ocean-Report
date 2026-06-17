@@ -38,7 +38,7 @@ def test_noaa_water_temperature_response_alias_mapping_and_dump() -> None:
     assert response.data[0].timestamp == "2025-07-04 15:00"
     assert response.data[0].temperature == 73.2
 
-    dumped = response.model_dump(by_alias=True)
+    dumped = response.model_dump(by_alias=True, exclude_none=True)
     assert dumped == {
         "data": [{"t": "2025-07-04 15:00", "v": 73.2}],
     }

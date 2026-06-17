@@ -26,3 +26,29 @@ ocean-report = "ocean_report:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "integration: marks tests as integration tests (may require external services)",
+    "performance: marks tests as performance/speed tests",
+    "benchmark: marks tests as detailed performance benchmarks",
+    "error_quality: marks tests that verify error message quality",
+]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["src/ocean_report"]
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false

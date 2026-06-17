@@ -1,4 +1,4 @@
-from ocean_report.services.wind_service import (
+from ocean_report.utils.wind_utils import (
     deg_to_16_point_direction,
     classify_wind_relative_to_beach,
 )

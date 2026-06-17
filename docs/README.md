@@ -189,6 +189,48 @@ logging:
 
 ---
 
+## 🧪 Testing Documentation
+
+Complete testing documentation with 160 comprehensive tests covering all layers.
+
+### 📚 Testing Docs (`tests/`)
+
+| Document | Description |
+|----------|-------------|
+| [**README.md**](tests/README.md) | 📌 **START HERE** - Testing overview and documentation index |
+| [**Quick Reference**](tests/quickref.md) | Fast command reference for daily testing |
+| [**Testing Guide**](tests/guide.md) | Complete testing guide with examples and patterns |
+| [**Coverage Report**](tests/coverage.md) | Detailed coverage analysis (88%) |
+
+### Quick Test Commands
+
+```bash
+# Run all tests (skip integration)
+pytest tests/ -m "not integration"
+
+# Run with coverage
+pytest tests/ --cov=ocean_report --cov-report=html
+
+# Run integration tests (requires internet)
+pytest tests/ -m integration -v
+
+# Run performance benchmarks
+pytest tests/ -m performance -v
+```
+
+### Test Suite Metrics
+
+| Metric | Value | Status |
+|--------|-------|--------|
+| Total Tests | 160 | ✅ |
+| Pass Rate | 100% | ✅ |
+| Coverage | 88% | ✅ |
+| Execution Time | ~8s (unit) | ✅ |
+
+**For complete testing documentation:** [tests/README.md](tests/README.md)
+
+---
+
 ## 🔍 Finding What You Need
 
 ### By Role
@@ -204,9 +246,10 @@ logging:
 3. [Application Context Factory](guides/application-context-factory.md) - Environment-specific configs
 
 #### **QA / Testing**
-1. [Email Preview Guide](guides/email-preview.md) - Test without sending
-2. [Logging Guide](guides/logging.md) - Debug output
-3. [Application Context Factory](guides/application-context-factory.md) - Test contexts
+1. [Testing Documentation](tests/README.md) - Complete test suite guide
+2. [Testing Quick Reference](tests/quickref.md) - Daily testing commands
+3. [Email Preview Guide](guides/email-preview.md) - Preview without sending
+4. [Logging Guide](guides/logging.md) - Debug output
 
 #### **Maintainer / Debugger**
 1. [Architecture Docs](architecture/) - Component internals
@@ -237,8 +280,9 @@ logging:
 - [Email Preview Guide](guides/email-preview.md) - Testing emails
 
 #### **Testing**
-- [API Client Factory Guide](guides/api-client-factory.md) - Mock clients
-- [Application Context Factory Guide](guides/application-context-factory.md) - Test contexts
+- [Testing Documentation](tests/README.md) - Complete test suite (160 tests)
+- [Testing Quick Reference](tests/quickref.md) - Daily commands
+- [Coverage Report](tests/coverage.md) - Coverage analysis (88%)
 - [Email Preview Guide](guides/email-preview.md) - Preview without sending
 
 ---

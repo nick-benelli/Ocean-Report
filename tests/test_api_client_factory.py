@@ -115,10 +115,10 @@ class TestFactoryIntegration:
 
         # Verify client has necessary methods
         assert hasattr(client, "get")
-        assert hasattr(client, "post")
+        assert hasattr(client, "get_json")
         assert hasattr(client, "_build_session")
         assert callable(client.get)
-        assert callable(client.post)
+        assert callable(client.get_json)
 
     def test_session_has_retry_adapters(self) -> None:
         """Created client should have properly configured retry adapters."""
