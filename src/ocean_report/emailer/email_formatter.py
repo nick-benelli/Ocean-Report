@@ -1,9 +1,21 @@
 """Email formatting module for ocean report."""
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional, TypedDict
 
 from ..logger import logger
+from ..models.noaa.tides import NoaaTidePredictionRecord
+
+
+class WindForecastEntry(TypedDict):
+    """Type definition for a wind forecast entry."""
+
+    time: str
+    speed_kmh: float
+    direction_deg: float
+    speed_mph: float
+    direction: str
+    wind_type: str
 
 
 def generate_email_body(
@@ -33,9 +45,9 @@ def generate_email_body(
 
     trailer = [
         "--------",
-        "\nTide & water temp from NOAA (Atlantic City Station 8534720) | Wind by Open-Meteo",
+        "\nTide & water temp from NOAA (Atlantic City Station 8534720) | Wind by Open-Meteo\n",
     ]
-    body_list = headings + timestamp_section + sections + trailer
+    body_list = headings + sections + trailer + timestamp_section
     return "".join(body_list)
 
 
@@ -50,27 +62,26 @@ def format_retrieval_timestamps(timestamps: Dict[str, datetime]) -> str:
     Returns:
         str: Formatted timestamp section
     """
-    lines = ["📊 Data Retrieved:\n"]
-
-    # Format each timestamp
+    # Since all data is typically retrieved at the same time, just show one timestamp
+    retrieval_time = None
     if "water_temp" in timestamps:
-        time_str = timestamps["water_temp"].strftime("%-I:%M %p")
-        lines.append(f"  • Water Temperature: {time_str}")
-
-        # Add the actual measurement time if available
-        if "water_temp_data_time" in timestamps and timestamps["water_temp_data_time"]:
-            data_time_str = timestamps["water_temp_data_time"]
-            lines.append(f" (measured at {data_time_str})")
-        lines.append("\n")
-
-    if "tides" in timestamps:
-        time_str = timestamps["tides"].strftime("%-I:%M %p")
-        lines.append(f"  • Tide Predictions: {time_str}\n")
-
-    if "wind" in timestamps:
-        time_str = timestamps["wind"].strftime("%-I:%M %p")
-        lines.append(f"  • Wind Forecast: {time_str}\n")
-
+        retrieval_time = timestamps["water_temp"]
+    elif "tides" in timestamps:
+        retrieval_time = timestamps["tides"]
+    elif "wind" in timestamps:
+        retrieval_time = timestamps["wind"]
+    
+    if not retrieval_time:
+        return ""
+    
+    lines = ["\n📊 Data Retrieved: "]
+    lines.append(retrieval_time.strftime("%b %-d at %-I:%M %p"))
+    
+    # Add the actual water temp measurement time if different from retrieval time
+    if "water_temp_data_time" in timestamps and timestamps["water_temp_data_time"]:
+        data_time_str = timestamps["water_temp_data_time"]
+        lines.append(f"\n  Water temp measured at {data_time_str}")
+    
     lines.append("\n")
     return "".join(lines)
 
@@ -102,22 +113,22 @@ def format_water_temp(water_temperature: Optional[float]) -> str:
 
 
 # NOTE ---- Tide ----
-def format_tide_for_email(tide_events: List[Dict[str, Any]]) -> str:
+def format_tide_for_email(tide_events: List[NoaaTidePredictionRecord]) -> str:
     """
-    Converts a list of tide event dictionaries into a formatted string for email display.
+    Converts a list of tide event objects into a formatted string for email display.
 
     Args:
-        tide_events (List[Dict[str, Any]]): List of tide events with keys 't', 'type', and 'v'.
+        tide_events: List of NoaaTidePredictionRecord objects with timestamp, event_type, and height_feet.
 
     Returns:
         str: Formatted string of tide events.
     """
     formatted = []
     for tide in tide_events:
-        dt = datetime.strptime(tide["t"], "%Y-%m-%d %H:%M")
+        dt = datetime.strptime(tide.timestamp, "%Y-%m-%d %H:%M")
         time_str = dt.strftime("%-I:%M %p")  # Format time as '2:47 PM'
-        tide_type = "High Tide" if tide["type"] == "H" else "Low Tide"
-        height = float(tide["v"])
+        tide_type = "⬆️ High Tide" if tide.event_type == "H" else "⬇️ Low Tide"
+        height = float(tide.height_feet)
         formatted.append(f"{tide_type} at {time_str} — {height:.1f} ft")
 
     tide_text = "\n".join(formatted)
@@ -125,7 +136,7 @@ def format_tide_for_email(tide_events: List[Dict[str, Any]]) -> str:
 
 
 # NOTE ---- Wind Forecast ----
-def convert_wind_data_to_text(wind_data: List[Dict[str, Any]]) -> str:
+def convert_wind_data_to_text(wind_data: List[WindForecastEntry]) -> str:
     """
     Convert structured wind data into formatted text.
     """
@@ -138,12 +149,12 @@ def convert_wind_data_to_text(wind_data: List[Dict[str, Any]]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def format_wind_forecast_email(wind_data: List[Dict[str, Any]]) -> str:
+def format_wind_forecast_email(wind_data: List[WindForecastEntry]) -> str:
     """
     Format wind forecast data as plain text for email.
 
     Args:
-        wind_data (List[Dict[str, Any]]): Wind forecast with keys 'time',
+        wind_data (List[WindForecastEntry]): Wind forecast with keys 'time',
             'speed_mph', 'direction', 'direction_deg', and 'wind_type'.
 
     Returns:
@@ -166,7 +177,7 @@ def format_wind_forecast_email(wind_data: List[Dict[str, Any]]) -> str:
             )  # Align degrees with parentheses
             wind_type = entry["wind_type"]
 
-            line = f"- {time_str}: {speed_str} mph {direction} {deg} → {wind_type}"
+            line = f"• {time_str}: {speed_str} mph {direction} {deg} → {wind_type}"
             lines.append(line)
         except (KeyError, TypeError, ValueError):
             continue
@@ -177,12 +188,12 @@ def format_wind_forecast_email(wind_data: List[Dict[str, Any]]) -> str:
     return "\n".join(lines) + "\n\n"
 
 
-def format_wind_forecast_html(wind_data: List[Dict[str, Any]]) -> str:
+def format_wind_forecast_html(wind_data: List[WindForecastEntry]) -> str:
     """
     Format wind forecast data as HTML for email clients.
 
     Args:
-        wind_data (List[Dict[str, Any]]): Wind forecast with keys 'time', 'speed_mph',
+        wind_data (List[WindForecastEntry]): Wind forecast with keys 'time', 'speed_mph',
             'direction', 'direction_deg', and 'wind_type'.
 
     Returns:

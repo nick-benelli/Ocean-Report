@@ -2,6 +2,7 @@
 
 from . import config  # noqa: F401
 from . import emailer  # noqa: F401
+from .logger import configure_logger, logger, LogOutput  # noqa: F401
 from .services import tide_service  # noqa: F401
 from .services import water_temp_service  # noqa: F401
 from .workflows.report_runner import run_report  # noqa: F401
@@ -17,6 +18,9 @@ __all__ = [
     "run_report",
     "config",
     "emailer",
+    "logger",
+    "configure_logger",
+    "LogOutput",
     "tide_service",
     "water_temp_service",
 ]

@@ -3,7 +3,7 @@ import tempfile
 from ocean_report.config.schemas import AppConfig
 from ocean_report.config.loader import (
     get_config_dict,
-    get_cached_settings,
+    get_settings,
     load_raw_config,
 )
 
@@ -123,8 +123,8 @@ api:
 
     try:
         monkeypatch.delenv("MISSING_LOADER_SENDER", raising=False)
-        settings = get_cached_settings(tmp_path)
-        dumped_config = get_config(tmp_path)
+        settings = get_settings(tmp_path)
+        dumped_config = get_config_dict(tmp_path)
 
         assert settings.noaa.station_id == "9999999"
         assert settings.email.smtp_server == "smtp.example.com"

@@ -13,16 +13,72 @@ from string import Template
 from typing import Any
 
 import yaml
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
-from .. import constants
 from .schemas import AppConfig
 
 
+def _get_default_config_path() -> Path:
+    """Find config path with production-ready fallback strategy.
+    
+    Resolution order:
+    1. OCEAN_REPORT_CONFIG environment variable
+    2. configs/config.yaml relative to project root (pyproject.toml location)
+    3. ~/.config/ocean-report/config.yaml (user config directory)
+    
+    Returns:
+        Resolved config path
+        
+    Raises:
+        FileNotFoundError: If no config file found in any location
+    """
+    # Load .env file first so OCEAN_REPORT_CONFIG is available
+    load_dotenv()
+    
+    # 1. Check environment variable (highest priority)
+    env_config = os.getenv("OCEAN_REPORT_CONFIG")
+    if env_config:
+        path = Path(env_config).expanduser().resolve()
+        if path.exists():
+            return path
+        raise FileNotFoundError(
+            f"Config path from OCEAN_REPORT_CONFIG not found: {path}"
+        )
+    
+    # 2. Check project-relative path (works for repo checkouts, GitHub Actions)
+    pyproject_path = find_dotenv("pyproject.toml")
+    if pyproject_path:
+        project_config = Path(pyproject_path).parent / "configs" / "config.yaml"
+        if project_config.exists():
+            return project_config
+    
+    # 3. Check user config directory (XDG-style for installed packages)
+    user_config = Path.home() / ".config" / "ocean-report" / "config.yaml"
+    if user_config.exists():
+        return user_config
+    
+    # 4. Nothing found - provide helpful error
+    raise FileNotFoundError(
+        "No config file found. Tried:\n"
+        f"  - OCEAN_REPORT_CONFIG env var\n"
+        f"  - {project_config if pyproject_path else 'configs/config.yaml (no pyproject.toml found)'}\n"
+        f"  - {user_config}\n"
+        "Set OCEAN_REPORT_CONFIG=/path/to/config.yaml or place config in one of the above locations."
+    )
+
+
 def resolve_config_path(path: str | Path | None = None) -> Path:
-    """Resolve config path to absolute Path, defaulting to project config."""
-    candidate = path if path is not None else constants.CONFIG_PATH
-    return Path(candidate).expanduser().resolve()
+    """Resolve config path to absolute Path.
+    
+    Args:
+        path: Optional explicit config path. If None, uses default resolution.
+        
+    Returns:
+        Resolved absolute Path to config file
+    """
+    if path is not None:
+        return Path(path).expanduser().resolve()
+    return _get_default_config_path()
 
 
 def load_raw_config(path: str | Path | None = None) -> dict[str, Any]:

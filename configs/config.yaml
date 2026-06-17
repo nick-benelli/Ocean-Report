@@ -35,3 +35,10 @@ api:
   retry_insecure_on_ssl_error: true
   max_retries: 3 # Retry attempts after the initial request
   backoff_seconds: 0.8 # Base exponential backoff delay in seconds
+
+# Logging Settings
+logging:
+  output: ${LOG_OUTPUT:console}  # Options: console, file, both (default: console)
+  file_path: ${LOG_FILE_PATH:logs/ocean_report.log}  # Path for log file
+  level: ${LOG_LEVEL:INFO}  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"  # Log message format

@@ -24,6 +24,7 @@ class NoaaTideParams(ApiSchema):
     format: Literal["json"] = "json"
 
     def to_query_params(self) -> dict[str, str]:
+        """Serialize this request into NOAA query params."""
         payload = self.model_dump(by_alias=True, exclude_none=True)
         return {key: str(value) for key, value in payload.items()}
 

@@ -32,12 +32,14 @@ class NoaaWaterTemperatureRecord(ApiSchema):
 
     timestamp: str = Field(alias="t")
     temperature: float = Field(alias="v")
+    f: str | None = None  # Quality flags returned by NOAA API
 
 
 class NoaaWaterTemperatureResponse(ApiSchema):
     """Top-level NOAA water temperature response body."""
 
     data: list[NoaaWaterTemperatureRecord] = Field(default_factory=list)
+    metadata: dict | None = None  # Station metadata returned by NOAA API
 
 
 # Backward-compatible aliases for earlier naming.

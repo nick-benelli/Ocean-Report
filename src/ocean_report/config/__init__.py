@@ -9,10 +9,11 @@ from .loader import (
     reload_config,
     resolve_config_path,
 )
-from .schemas import AppConfig
+from .schemas import AppConfig, LoggingConfig
 
 __all__ = [
     "AppConfig",
+    "LoggingConfig",
     "clear_config_cache",
     "get_config_dict",
     "get_settings",

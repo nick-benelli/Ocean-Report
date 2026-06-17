@@ -6,7 +6,7 @@ from ocean_report.emailer.address_fetcher import (
 from ..application.context import ApplicationContext
 from ..application.factory import create_application_context
 from ..logger import logger
-from ..utils import determine_is_summer
+from ..utils.date_utils import determine_is_summer
 
 
 def get_email_recipients(
@@ -55,5 +55,5 @@ def get_email_recipients(
             logger.info("Using offseason recipients URL.")
             url = settings.email.recipient_urls.offseason
 
-    raw_text = fetch_recipients_from_gist(url=url)
+    raw_text = fetch_recipients_from_gist(client= context.client, url=url)
     return parse_recipients(raw_text, verbose=verbose)

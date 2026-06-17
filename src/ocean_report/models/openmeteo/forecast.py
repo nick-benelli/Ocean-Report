@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, Dict
 
 from pydantic import Field
 
@@ -38,3 +38,11 @@ class OpenMeteoForecastResponse(ApiSchema):
     """Top-level Open-Meteo forecast response body."""
 
     hourly: OpenMeteoHourlyForecast
+    latitude: float | None = None
+    longitude: float | None = None
+    elevation: float | None = None
+    generationtime_ms: float | None = None
+    timezone: str | None = None
+    timezone_abbreviation: str | None = None
+    utc_offset_seconds: int | None = None
+    hourly_units: Dict | None = None
