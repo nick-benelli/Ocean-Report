@@ -32,11 +32,17 @@ This project fetches the wind forecast each morning and emails it to a list of r
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/ocean-report.git
+git clone https://github.com/nick-benelli/ocean-report.git
 cd ocean-report
 ```
 
-### 2. Configure environment variables
+### 2. Install dependencies
+
+```bash
+uv sync
+```
+
+### 3. Configure environment variables
 
 Create a `.env` file in the root directory (copy from `.env.template`). Example:
 
@@ -52,7 +58,9 @@ LONGITUDE=-74.22
 BEACH_ORIENTATION_DEGREES=140
 RECIPIENTS_GIST_URL=https://gist.github.com/your-gist-url  # optional
 TEST_RECIPIENTS=your_test@email.com                        # optional
-TEST_RECIPIENTS_GIST_URL=https://gist.github.com/your-test-gist-url  # optional
+**See also:** [Configuration Setup Guide](docs/guides/config-setup.md) for advanced configuration options, Docker deployment, and multi-environment setup.
+
+### 4RECIPIENTS_GIST_URL=https://gist.github.com/your-test-gist-url  # optional
 ```
 
 - Use an App Password if your email provider requires 2FA.
@@ -109,61 +117,81 @@ Example output:
 Install dependencies:
 
 ```bash
-uv pip install -e .
+uv sync
+```
+
+For development with all dependencies:
+
+```bash
+uv sync --all-extras
 ```
 
 ### 🚀 Running the Project
 
-**Command line:**
+**Send email (production):**
 
 ```bash
-uv run scripts/run-report.py
+uv run scripts/run_report.py
+```
+
+**Preview without sending (testing):**
+
+```bash
+uv run scripts/run_report_no_email.py
 ```
 
 **Jupyter Notebook:**
 
 Open `notebooks/run.ipynb` and run the cells.
 
-### 🧭 Documentation
+**See also:** [Email Preview Guide](docs/guides/email-preview.md) for testing workflows
 
-- [Architecture](resources/docs/architecture.md)
+### 📚 Documentation
+
+**Comprehensive documentation is available in the [`docs/`](docs/) folder:**
+
+- **[Documentation Hub](docs/README.md)** - Start here! Complete overview and navigation guide
+- **[Architecture Documentation](docs/architecture/README.md)** - Technical deep dive into system design and components
+- **[Practical Guides](docs/guides/README.md)** - How-to guides for configuration, logging, testing, and deployment
+
+**Quick Links:**
+- [Configuration Setup Guide](docs/guides/config-setup.md) - Environment setup and deployment
+- [Logging Guide](docs/guides/logging.md) - Configure logging for different environments
+- [Email Preview System](docs/guides/email-preview.md) - Test emails before sending
+- [System Architecture Overview](docs/architecture/README.md) - Understand how components fit together
 
 ### 📂 Project Structure
 
-```pgsql
+```
 .
-├── LICENSE
-├── README.md
-├── bash-commands
-│   └── run-package.sh
-├── config.yaml
-├── main.py
-├── notebooks
-│   ├── README.md
-│   ├── run.ipynb
-├── pyproject.toml
-├── src
-│   └── ocean_report
-│       ├── __init__.py
-│       ├── address_fetcher.py
-│       ├── config.py
-│       ├── constants.py
-│       ├── email_formatter.py
-│       ├── emailer.py
-│       ├── logger.py
-│       ├── main.py
-│       ├── tide.py
-│       ├── utils.py
-│       ├── water_temp.py
-│       └── wind.py
-├── tests
-│   ├── test_config.py
-│   ├── test_email_formatter.py
-│   ├── test_gist_url.py
-│   ├── test_noaa_data.py
-│   ├── test_open_meto.py
-│   └── test_wind.py
-└── uv.lock
+├── configs/                 # Configuration files (YAML)
+├── docs/                    # Comprehensive documentation
+│   ├── architecture/        # Technical component documentation
+│   └── guides/              # Practical how-to guides
+├── help/                    # Helper scripts
+│   └── bin/
+├── logs/                    # Log output (gitignored)
+├── notebooks/               # Jupyter notebooks for development
+├── scripts/                 # Executable scripts
+│   ├── run_report.py        # Send email
+│   ├── run_report_no_email.py  # Preview mode
+│   └── demo_logger.py       # Logger demo
+├── src/
+│   └── ocean_report/
+│       ├── api_client/      # HTTP client with retry logic
+│       ├── application/     # Dependency injection container
+│       ├── config/          # Configuration loading and validation
+│       ├── emailer/         # Email formatting and delivery
+│       ├── endpoints/       # API-specific implementations
+│       ├── models/          # Pydantic data models
+│       ├── services/        # Data fetching services
+│       ├── use_cases/       # Business logic layer
+│       ├── utils/           # Utility functions
+│       ├── workflows/       # Top-level orchestration
+│       └── logger.py        # Logging configuration
+├── tests/                   # Unit and integration tests
+├── pyproject.toml           # Project metadata and dependencies
+└── uv.lock                  # Locked dependencies
 ```
 
 ### 🙏 Credits
