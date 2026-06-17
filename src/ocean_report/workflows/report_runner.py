@@ -354,21 +354,35 @@ def _fetch_report_data(
         water_temp if water_temp else 0.0,
     )
 
+    # Fetch wind forecast with graceful error handling
     logger.info("  → Fetching wind forecast from Open-Meteo...")
     fetch_start = time.time()
-    wind_forecast, wind_retrieval_time = wind_use_case.get_daily_wind_forecast(
-        context=context,
-        latitude=latitude,
-        longitude=longitude,
-        beach_facing_deg=beach_facing_deg,
-        times_to_get=forecast_times,
-    )
-    wind_text = formatter.format_wind_forecast_email(wind_forecast)
-    logger.info(
-        "  ✓ Wind forecast fetched in %.2f seconds (%d time slots)",
-        time.time() - fetch_start,
-        len(wind_forecast),
-    )
+    try:
+        wind_forecast, wind_retrieval_time = wind_use_case.get_daily_wind_forecast(
+            context=context,
+            latitude=latitude,
+            longitude=longitude,
+            beach_facing_deg=beach_facing_deg,
+            times_to_get=forecast_times,
+        )
+        wind_text = formatter.format_wind_forecast_email(wind_forecast)
+        logger.info(
+            "  ✓ Wind forecast fetched in %.2f seconds (%d time slots)",
+            time.time() - fetch_start,
+            len(wind_forecast),
+        )
+    except Exception as e:
+        logger.warning(
+            "  ⚠ Wind forecast unavailable after %.2f seconds: %s",
+            time.time() - fetch_start,
+            str(e),
+        )
+        logger.debug("Wind API error details:", exc_info=True)
+        # Provide fallback - empty list will trigger "unavailable" message in formatter
+        wind_forecast = []
+        wind_retrieval_time = None
+        wind_text = formatter.format_wind_forecast_email(wind_forecast)
+        logger.info("  → Continuing with report despite wind data failure")
 
     # Collect all retrieval timestamps
     retrieval_times = {

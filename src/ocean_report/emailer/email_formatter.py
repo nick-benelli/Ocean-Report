@@ -169,6 +169,9 @@ def format_wind_forecast_email(wind_data: List[WindForecastEntry]) -> str:
     Returns:
         str: Plain text wind forecast section.
     """
+    if not wind_data:
+        return "🌬️ Wind Forecast: Temporarily unavailable\n\n"
+    
     lines = [
         "🌬️ Wind Forecast:",
         "Key times for your beach today:",
@@ -192,7 +195,7 @@ def format_wind_forecast_email(wind_data: List[WindForecastEntry]) -> str:
             continue
 
     if len(lines) < 3:
-        return "🌬️ Wind Forecast: unavailable\n\n"
+        return "🌬️ Wind Forecast: Temporarily unavailable\n\n"
 
     return "\n".join(lines) + "\n\n"
 
