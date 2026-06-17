@@ -471,6 +471,8 @@ def _send_email(
                 to_email=email_recipients,
                 bcc_list=bcc_recipients,
             ),
+            smtp_server=context.config.email.smtp_server,
+            smtp_port=context.config.email.smtp_port,
         )
         logger.info(
             "  ✓ Email sent successfully via SMTP in %.2f seconds",
