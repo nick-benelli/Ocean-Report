@@ -1,6 +1,7 @@
 """Email formatting module for ocean report."""
 
-from datetime import datetime
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from typing import Dict, List, Optional, TypedDict
 
 from ..logger import logger
@@ -74,8 +75,16 @@ def format_retrieval_timestamps(timestamps: Dict[str, datetime]) -> str:
     if not retrieval_time:
         return ""
     
+    # Convert to Eastern Time if timestamp is naive (assume UTC) or already has timezone info
+    eastern = ZoneInfo("America/New_York")
+    if retrieval_time.tzinfo is None:
+        # Naive datetime - assume UTC
+        retrieval_time = retrieval_time.replace(tzinfo=timezone.utc)
+    # Convert to Eastern Time
+    retrieval_time_et = retrieval_time.astimezone(eastern)
+    
     lines = ["\n📊 Data Retrieved: "]
-    lines.append(retrieval_time.strftime("%b %-d at %-I:%M %p"))
+    lines.append(retrieval_time_et.strftime("%b %-d at %-I:%M %p"))
     
     # Add the actual water temp measurement time if different from retrieval time
     if "water_temp_data_time" in timestamps and timestamps["water_temp_data_time"]:
