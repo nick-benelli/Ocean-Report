@@ -76,12 +76,10 @@ def test_water_temp_service_fetch_real_data(context, atlantic_city_station):
     
     # Verify response (may be None if no recent data)
     if result is not None:
-        water_temp, data_time = result
-        assert isinstance(water_temp, float)
-        assert water_temp > 0  # Reasonable temp (above freezing)
-        assert water_temp < 100  # Reasonable temp (below boiling)
-        if data_time:
-            assert isinstance(data_time, str)
+        assert isinstance(result.temperature, float)
+        assert result.temperature > 0  # Reasonable temp (above freezing)
+        assert result.temperature < 100  # Reasonable temp (below boiling)
+        assert isinstance(result.timestamp, str)
 
 
 @pytest.mark.integration
@@ -172,16 +170,41 @@ def test_wind_use_case_real_api(context):
 
 
 @pytest.mark.integration
-def test_run_report_full_integration_preview_mode(context):
+def test_run_report_full_integration_preview_mode(tmp_path):
     """Test complete run_report workflow with real APIs in preview mode."""
+    # Create a temporary config that doesn't require gist URLs
+    config_content = """
+noaa:
+  station_id: "8534720"
+  buoy_id: "44091"
+  
+email:
+  smtp_server: "smtp.example.com"
+  smtp_port: 587
+  sender: "test@example.com"
+  recipients: "test@example.com"
+  use_recipient_url: false
+  
+location:
+  longitude: -74.2
+  latitude: 39.5
+  beach_orientation_degrees: 140
+  
+logging:
+  level: "INFO"
+  output: "console"
+  format: "%(message)s"
+"""
+    config_file = tmp_path / "test_config.yaml"
+    config_file.write_text(config_content)
+    
     result = run_report(
+        cfg_path=config_file,
         run_email=False,  # Preview only
         test=False,
     )
     
-    # Should complete successfully
-    assert result is not None
-    
+    # Should complete successfully (returns None)
     # In preview mode, run_report prints to console and doesn't return structured data
     # Just verify it completes without error
 
