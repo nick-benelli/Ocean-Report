@@ -1,16 +1,17 @@
 """Data formatting operations for ocean report."""
+
 from ...emailer import email_formatter as formatter
 from ..models import RawReportData, FormattedReportData
 
 
 def format_report_data(raw_data: RawReportData) -> FormattedReportData:
     """Format raw data into email-ready text sections.
-    
+
     Pure formatting layer - takes raw data, returns formatted text.
-    
+
     Args:
         raw_data: Raw data from APIs
-        
+
     Returns:
         FormattedReportData with text sections ready for email
     """

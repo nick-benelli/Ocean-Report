@@ -7,6 +7,7 @@ import ocean_report
 RUN_EMAIL = False
 TEST = os.getenv("TEST", "False").lower() == "true"
 
+
 def main():
     """
     Run Ocean report without email

@@ -20,15 +20,15 @@ from .schemas import AppConfig
 
 def _get_default_config_path() -> Path:
     """Find config path with production-ready fallback strategy.
-    
+
     Resolution order:
     1. OCEAN_REPORT_CONFIG environment variable
     2. configs/config.yaml relative to project root (pyproject.toml location)
     3. ~/.config/ocean-report/config.yaml (user config directory)
-    
+
     Returns:
         Resolved config path
-        
+
     Raises:
         FileNotFoundError: If no config file found in any location
     """
@@ -75,10 +75,10 @@ def _get_default_config_path() -> Path:
 
 def resolve_config_path(path: str | Path | None = None) -> Path:
     """Resolve config path to absolute Path.
-    
+
     Args:
         path: Optional explicit config path. If None, uses default resolution.
-        
+
     Returns:
         Resolved absolute Path to config file
     """

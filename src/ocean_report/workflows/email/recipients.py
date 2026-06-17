@@ -1,4 +1,5 @@
 """Email recipient management."""
+
 import time
 from ...logger import logger
 from ...use_cases.email import get_email_recipients

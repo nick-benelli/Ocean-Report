@@ -41,13 +41,13 @@ def configure_logger(
     Examples:
         >>> # Console only (default)
         >>> configure_logger()
-        
+
         >>> # File only
         >>> configure_logger(LogOutput.FILE, log_file="ocean_report.log")
-        
+
         >>> # Both console and file
         >>> configure_logger(LogOutput.BOTH, log_file="logs/report.log")
-        
+
         >>> # With custom level
         >>> configure_logger(LogOutput.BOTH, log_file="debug.log", level=logging.DEBUG)
     """

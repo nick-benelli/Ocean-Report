@@ -1,4 +1,5 @@
 """Email preview utility for ocean report workflows."""
+
 from pathlib import Path
 from datetime import datetime
 
@@ -11,17 +12,17 @@ def write_email_preview(
     bcc_recipients: list[str],
 ) -> Path:
     """Write email preview to files for review.
-    
+
     Creates both HTML and plain text versions in logs/email-previews/
     with timestamped filenames.
-    
+
     Args:
         subject: Email subject line
         body: Email body content
         sender_email: Sender email address
         email_recipients: To: recipients
         bcc_recipients: BCC recipients list
-        
+
     Returns:
         Path to the HTML preview file
     """
@@ -112,7 +113,7 @@ def write_email_preview(
 
         <div class="email-header">
             <div><strong>To:</strong> {email_recipients if email_recipients else "(none)"}</div>
-            <div><strong>BCC:</strong> {', '.join(bcc_recipients)}</div>
+            <div><strong>BCC:</strong> {", ".join(bcc_recipients)}</div>
             <div><strong>From:</strong> {sender_email}</div>
             <div><strong>Generated:</strong> {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</div>
         </div>

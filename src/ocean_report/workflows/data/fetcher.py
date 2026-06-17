@@ -1,4 +1,5 @@
 """Data fetching operations for ocean report."""
+
 import time
 from ...application import ApplicationContext
 from ...logger import logger
@@ -10,16 +11,16 @@ from ..models import FetchParams, RawReportData
 
 def fetch_raw_data(context: ApplicationContext, params: FetchParams) -> RawReportData:
     """Fetch raw data from all APIs without any formatting.
-    
+
     Pure data fetching layer - no formatting, just retrieval.
-    
+
     Args:
         context: Application context
         params: Fetch parameters
-        
+
     Returns:
         RawReportData with all fetched information
-        
+
     Raises:
         ApiClientError: If any critical API call fails
     """

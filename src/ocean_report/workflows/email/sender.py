@@ -1,4 +1,5 @@
 """Email sending operations."""
+
 import time
 from ...application import ApplicationContext
 from ...emailer import sender as emailer

@@ -57,5 +57,5 @@ def get_email_recipients(
             logger.info("Using offseason recipients URL.")
             url = settings.email.recipient_urls.offseason
 
-    raw_text = fetch_recipients_from_gist(client= context.client, url=url)
+    raw_text = fetch_recipients_from_gist(client=context.client, url=url)
     return parse_recipients(raw_text, verbose=verbose)
