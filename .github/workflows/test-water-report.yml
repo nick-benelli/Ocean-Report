@@ -1,15 +1,10 @@
-name: Daily Water Report
+name: Test Daily Water Report
 
 on:
-  schedule:
-    # What Time does it run? 
-    # 10:35am UTC (6:35am Eastern Time, 3:35am Pacific Time)
-    # 09:50am UTC (5:50am Eastern Time, 2:50am Pacific Time)
-    - cron: "00 08 * * *"
-  workflow_dispatch:
+  workflow_dispatch: # Manual trigger only
 
 concurrency:
-  group: water-report
+  group: water-report-test
   cancel-in-progress: true
 
 jobs:
