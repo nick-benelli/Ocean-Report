@@ -70,7 +70,7 @@ def test_tide_service_fetch_real_data(context, atlantic_city_station, recent_dat
 @pytest.mark.integration
 def test_water_temp_service_fetch_real_data(context, atlantic_city_station):
     """Test water temperature service with real NOAA API."""
-    params = NoaaWaterTempParams(station=atlantic_city_station)
+    params = NoaaWaterTemperatureParams(station=atlantic_city_station)
     
     result = water_temp_service.fetch_water_temp(context=context, params=params)
     
@@ -176,7 +176,6 @@ def test_run_report_full_integration_preview_mode(context):
     """Test complete run_report workflow with real APIs in preview mode."""
     result = run_report(
         run_email=False,  # Preview only
-        context=context,
         test=False,
     )
     
