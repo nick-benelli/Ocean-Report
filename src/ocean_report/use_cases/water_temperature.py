@@ -23,7 +23,8 @@ def get_latest_water_temp(
     3. Extracts and returns the temperature value
 
     Args:
-        context (ApplicationContext): The application context containing configuration and API client.
+        context (ApplicationContext): The application context containing
+            configuration and API client.
         station_id (str | None): NOAA station ID. If None, uses station from config.
 
     Returns:

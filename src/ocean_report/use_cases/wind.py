@@ -33,11 +33,14 @@ def get_daily_wind_forecast(
     5. Returns list of normalized wind entries
 
     Args:
-        context (ApplicationContext): The application context containing configuration and API client.
+        context (ApplicationContext): The application context containing
+            configuration and API client.
         latitude (float | None): Location latitude. If None, uses config value.
         longitude (float | None): Location longitude. If None, uses config value.
-        beach_facing_deg (float | None): Beach orientation in degrees. If None, uses config value.
-        times_to_get (Set[str] | None): Set of times in "HH:MM" format to filter (e.g., {"08:00", "12:00"}).
+        beach_facing_deg (float | None): Beach orientation in degrees.
+            If None, uses config value.
+        times_to_get (Set[str] | None): Set of times in "HH:MM" format to filter
+            (e.g., {"08:00", "12:00"}).
             If None, defaults to {"08:00", "12:00", "15:00", "18:00"}.
 
     Returns:

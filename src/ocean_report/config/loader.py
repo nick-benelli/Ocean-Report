@@ -34,7 +34,7 @@ def _get_default_config_path() -> Path:
     """
     # Load .env file first so OCEAN_REPORT_CONFIG is available
     load_dotenv()
-    
+
     # 1. Check environment variable (highest priority)
     env_config = os.getenv("OCEAN_REPORT_CONFIG")
     if env_config:
@@ -44,26 +44,32 @@ def _get_default_config_path() -> Path:
         raise FileNotFoundError(
             f"Config path from OCEAN_REPORT_CONFIG not found: {path}"
         )
-    
+
     # 2. Check project-relative path (works for repo checkouts, GitHub Actions)
     pyproject_path = find_dotenv("pyproject.toml")
     if pyproject_path:
         project_config = Path(pyproject_path).parent / "configs" / "config.yaml"
         if project_config.exists():
             return project_config
-    
+
     # 3. Check user config directory (XDG-style for installed packages)
     user_config = Path.home() / ".config" / "ocean-report" / "config.yaml"
     if user_config.exists():
         return user_config
-    
+
     # 4. Nothing found - provide helpful error
+    project_str = (
+        str(project_config)
+        if pyproject_path
+        else "configs/config.yaml (no pyproject.toml found)"
+    )
     raise FileNotFoundError(
-        "No config file found. Tried:\n"
+        f"No config file found. Tried:\n"
         f"  - OCEAN_REPORT_CONFIG env var\n"
-        f"  - {project_config if pyproject_path else 'configs/config.yaml (no pyproject.toml found)'}\n"
+        f"  - {project_str}\n"
         f"  - {user_config}\n"
-        "Set OCEAN_REPORT_CONFIG=/path/to/config.yaml or place config in one of the above locations."
+        f"Set OCEAN_REPORT_CONFIG=/path/to/config.yaml or place config "
+        f"in one of the above locations."
     )
 
 

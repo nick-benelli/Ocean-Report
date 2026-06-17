@@ -2,6 +2,7 @@
 """Demo script showing different logger configurations."""
 
 import logging
+from datetime import datetime
 from pathlib import Path
 
 from ocean_report import configure_logger, logger, LogOutput
@@ -76,14 +77,12 @@ def demo_organize_by_date():
     print("DEMO 5: Organized Log Files")
     print("=" * 60)
 
-    from datetime import datetime
-
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     log_file = Path(f"logs/runs/ocean_report_{timestamp}.log")
 
     configure_logger(output=LogOutput.BOTH, log_file=log_file, level=logging.INFO)
 
-    logger.info(f"Log file created at {timestamp}")
+    logger.info("Log file created at %s", timestamp)
     logger.info("This helps organize logs by run time")
 
     print(f"\n✓ Timestamped log: {log_file.absolute()}")

@@ -25,7 +25,8 @@ def get_daytime_tides_for_date(
     4. Returns the final filtered list
 
     Args:
-        context (ApplicationContext): The application context containing configuration and API client.
+        context (ApplicationContext): The application context containing
+            configuration and API client.
         station_id (str | None): NOAA station ID. If None, uses station from config.
         date (str | None): Date for predictions in YYYYMMDD format. If None, uses today.
 

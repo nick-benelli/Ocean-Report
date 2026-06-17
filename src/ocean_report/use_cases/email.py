@@ -1,3 +1,5 @@
+"""Email use case for sending ocean reports."""
+
 import datetime as dt
 from ocean_report.emailer.address_fetcher import (
     fetch_recipients_from_gist,

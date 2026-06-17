@@ -45,7 +45,8 @@ def fetch_wind_forecast(
         api_duration = time.time() - api_start
 
         logger.info(
-            "    ✓ Open-Meteo Wind Forecast API responded in %.2f seconds. Found %d hourly records.",
+            "    ✓ Open-Meteo Wind Forecast API responded in %.2f seconds. "
+            "Found %d hourly records.",
             api_duration,
             len(response.hourly.time),
         )

@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from ..api_client.client import ApiClient
 
-TModel = TypeVar("TModel", bound=BaseModel)
+ModelT = TypeVar("ModelT", bound=BaseModel)
 
 
 class BaseEndpoint:
@@ -78,7 +78,7 @@ class BaseEndpoint:
         )
 
     @staticmethod
-    def parse_model(model_type: type[TModel], payload: object) -> TModel:
+    def parse_model(model_type: type[ModelT], payload: object) -> ModelT:
         """Validate and parse a JSON payload into a typed model."""
 
         return model_type.model_validate(payload)

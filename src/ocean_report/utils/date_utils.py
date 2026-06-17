@@ -1,3 +1,5 @@
+"""Date utility functions for ocean report."""
+
 from datetime import date, timedelta
 
 

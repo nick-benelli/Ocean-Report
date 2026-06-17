@@ -29,7 +29,8 @@ def fetch_water_temp(
         params (NoaaWaterTempParams): Fully constructed NOAA water temperature query parameters.
 
     Returns:
-        Optional[NoaaWaterTemperatureRecord]: The latest water temperature record, or None if no data.
+        Optional[NoaaWaterTemperatureRecord]: The latest water temperature record,
+            or None if no data.
 
     Raises:
         ApiClientError: If the NOAA API request fails.

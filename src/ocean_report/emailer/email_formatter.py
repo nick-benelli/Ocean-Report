@@ -2,21 +2,11 @@
 
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
-from typing import Dict, List, Optional, TypedDict
+from typing import Dict, List, Optional
 
 from ..logger import logger
 from ..models.noaa.tides import NoaaTidePredictionRecord
-
-
-class WindForecastEntry(TypedDict):
-    """Type definition for a wind forecast entry."""
-
-    time: str
-    speed_kmh: float
-    direction_deg: float
-    speed_mph: float
-    direction: str
-    wind_type: str
+from ..models.openmeteo.wind import WindForecastEntry
 
 
 def generate_email_body(
@@ -71,10 +61,10 @@ def format_retrieval_timestamps(timestamps: Dict[str, datetime]) -> str:
         retrieval_time = timestamps["tides"]
     elif "wind" in timestamps:
         retrieval_time = timestamps["wind"]
-    
+
     if not retrieval_time:
         return ""
-    
+
     # Convert to Eastern Time if timestamp is naive (assume UTC) or already has timezone info
     eastern = ZoneInfo("America/New_York")
     if retrieval_time.tzinfo is None:
@@ -82,15 +72,15 @@ def format_retrieval_timestamps(timestamps: Dict[str, datetime]) -> str:
         retrieval_time = retrieval_time.replace(tzinfo=timezone.utc)
     # Convert to Eastern Time
     retrieval_time_et = retrieval_time.astimezone(eastern)
-    
+
     lines = ["\n📊 Data Retrieved: "]
     lines.append(retrieval_time_et.strftime("%b %-d at %-I:%M %p"))
-    
+
     # Add the actual water temp measurement time if different from retrieval time
     if "water_temp_data_time" in timestamps and timestamps["water_temp_data_time"]:
         data_time_str = timestamps["water_temp_data_time"]
         lines.append(f"\n  Water temp measured at {data_time_str}")
-    
+
     lines.append("\n")
     return "".join(lines)
 
@@ -127,7 +117,8 @@ def format_tide_for_email(tide_events: List[NoaaTidePredictionRecord]) -> str:
     Converts a list of tide event objects into a formatted string for email display.
 
     Args:
-        tide_events: List of NoaaTidePredictionRecord objects with timestamp, event_type, and height_feet.
+        tide_events: List of NoaaTidePredictionRecord objects with timestamp,
+            event_type, and height_feet.
 
     Returns:
         str: Formatted string of tide events.
@@ -135,7 +126,8 @@ def format_tide_for_email(tide_events: List[NoaaTidePredictionRecord]) -> str:
     formatted = []
     for tide in tide_events:
         dt = datetime.strptime(tide.timestamp, "%Y-%m-%d %H:%M")
-        time_str = dt.strftime("%-I:%M %p")  # Format time as '2:47 PM'
+        # Format time as '2:47 PM'
+        time_str = dt.strftime("%-I:%M %p")
         tide_type = "⬆️ High Tide" if tide.event_type == "H" else "⬇️ Low Tide"
         height = float(tide.height_feet)
         formatted.append(f"{tide_type} at {time_str} — {height:.1f} ft")
@@ -171,7 +163,7 @@ def format_wind_forecast_email(wind_data: List[WindForecastEntry]) -> str:
     """
     if not wind_data:
         return "🌬️ Wind Forecast: Temporarily unavailable\n\n"
-    
+
     lines = [
         "🌬️ Wind Forecast:",
         "Key times for your beach today:",
