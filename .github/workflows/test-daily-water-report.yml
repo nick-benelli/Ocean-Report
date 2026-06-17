@@ -63,4 +63,4 @@ jobs:
           RUN_EMAIL: "true"
           TEST: "true"
 
-        run: python scripts/run_report.py
+        run: uv run python scripts/run_report.py
