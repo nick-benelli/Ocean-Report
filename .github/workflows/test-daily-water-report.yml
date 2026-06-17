@@ -28,6 +28,10 @@ jobs:
 
       - name: Run water report
         env:
+          # Configuration
+          OCEAN_REPORT_CONFIG: configs/config.yaml
+          
+          # Environment
           EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           LONGITUDE: ${{ secrets.LONGITUDE }}
@@ -45,4 +49,4 @@ jobs:
           RUN_EMAIL: "true"
           TEST: "true"
 
-        run: python scripts/run-report.py
+        run: python scripts/run_report.py
