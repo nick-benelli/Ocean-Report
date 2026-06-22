@@ -1,0 +1,44 @@
+# NOAA Station Info
+noaa:
+  station_id: "8534720" # Atlantic City Station ID
+  buoy_id: "44091" # Barnegat Buoy ID
+
+# Email Settings
+email:
+  smtp_server: "smtp.gmail.com"
+  smtp_port: 587
+  sender: ${EMAIL_SENDER}
+  password: ${EMAIL_PASSWORD}
+  recipients: ${EMAIL_RECIPIENTS}
+  test_recipients: ${TEST_RECIPIENTS} # Optional for testing
+  use_recipient_url: true # If true, fetch recipients from URL; if false, use recipients field
+  recipient_urls:
+    main: ${RECIPIENTS_GIST_URL}
+    test: ${TEST_RECIPIENTS_GIST_URL}
+    offseason: ${OFFSEASON_RECIPIENTS_GIST_URL}
+
+# Location Coordinates
+location:
+  longitude: ${LONGITUDE}
+  latitude: ${LATITUDE}
+  beach_orientation_degrees: 140 # ${BEACH_ORIENTATION_DEGREES}
+
+# Deterimine Summertime
+summer:
+  memorial_day_offset: -4   # days before Memorial Day (negative = before, positive = after)
+  labor_day_offset: 7       # days after Labor Day
+
+# API Client Settings
+api:
+  verify_ssl: true # Enable/disable TLS certificate verification
+  timeout_seconds: 30.0 # Request timeout in seconds
+  retry_insecure_on_ssl_error: true
+  max_retries: 3 # Retry attempts after the initial request
+  backoff_seconds: 0.8 # Base exponential backoff delay in seconds
+
+# Logging Settings
+logging:
+  output: ${LOG_OUTPUT:console}  # Options: console, file, both (default: console)
+  file_path: ${LOG_FILE_PATH:logs/ocean_report.log}  # Path for log file
+  level: ${LOG_LEVEL:INFO}  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"  # Log message format

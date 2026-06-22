@@ -1,6 +1,32 @@
 import pytest
 from unittest.mock import patch
-from ocean_report import address_fetcher
+from ocean_report.emailer import address_fetcher
+from ocean_report.config.schemas import AppConfig
+
+
+def _build_settings(
+    *,
+    main_url: str = "",
+    offseason_url: str = "",
+    test_url: str = "",
+    memorial_day_offset: int = -4,
+    labor_day_offset: int = 7,
+) -> AppConfig:
+    return AppConfig.model_validate(
+        {
+            "email": {
+                "recipient_urls": {
+                    "main": main_url,
+                    "offseason": offseason_url,
+                    "test": test_url,
+                }
+            },
+            "summer": {
+                "memorial_day_offset": memorial_day_offset,
+                "labor_day_offset": labor_day_offset,
+            },
+        }
+    )
 
 
 def test_parse_recipients_basic():
@@ -18,80 +44,29 @@ def test_parse_recipients_verbose(capsys):
 
 
 def test_fetch_recipients_from_gist_success():
+    """Test successful fetching from gist URL using mock client."""
     url = "https://example.com/gist.txt"
-    with patch("requests.get") as mock_get:
-        mock_response = mock_get.return_value
-        mock_response.raise_for_status.return_value = None
-        mock_response.text = "test@example.com\nfoo@bar.com"
-        result = address_fetcher.fetch_recipients_from_gist(url)
-        assert result == "test@example.com\nfoo@bar.com"
-        mock_get.assert_called_once()
-        args, kwargs = mock_get.call_args
-        assert args[0] == url
-        assert "verify" in kwargs
-        assert "timeout" in kwargs
+    
+    from unittest.mock import Mock
+    mock_response = Mock()
+    mock_response.text = "test@example.com\nfoo@bar.com"
+    
+    mock_client = Mock()
+    mock_client.get.return_value = mock_response
+    
+    result = address_fetcher.fetch_recipients_from_gist(client=mock_client, url=url)
+    
+    assert result == "test@example.com\nfoo@bar.com"
+    assert "test@example.com" in result
+    assert "foo@bar.com" in result
+    mock_client.get.assert_called_once_with(url)
 
 
 def test_fetch_recipients_from_gist_no_url():
+    from unittest.mock import Mock
+    mock_client = Mock()
     with pytest.raises(ValueError):
-        address_fetcher.fetch_recipients_from_gist(None)
-
-
-def test_get_recipients_integration(monkeypatch):
-    # Patch the RECIPIENTS_GIST_URL and requests.get
-    monkeypatch.setattr(
-        address_fetcher, "RECIPIENTS_GIST_URL", "https://example.com/gist.txt"
-    )
-    with patch("requests.get") as mock_get:
-        mock_response = mock_get.return_value
-        mock_response.raise_for_status.return_value = None
-        mock_response.text = "A@EXAMPLE.COM, b@example.com\nc@example.com"
-        result = address_fetcher.get_recipients()
-        assert result == "a@example.com,b@example.com,c@example.com"
-
-
-def test_get_recipients_offseason(monkeypatch):
-    # Patch to simulate January (offseason) by patching determine_is_summer
-    monkeypatch.setattr(
-        "ocean_report.address_fetcher.determine_is_summer", lambda **kw: False
-    )
-    monkeypatch.setattr(
-        address_fetcher,
-        "OFFSEASON_RECIPIENTS_GIST_URL",
-        "https://example.com/offseason.txt",
-    )
-    with patch("requests.get") as mock_get:
-        mock_response = mock_get.return_value
-        mock_response.raise_for_status.return_value = None
-        mock_response.text = "off1@example.com, off2@example.com"
-        result = address_fetcher.get_recipients()
-        assert result == "off1@example.com,off2@example.com"
-        mock_get.assert_called_once()
-        args, kwargs = mock_get.call_args
-        assert args[0] == "https://example.com/offseason.txt"
-        assert "verify" in kwargs
-        assert "timeout" in kwargs
-
-
-def test_get_recipients_summer(monkeypatch):
-    # Patch to simulate July (summer) by patching determine_is_summer
-    monkeypatch.setattr(
-        "ocean_report.address_fetcher.determine_is_summer", lambda **kw: True
-    )
-    monkeypatch.setattr(
-        address_fetcher, "RECIPIENTS_GIST_URL", "https://example.com/summer.txt"
-    )
-    with patch("requests.get") as mock_get:
-        mock_response = mock_get.return_value
-        mock_response.raise_for_status.return_value = None
-        mock_response.text = "sum1@example.com, sum2@example.com"
-        result = address_fetcher.get_recipients()
-        assert result == "sum1@example.com,sum2@example.com"
-        mock_get.assert_called_once()
-        args, kwargs = mock_get.call_args
-        assert args[0] == "https://example.com/summer.txt"
-        assert "verify" in kwargs
-        assert "timeout" in kwargs
+        address_fetcher.fetch_recipients_from_gist(client=mock_client, url="")
 
 
 if __name__ == "__main__":

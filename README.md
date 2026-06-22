@@ -32,11 +32,27 @@ This project fetches the wind forecast each morning and emails it to a list of r
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/ocean-report.git
+git clone https://github.com/nick-benelli/ocean-report.git
 cd ocean-report
 ```
 
-### 2. Configure environment variables
+### 2. Install dependencies
+
+**For development (editable install - recommended):**
+
+```bash
+uv pip install -e .
+```
+
+**For production/deployment (locked dependencies):**
+
+```bash
+uv sync
+```
+
+> **Note:** Editable install means code changes take effect immediately without reinstalling.
+
+### 3. Configure environment variables
 
 Create a `.env` file in the root directory (copy from `.env.template`). Example:
 
@@ -58,7 +74,9 @@ TEST_RECIPIENTS_GIST_URL=https://gist.github.com/your-test-gist-url  # optional
 - Use an App Password if your email provider requires 2FA.
 - **Never commit real credentials to public repositories.**
 
-### 3. Add GitHub Secrets
+**See also:** [Configuration Setup Guide](docs/guides/config-setup.md) for advanced configuration options, Docker deployment, and multi-environment setup.
+
+### 4. Add GitHub Secrets
 
 Store the same values from your `.env` file as **GitHub Secrets** for use in Actions workflows.
 
@@ -87,7 +105,7 @@ Optional/test secrets:
 ### ⏰ Schedule & Workflow
 
 - **Daily at 6:45 AM Eastern Time** (10:45 UTC)
-- Runs only between **June 1 and October 1**
+- Runs only between **June 1 - October 1** (inclusive, summer season)
 - **Manual run:** Actions tab → Daily Surf Wind Forecast → Run workflow
 
 ### 📨 Email Preview
@@ -95,91 +113,119 @@ Optional/test secrets:
 Example output:
 
 ```txt
-- 8 AM: 13.0 mph from NW  (312°) → Offshore
-- 12 PM:  4.0 mph from NNW (333°) → Offshore
-- 3 PM: 11.9 mph from ENE ( 68°) → Cross-shore
-- 6 PM:  7.5 mph from ESE (113°) → Onshore/Cross-shore
+🌊 Daily Ocean Report - Long Beach Island, NJ
+📅 June 17, 2026
+
+🌡️ Water Temperature: 68.5°F
+
+💨 Wind Forecast:
+- 8 AM:  13.0 mph from NW  (312°) → Offshore
+- 12 PM:  4.0 mph from NNW (333°) → Offshore  
+- 3 PM:  11.9 mph from ENE ( 68°) → Cross-shore
+- 6 PM:   7.5 mph from ESE (113°) → Onshore/Cross-shore
 ```
 
 ### 📦 Dependencies
 
-- Python 3.11+
+- Python 3.12+
 - [`uv`](https://github.com/astral-sh/uv) (fast Python package installer)
 
-Install dependencies:
+**Install `uv` first (if not already installed):**
 
 ```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# or on macOS:
+brew install uv
+```
+
+**Then install the project:**
+
+```bash
+# Development mode (recommended - code changes take effect immediately):
 uv pip install -e .
+
+# Production mode (uses locked dependencies from uv.lock):
+uv sync
 ```
 
 ### 🚀 Running the Project
 
-**Command line:**
+**Send email (production):**
 
 ```bash
-uv run scripts/run-report.py
+uv run scripts/run_report.py
+```
+
+**Preview without sending (testing):**
+
+```bash
+uv run scripts/run_report_no_email.py
 ```
 
 **Jupyter Notebook:**
 
 Open `notebooks/run.ipynb` and run the cells.
 
-### 🧭 Documentation
+**See also:** [Email Preview Guide](docs/guides/email-preview.md) for testing workflows
 
-- [Architecture](resources/docs/architecture.md)
+### 📚 Documentation
+
+**Comprehensive documentation is available in the [`docs/`](docs/) folder:**
+
+- **[Documentation Hub](docs/README.md)** - Start here! Complete overview and navigation guide
+- **[Architecture Documentation](docs/architecture/README.md)** - Technical deep dive into system design and components
+- **[Practical Guides](docs/guides/README.md)** - How-to guides for configuration, logging, testing, and deployment
+
+**Quick Links:**
+- [Configuration Setup Guide](docs/guides/config-setup.md) - Environment setup and deployment
+- [Logging Guide](docs/guides/logging.md) - Configure logging for different environments
+- [Email Preview System](docs/guides/email-preview.md) - Test emails before sending
+- [System Architecture Overview](docs/architecture/README.md) - Understand how components fit together
 
 ### 📂 Project Structure
 
-```pgsql
+```
 .
-├── LICENSE
-├── README.md
-├── bash-commands
-│   └── run-package.sh
-├── config.yaml
-├── main.py
-├── notebooks
-│   ├── README.md
-│   ├── run.ipynb
-├── pyproject.toml
-├── src
-│   └── ocean_report
-│       ├── __init__.py
-│       ├── address_fetcher.py
-│       ├── config.py
-│       ├── constants.py
-│       ├── email_formatter.py
-│       ├── emailer.py
-│       ├── logger.py
-│       ├── main.py
-│       ├── tide.py
-│       ├── utils.py
-│       ├── water_temp.py
-│       └── wind.py
-├── tests
-│   ├── test_config.py
-│   ├── test_email_formatter.py
-│   ├── test_gist_url.py
-│   ├── test_noaa_data.py
-│   ├── test_open_meto.py
-│   └── test_wind.py
-└── uv.lock
+├── configs/                 # YAML configuration files
+├── docs/                    # Comprehensive documentation
+│   ├── architecture/        # Technical component docs
+│   └── guides/              # Practical how-to guides
+├── help/bin/                # Helper shell scripts
+├── logs/                    # Log output (gitignored)
+├── notebooks/               # Jupyter notebooks for development
+├── scripts/                 # Executable Python scripts
+├── src/ocean_report/        # Main application code
+│   ├── api_client/          # HTTP client with retry logic
+│   ├── application/         # Dependency injection container
+│   ├── config/              # Configuration loading
+│   ├── emailer/             # Email formatting and delivery
+│   ├── endpoints/           # API endpoint implementations (NOAA, Open-Meteo, NDBC)
+│   ├── models/              # Pydantic data models
+│   ├── services/            # Data fetching services
+│   ├── use_cases/           # Business logic layer
+│   ├── utils/               # Utility functions
+│   ├── workflows/           # Top-level orchestration
+│   └── logger.py            # Logging configuration
+├── tests/                   # Unit and integration tests
+└── pyproject.toml           # Project metadata and dependencies
 ```
 
-### 🙏 Credits
-
-- Open-Meteo API
-- NOAA Tides & Currents
-- Wind direction logic adapted from NWS/NOAA standards
-
-### 🧼 License
-
-Non-Commercial License (Modified MIT)
+**See also:** [System Architecture Overview](docs/architecture/README.md) for detailed component documentation
 
 ---
 
-Let me know if you'd like to add deployment instructions, screenshots, or additional badges.
+## 🙏 Credits
 
-### Questions
+- [Open-Meteo API](https://open-meteo.com/) - Wind forecast data
+- [NOAA Tides & Currents](https://tidesandcurrents.noaa.gov/) - Water temperature data
+- Wind direction logic adapted from NWS/NOAA standards
 
-Questions? Email Nick Benelli: [nick.benelli12@gmail.com](mailto:nick.benelli12@gmail.com)
+## 📄 License
+
+[Non-Commercial License (Modified MIT)](LICENSE)
+
+Copyright © 2025 Nick Benelli. This software may be used for personal and non-commercial purposes only.
+
+## 📧 Contact
+
+Questions or feedback? Email Nick Benelli at [nick.benelli12@gmail.com](mailto:nick.benelli12@gmail.com)

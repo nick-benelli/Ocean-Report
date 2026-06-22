@@ -1,0 +1,61 @@
+name: Test Water Report
+
+on:
+  workflow_dispatch: # Manual trigger only
+
+concurrency:
+  group: water-report-test
+  cancel-in-progress: true
+
+jobs:
+  run-water-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log start time
+        run: |
+          echo "Workflow started:"
+          date -u
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Create virtual environment
+        run: uv venv
+
+      - name: Install dependencies
+        run: uv pip install .
+
+      - name: Run water report
+        env:
+          # Configuration
+          OCEAN_REPORT_CONFIG: configs/config.yaml
+          
+          # Environment
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          LONGITUDE: ${{ secrets.LONGITUDE }}
+          LATITUDE: ${{ secrets.LATITUDE }}
+          BEACH_ORIENTATION_DEGREES: ${{ secrets.BEACH_ORIENTATION_DEGREES || '140' }}
+
+          EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
+          BCC_URL: ${{ secrets.BCC_URL }}
+          TEST_RECIPIENTS: ${{ secrets.TEST_RECIPIENTS }}
+
+          RECIPIENTS_GIST_URL: ${{ secrets.RECIPIENTS_GIST_URL }}
+          TEST_RECIPIENTS_GIST_URL: ${{ secrets.TEST_RECIPIENTS_GIST_URL }}
+          OFFSEASON_RECIPIENTS_GIST_URL: ${{ secrets.OFFSEASON_RECIPIENTS_GIST_URL }}
+
+          RUN_EMAIL: "true"
+          TEST: "true"
+
+        run: uv run python scripts/run_report.py

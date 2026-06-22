@@ -1,10 +1,10 @@
 """Ocean Report package initialization."""
 
-from . import config  # noqa: F401
-from . import emailer  # noqa: F401
-from . import tide  # noqa: F401
-from . import water_temp  # noqa: F401
-from .main import run_report  # noqa: F401
+from . import config
+from .logger import configure_logger, logger, LogOutput
+from .services import tide_service
+from .services import water_temp_service
+from .workflows.report_runner import run_report
 
 
 def hello() -> None:
@@ -16,7 +16,9 @@ __all__ = [
     "hello",
     "run_report",
     "config",
-    "emailer",
-    "tide",
-    "water_temp",
+    "logger",
+    "configure_logger",
+    "LogOutput",
+    "tide_service",
+    "water_temp_service",
 ]
