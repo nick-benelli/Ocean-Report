@@ -1,0 +1,26 @@
+Daily Water Report – {{ long_date }}
+
+🌡️ Water Temperature: {% if water_temp %}{{ water_temp }}{% else %}Temporarily unavailable{% endif %}
+
+🌊 Tides:
+{% if tide_info -%}
+{{ tide_info }}
+{%- else -%}
+Temporarily unavailable
+{%- endif %}
+
+🌬️ Wind Forecast:
+Key times for your beach today:
+{% if wind_info -%}
+{{ wind_info }}
+{%- else -%}
+Temporarily unavailable
+{%- endif %}
+
+--------
+Tide & water temp from {{ station_name | default("NOAA (Atlantic City Station 8534720)") }} | Wind by {{ wind_provider | default("Open-Meteo") }}
+
+📊 Data Retrieved: {{ date_retrieved }}
+{%- if water_temp_measured_at_date %}
+  Water temp measured at {{ water_temp_measured_at_date }}
+{%- endif %}
