@@ -128,7 +128,7 @@ def format_tide_for_email(tide_events: List[NoaaTidePredictionRecord]) -> str:
         dt = datetime.strptime(tide.timestamp, "%Y-%m-%d %H:%M")
         # Format time as '2:47 PM'
         time_str = dt.strftime("%-I:%M %p")
-        tide_type = "⬆️ High Tide" if tide.event_type == "H" else "⬇️ Low Tide"
+        tide_type = "• ⬆️ High Tide" if tide.event_type == "H" else "• ⬇️ Low Tide"
         height = float(tide.height_feet)
         formatted.append(f"{tide_type} at {time_str} — {height:.1f} ft")
 
