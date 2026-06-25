@@ -1,4 +1,13 @@
-"""Email formatting module for ocean report."""
+"""Email formatting module for ocean report.
+
+DEPRECATION NOTICE: This module uses the old string-concatenation approach.
+For new code, use:
+  - template_helpers.py to format individual values
+  - template_renderer.py to render Jinja2 templates
+  - models.email.EmailTemplateData for type-safe template data
+
+This module is kept for backward compatibility with existing workflows.
+"""
 
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
@@ -14,6 +23,10 @@ def generate_email_body(
 ) -> str:
     """
     Generate the full email body including water temperature, tides, and wind data.
+
+    DEPRECATED: Use render_email_template() from template_renderer.py with
+    EmailTemplateData instead. This function uses string concatenation and
+    is harder to maintain than template-based rendering.
 
     Args:
         sections (List[str]): Sections to add to emails. Example:
@@ -128,9 +141,9 @@ def format_tide_for_email(tide_events: List[NoaaTidePredictionRecord]) -> str:
         dt = datetime.strptime(tide.timestamp, "%Y-%m-%d %H:%M")
         # Format time as '2:47 PM'
         time_str = dt.strftime("%-I:%M %p")
-        tide_type = "• ⬆️ High Tide" if tide.event_type == "H" else "• ⬇️ Low Tide"
+        tide_type = "⬆️ High Tide" if tide.event_type == "H" else "⬇️ Low Tide"
         height = float(tide.height_feet)
-        formatted.append(f"{tide_type} at {time_str} — {height:.1f} ft")
+        formatted.append(f"• {tide_type} at {time_str} — {height:.1f} ft")
 
     tide_text = "\n".join(formatted)
     return f"🌊 Tides:\n{tide_text}\n\n"
