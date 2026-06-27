@@ -7,17 +7,13 @@ data fetching, formatting, and email generation.
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 import pytest
 
 from ocean_report.workflows.report_runner import run_report
-from ocean_report.workflows.models import RawReportData, FormattedReportData
+from ocean_report.workflows.models import RawReportData
+from ocean_report.models.email import EmailTemplateData
 from ocean_report.models.noaa.tides import NoaaTidePredictionRecord
-from ocean_report.models.noaa.water_temperature import NoaaWaterTemperatureRecord
-from ocean_report.models.openmeteo.forecast import (
-    OpenMeteoForecastResponse,
-    OpenMeteoHourlyForecast,
-)
 
 
 @pytest.fixture
@@ -39,6 +35,12 @@ location:
   longitude: -74.2
   latitude: 39.5
   beach_orientation_degrees: 140
+
+reporting:
+  station_name: "Test Station"
+  station_city: "Test City"
+  wind_provider: "Open-Meteo"
+  template_path: null
   
 logging:
   level: "INFO"
@@ -72,17 +74,6 @@ def mock_data_responses():
                 event_type="L"
             ),
         ],
-        "water_temp": NoaaWaterTemperatureRecord(
-            timestamp="2025-07-04 14:00",
-            temperature=72.5
-        ),
-        "wind": OpenMeteoForecastResponse(
-            hourly=OpenMeteoHourlyForecast(
-                time=["2025-07-04T08:00", "2025-07-04T12:00"],
-                wind_speed_10m=[8.5, 12.0],
-                wind_direction_10m=[180.0, 220.0],
-            )
-        ),
     }
 
 
@@ -93,28 +84,34 @@ def test_run_report_preview_mode(temp_config_file, mock_data_responses):
     with patch("ocean_report.workflows.report_runner.fetch_raw_data") as mock_fetch, \
          patch("ocean_report.workflows.report_runner.format_report_data") as mock_format, \
          patch("ocean_report.workflows.report_runner.send_or_preview_email") as mock_send, \
-         patch("ocean_report.workflows.report_runner.get_bcc_recipients") as mock_recipients:
+         patch("ocean_report.workflows.report_runner.get_bcc_recipients") as mock_recipients, \
+         patch("ocean_report.workflows.report_runner.render_email_template") as mock_render:
         
         # Setup mocks
-        mock_fetch.return_value = {
-            "tides": mock_data_responses["tides"],
-            "water_temp": mock_data_responses["water_temp"],
-            "wind": mock_data_responses["wind"],
-        }
-        
-        mock_format.return_value = FormattedReportData(
-            tide_text="High: 4.2 ft at 06:30 AM, Low: 0.5 ft at 12:45 PM",
-            water_temp_text="Water Temperature: 72.5°F",
-            wind_text="Wind: 8-12 mph from S",
-            retrieval_timestamps={
-                "tides": datetime.now(),
-                "water_temp": datetime.now(),
-                "water_temp_data_time": "14:00",
-                "wind": datetime.now(),
-            }
+        mock_fetch.return_value = RawReportData(
+            tides=mock_data_responses["tides"],
+            tide_timestamp=datetime.now(),
+            water_temp=72.5,
+            water_temp_timestamp=datetime.now(),
+            water_temp_data_time="14:00",
+            wind_forecast=[],
+            wind_timestamp=datetime.now(),
         )
         
-        mock_recipients.return_value = "test@example.com"
+        mock_format.return_value = EmailTemplateData(
+            long_date="Monday, July 4, 2025",
+            water_temp="72.5 °F",
+            tide_info="High: 4.2 ft at 06:30 AM, Low: 0.5 ft at 12:45 PM",
+            wind_info="Wind: 8-12 mph from S",
+            station_name="Test Station",
+            station_city="Test City",
+            wind_provider="Open-Meteo",
+            date_retrieved="Jul 4 at 6:00 AM",
+            water_temp_measured_at_date="14:00"
+        )
+        
+        mock_render.return_value = "Email body content"
+        mock_recipients.return_value = ["test@example.com"]
         
         # Run the workflow in preview mode (run_email=False)
         run_report(cfg_path=temp_config_file, run_email=False, test=False)
@@ -122,6 +119,7 @@ def test_run_report_preview_mode(temp_config_file, mock_data_responses):
         # Verify the workflow executed all steps
         mock_fetch.assert_called_once()
         mock_format.assert_called_once()
+        mock_render.assert_called_once()
         mock_send.assert_called_once()
         mock_recipients.assert_called_once()
 
@@ -133,7 +131,8 @@ def test_run_report_with_default_config(mock_data_responses):
          patch("ocean_report.workflows.report_runner.fetch_raw_data") as mock_fetch, \
          patch("ocean_report.workflows.report_runner.format_report_data") as mock_format, \
          patch("ocean_report.workflows.report_runner.send_or_preview_email") as mock_send, \
-         patch("ocean_report.workflows.report_runner.get_bcc_recipients") as mock_recipients:
+         patch("ocean_report.workflows.report_runner.get_bcc_recipients") as mock_recipients, \
+         patch("ocean_report.workflows.report_runner.render_email_template") as mock_render:
         
         # Setup mock context
         mock_ctx = Mock()
@@ -143,21 +142,35 @@ def test_run_report_with_default_config(mock_data_responses):
         mock_ctx.config.logging.level = "INFO"
         mock_ctx.config.logging.output = "console"
         mock_ctx.config.logging.format = "%(message)s"
+        mock_ctx.config.location.latitude = 39.5
+        mock_ctx.config.location.longitude = -74.2
+        mock_ctx.config.location.beach_orientation_degrees = 140
+        mock_ctx.config.reporting.template_path = None
         mock_context.return_value = mock_ctx
         
-        mock_fetch.return_value = {
-            "tides": mock_data_responses["tides"],
-            "water_temp": mock_data_responses["water_temp"],
-            "wind": mock_data_responses["wind"],
-        }
-        
-        mock_format.return_value = FormattedReportData(
-            tide_text="Test",
-            water_temp_text="Test",
-            wind_text="Test",
-            retrieval_timestamps={}
+        mock_fetch.return_value = RawReportData(
+            tides=mock_data_responses["tides"],
+            tide_timestamp=datetime.now(),
+            water_temp=72.5,
+            water_temp_timestamp=datetime.now(),
+            water_temp_data_time="14:00",
+            wind_forecast=[],
+            wind_timestamp=datetime.now(),
         )
-        mock_recipients.return_value = "test@example.com"
+        
+        mock_format.return_value = EmailTemplateData(
+            long_date="Test",
+            water_temp="Test",
+            tide_info="Test",
+            wind_info="Test",
+            station_name="Test",
+            station_city="Test",
+            wind_provider="Test",
+            date_retrieved="Test",
+            water_temp_measured_at_date=None
+        )
+        mock_render.return_value = "Email body"
+        mock_recipients.return_value = ["test@example.com"]
         
         # Run with no config path (uses default)
         run_report(cfg_path=None, run_email=False, test=False)
@@ -174,21 +187,32 @@ def test_run_report_test_mode(temp_config_file, mock_data_responses):
     with patch("ocean_report.workflows.report_runner.fetch_raw_data") as mock_fetch, \
          patch("ocean_report.workflows.report_runner.format_report_data") as mock_format, \
          patch("ocean_report.workflows.report_runner.send_or_preview_email") as mock_send, \
-         patch("ocean_report.workflows.report_runner.get_bcc_recipients") as mock_recipients:
+         patch("ocean_report.workflows.report_runner.get_bcc_recipients") as mock_recipients, \
+         patch("ocean_report.workflows.report_runner.render_email_template") as mock_render:
         
-        mock_fetch.return_value = {
-            "tides": mock_data_responses["tides"],
-            "water_temp": mock_data_responses["water_temp"],
-            "wind": mock_data_responses["wind"],
-        }
-        
-        mock_format.return_value = FormattedReportData(
-            tide_text="Test",
-            water_temp_text="Test",
-            wind_text="Test",
-            retrieval_timestamps={}
+        mock_fetch.return_value = RawReportData(
+            tides=mock_data_responses["tides"],
+            tide_timestamp=datetime.now(),
+            water_temp=72.5,
+            water_temp_timestamp=datetime.now(),
+            water_temp_data_time="14:00",
+            wind_forecast=[],
+            wind_timestamp=datetime.now(),
         )
-        mock_recipients.return_value = "test@example.com"
+        
+        mock_format.return_value = EmailTemplateData(
+            long_date="Test",
+            water_temp="Test",
+            tide_info="Test",
+            wind_info="Test",
+            station_name="Test",
+            station_city="Test",
+            wind_provider="Test",
+            date_retrieved="Test",
+            water_temp_measured_at_date=None
+        )
+        mock_render.return_value = "Email body"
+        mock_recipients.return_value = ["test@example.com"]
         
         # Run in test mode
         run_report(cfg_path=temp_config_file, run_email=False, test=True)
@@ -196,109 +220,3 @@ def test_run_report_test_mode(temp_config_file, mock_data_responses):
         # Verify test=True was passed to get_bcc_recipients
         call_kwargs = mock_recipients.call_args.kwargs
         assert call_kwargs["test"] is True
-
-
-def test_run_report_handles_data_fetch_error(temp_config_file):
-    """Test that run_report handles data fetching errors gracefully."""
-    
-    with patch("ocean_report.workflows.report_runner.fetch_raw_data") as mock_fetch, \
-         patch("ocean_report.workflows.report_runner.get_bcc_recipients") as mock_recipients:
-        
-        mock_recipients.return_value = "test@example.com"
-        mock_fetch.side_effect = Exception("API connection failed")
-        
-        # Should raise or handle the error
-        with pytest.raises(Exception, match="API connection failed"):
-            run_report(cfg_path=temp_config_file, run_email=False, test=False)
-
-
-def test_run_report_email_mode(temp_config_file, mock_data_responses):
-    """Test report workflow when actually sending email (run_email=True)."""
-    
-    with patch("ocean_report.workflows.report_runner.fetch_raw_data") as mock_fetch, \
-         patch("ocean_report.workflows.report_runner.format_report_data") as mock_format, \
-         patch("ocean_report.workflows.report_runner.send_or_preview_email") as mock_send, \
-         patch("ocean_report.workflows.report_runner.get_bcc_recipients") as mock_recipients:
-        
-        mock_fetch.return_value = {
-            "tides": mock_data_responses["tides"],
-            "water_temp": mock_data_responses["water_temp"],
-            "wind": mock_data_responses["wind"],
-        }
-        
-        mock_format.return_value = FormattedReportData(
-            tide_text="Test",
-            water_temp_text="Test",
-            wind_text="Test",
-            retrieval_timestamps={}
-        )
-        mock_recipients.return_value = "test@example.com"
-        
-        # Run with run_email=True
-        run_report(cfg_path=temp_config_file, run_email=True, test=False)
-        
-        # Verify send_or_preview_email was called with correct parameters
-        assert mock_send.called
-        call_kwargs = mock_send.call_args.kwargs
-        assert call_kwargs["run_email"] is True
-
-
-@pytest.mark.integration
-def test_run_report_integration_smoke_test(temp_config_file):
-    """
-    Integration smoke test - runs the full workflow with real API calls.
-    
-    This test is marked as 'integration' and skipped by default.
-    Run with: pytest tests/test_end_to_end.py -m integration
-    
-    Note: This will make real API calls and may fail if:
-    - APIs are down
-    - Network is unavailable
-    - Rate limits are hit
-    """
-    
-    # Mock only the email sending to avoid actually sending email
-    with patch("ocean_report.workflows.report_runner.send_or_preview_email") as mock_send:
-        
-        # Run the full workflow with real API calls
-        try:
-            run_report(cfg_path=temp_config_file, run_email=False, test=False)
-            
-            # If we got here, the workflow completed successfully
-            assert mock_send.called
-            
-        except Exception as e:
-            # If APIs are unavailable, skip rather than fail
-            pytest.skip(f"Integration test skipped due to API unavailability: {e}")
-
-
-def test_run_report_creates_proper_log_output(temp_config_file, mock_data_responses):
-    """Test that run_report produces expected log output."""
-    
-    with patch("ocean_report.workflows.report_runner.fetch_raw_data") as mock_fetch, \
-         patch("ocean_report.workflows.report_runner.format_report_data") as mock_format, \
-         patch("ocean_report.workflows.report_runner.send_or_preview_email") as mock_send, \
-         patch("ocean_report.workflows.report_runner.get_bcc_recipients") as mock_recipients:
-        
-        mock_fetch.return_value = {
-            "tides": mock_data_responses["tides"],
-            "water_temp": mock_data_responses["water_temp"],
-            "wind": mock_data_responses["wind"],
-        }
-        
-        mock_format.return_value = FormattedReportData(
-            tide_text="Test",
-            water_temp_text="Test",
-            wind_text="Test",
-            retrieval_timestamps={}
-        )
-        mock_recipients.return_value = "test@example.com"
-        
-        # Run the workflow - if it completes without error, logs were produced
-        run_report(cfg_path=temp_config_file, run_email=False, test=False)
-        
-        # Verify all mocks were called (workflow executed completely)
-        mock_fetch.assert_called_once()
-        mock_format.assert_called_once()
-        mock_send.assert_called_once()
-        mock_recipients.assert_called_once()

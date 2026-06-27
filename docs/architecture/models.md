@@ -40,6 +40,7 @@ If data doesn't match the template, the application rejects it immediately with 
 ```
 models/
 ├── __init__.py
+├── email.py              # Email template data models
 ├── common/
 │   ├── __init__.py
 │   ├── base.py           # Base model classes
@@ -66,6 +67,9 @@ Common Models (shared patterns)
     ├── BaseAPIModel (frozen, validation enabled)
     ├── ErrorResponse (API error handling)
     └── PaginatedResponse (paginated results)
+
+Email Models (template data)
+    └── EmailTemplateData (data contract for Jinja2 templates)
 
 Provider Models (API-specific)
     ├── NOAA Models (water temp, tides, stations)
@@ -128,7 +132,94 @@ record.temperature = 75.0  # Raises FrozenInstanceError
 
 ---
 
-### 2. NOAA Models (`noaa/`)
+### 2. Email Models (`email.py`)
+
+#### EmailTemplateData
+
+**Purpose**: Data contract between workflow layer and Jinja2 email templates.
+
+**Definition**:
+```python
+from pydantic import BaseModel, Field
+
+class EmailTemplateData(BaseModel):
+    """
+    Data model for email template variables.
+    
+    This represents the contract between the workflow
+    and the Jinja2 email template. All data should be
+    pre-formatted and ready for display.
+    """
+    
+    # Header
+    long_date: str = Field(
+        ..., description="Full date string (e.g., 'Monday, June 24, 2026')"
+    )
+    
+    # Water temperature section
+    water_temp: Optional[str] = Field(
+        None, description="Formatted water temperature with unit (e.g., '64.4 °F')"
+    )
+    
+    # Tides section
+    tide_info: Optional[str] = Field(
+        None, description="Formatted tide information with emoji and times"
+    )
+    
+    # Wind section
+    wind_info: Optional[str] = Field(
+        None, description="Formatted wind forecast with bullet points"
+    )
+    
+    # Footer - station/provider info
+    station_name: str = Field(..., description="NOAA station name and ID")
+    station_city: str = Field(..., description="Station city name")
+    wind_provider: str = Field(
+        default="Open-Meteo", description="Wind data provider name"
+    )
+    
+    # Metadata timestamps
+    date_retrieved: str = Field(
+        ..., description="Formatted data retrieval timestamp (e.g., 'Jun 24 at 6:22 AM')"
+    )
+    water_temp_measured_at_date: Optional[str] = Field(
+        None, description="Water temp measurement timestamp from NOAA sensor"
+    )
+    
+    model_config = {"frozen": True}  # Immutable
+```
+
+**Usage Example**:
+```python
+from ocean_report.models.email import EmailTemplateData
+
+# Create template data
+data = EmailTemplateData(
+    long_date="Monday, June 16, 2026",
+    water_temp="72.5 °F",
+    tide_info="⬇️ Low Tide at 8:23 AM — 0.3 ft\n⬆️ High Tide at 2:46 PM — 4.1 ft",
+    wind_info="•  8 AM:  4.8 mph ESE (108.0°) → Cross/Onshore",
+    station_name="Atlantic City Station 8534720",
+    station_city="Atlantic City",
+    wind_provider="Open-Meteo",
+    date_retrieved="Jun 16 at 6:45 AM",
+    water_temp_measured_at_date="Jun 16 at 6:30 AM"
+)
+
+# Convert to template dict
+template_dict = data.to_template_dict()
+# Uses .model_dump(exclude_none=False) to include None values for template conditionals
+```
+
+**Design Notes**:
+- **Frozen**: Immutable after creation (prevents accidental modification)
+- **Pre-formatted**: All values ready for display (no formatting in template)
+- **Optional fields**: Use `None` for unavailable data
+- **Type safety**: Pydantic validates all fields before template rendering
+
+---
+
+### 3. NOAA Models (`noaa/`)
 
 #### Water Temperature Models
 
@@ -260,7 +351,7 @@ for tide in response.predictions:
 
 ---
 
-### 3. Open-Meteo Models (`openmeteo/`)
+### 4. Open-Meteo Models (`openmeteo/`)
 
 #### Forecast Models
 
@@ -342,7 +433,7 @@ for i, time_str in enumerate(api_response["hourly"]["time"]):
 
 ---
 
-### 4. Error Models (`common/errors.py`)
+### 5. Error Models (`common/errors.py`)
 
 **ApiErrorResponse**:
 ```python

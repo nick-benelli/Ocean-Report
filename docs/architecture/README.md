@@ -119,7 +119,7 @@ flowchart TD
     H -->|Fetches from| I[NOAA APIs]
     H -->|Fetches from| J[Open-Meteo API]
     
-    E -->|4. Formats| K[Email Formatter]
+    E -->|4. Formats| K[Template Renderer]
     E -->|5. Sends| L[Email Sender]
     
     I -->|Returns| M[Tide Data]
@@ -182,7 +182,7 @@ graph LR
 | **[Services](./services.md)** | Pure data fetching functions (no business logic) | `services/*.py` |
 | **[Use Cases](./use_cases.md)** | Business logic orchestration with default resolution | `use_cases/*.py` |
 | **[Workflows](./workflows.md)** | Top-level report generation workflow | `workflows/report_runner.py` |
-| **[Emailer](./emailer.md)** | Email formatting and SMTP delivery | `emailer/email_formatter.py`, `emailer/sender.py` |
+| **[Emailer](./emailer.md)** | Email template rendering and SMTP delivery | `emailer/template_renderer.py`, `emailer/sender.py`, `emailer/template_helpers.py` |
 | **[Utils](./utils.md)** | Date utilities and wind calculations | `utils/*.py` |
 | **[Logger](./logger.md)** | Centralized logging configuration | `logger.py` |
 
@@ -229,7 +229,7 @@ Let's trace a single water temperature request through the entire system:
    └─> Workflow formats and adds to email
 
 8. Email Delivery
-   └─> Formatter generates email body
+   └─> Template renderer generates email body from Jinja2 template
    └─> Sender delivers via SMTP
 ```
 

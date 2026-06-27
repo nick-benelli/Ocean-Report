@@ -85,9 +85,9 @@ def test_format_report_data_performance_large_dataset(large_tide_dataset):
         wind_timestamp=datetime.now(),
     )
     
-    with patch("ocean_report.workflows.data.formatter.formatter.format_tide_for_email") as mock_tide, \
-         patch("ocean_report.workflows.data.formatter.formatter.format_water_temp") as mock_temp, \
-         patch("ocean_report.workflows.data.formatter.formatter.format_wind_forecast_email") as mock_wind:
+    with patch("ocean_report.emailer.template_helpers.format_tide_info") as mock_tide, \
+         patch("ocean_report.emailer.template_helpers.format_water_temp_value") as mock_temp, \
+         patch("ocean_report.emailer.template_helpers.format_wind_info") as mock_wind:
         
         mock_tide.return_value = "Tide text"
         mock_temp.return_value = "Water temp text"
@@ -104,14 +104,14 @@ def test_format_report_data_performance_large_dataset(large_tide_dataset):
 @pytest.mark.performance
 def test_tide_formatting_performance(large_tide_dataset):
     """Test tide formatting performance with many events."""
-    from ocean_report.emailer.email_formatter import format_tide_for_email
+    from ocean_report.emailer.template_helpers import format_tide_info
     
     start_time = time.time()
-    result = format_tide_for_email(large_tide_dataset)
+    result = format_tide_info(large_tide_dataset)
     elapsed = time.time() - start_time
     
     # Should format 96 tide events quickly
-    assert elapsed < 0.1, f"format_tide_for_email took {elapsed*1000:.2f}ms for 96 events"
+    assert elapsed < 0.1, f"format_tide_info took {elapsed*1000:.2f}ms for 96 events"
     assert isinstance(result, str)
     assert len(result) > 0
 
@@ -136,22 +136,29 @@ def test_wind_classification_performance():
 
 @pytest.mark.performance
 def test_email_body_generation_performance():
-    """Test full email body generation performance."""
-    from ocean_report.emailer.email_formatter import generate_email_body
+    """Test full email template rendering performance."""
+    from ocean_report.emailer.template_renderer import render_email_template
+    from ocean_report.models.email import EmailTemplateData
     
-    # Create realistic sections
-    sections = [
-        "🌡️ Water Temperature: 73.5°F",
-        "🌊 Tides:\n" + "\n".join([f"High: {h}.{m} ft at {h:02d}:{m:02d}" for h, m in [(8, 30), (14, 45), (20, 15)]]),
-        "💨 Wind Forecast:\n" + "\n".join([f"{h} AM: 10.5 mph NW (Offshore)" for h in range(8, 16)]),
-    ]
+    # Create realistic template data
+    template_data = EmailTemplateData(
+        long_date="Monday, July 4, 2025",
+        water_temp="73.5 °F",
+        tide_info="High: 4.2 ft at 08:30 AM, Low: 0.5 ft at 14:45 PM",
+        wind_info="8 AM: 10.5 mph NW (Offshore)\n12 PM: 12.0 mph NW (Offshore)",
+        station_name="Test Station",
+        station_city="Test City",
+        wind_provider="Open-Meteo",
+        date_retrieved="Jul 4 at 6:00 AM",
+        water_temp_measured_at_date="14:00"
+    )
     
     start_time = time.time()
-    result = generate_email_body(sections)
+    result = render_email_template(template_data)
     elapsed = time.time() - start_time
     
-    # Should generate email body quickly
-    assert elapsed < 0.01, f"generate_email_body took {elapsed*1000:.2f}ms"
+    # Should render template quickly
+    assert elapsed < 0.01, f"render_email_template took {elapsed*1000:.2f}ms"
     assert isinstance(result, str)
     assert len(result) > 100
 
@@ -217,9 +224,9 @@ def test_full_report_workflow_performance_benchmark(mock_context, fetch_params):
     with patch("ocean_report.workflows.data.fetcher.tides_use_case.get_daytime_tides_for_date") as mock_tides, \
          patch("ocean_report.workflows.data.fetcher.water_temp_use_case.get_latest_water_temp") as mock_temp, \
          patch("ocean_report.workflows.data.fetcher.wind_use_case.get_daily_wind_forecast") as mock_wind, \
-         patch("ocean_report.workflows.data.formatter.formatter.format_tide_for_email") as mock_fmt_tide, \
-         patch("ocean_report.workflows.data.formatter.formatter.format_water_temp") as mock_fmt_temp, \
-         patch("ocean_report.workflows.data.formatter.formatter.format_wind_forecast_email") as mock_fmt_wind:
+         patch("ocean_report.emailer.template_helpers.format_tide_info") as mock_fmt_tide, \
+         patch("ocean_report.emailer.template_helpers.format_water_temp_value") as mock_fmt_temp, \
+         patch("ocean_report.emailer.template_helpers.format_wind_info") as mock_fmt_wind:
         
         mock_tides.return_value = ([], datetime.now())
         mock_temp.return_value = (73.5, datetime.now(), None)

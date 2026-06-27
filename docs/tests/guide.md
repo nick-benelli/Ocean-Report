@@ -75,9 +75,9 @@ pytest tests/test_performance.py -m performance -v
 **Performance Benchmarks:**
 - `fetch_raw_data`: < 100ms (mocked)
 - `format_report_data`: < 50ms (large dataset)
-- `format_tide_for_email`: < 100ms (96 events)
+- `format_tide_info`: < 100ms (96 events)
 - `classify_wind_relative_to_beach`: < 10ms (72 classifications)
-- `generate_email_body`: < 10ms
+- `render_email_template`: < 10ms
 - `load_app_config`: < 100ms
 - `create_application_context`: < 200ms
 - Pydantic validation: < 50ms (100 records)
@@ -176,7 +176,7 @@ show_missing = true
 
 **Medium Coverage (70-90%):**
 - Config loader (74%)
-- Email formatter (72%)
+- Template helpers (85%)
 - Wind utils (72%)
 - Logger (77%)
 - Base endpoints (84%)
@@ -193,7 +193,7 @@ tests/
 ├── test_api_client_factory.py            # 12 tests - Client creation
 ├── test_application_context_factory.py   # 22 tests - Context creation
 ├── test_config.py                        # 3 tests - Configuration
-├── test_email_formatter.py               # 9 tests - Email formatting
+├── test_email_formatter.py               # 6 tests - Template helpers
 ├── test_email_sender.py                  # 4 tests - SMTP sending
 ├── test_end_to_end.py                    # 7 tests - Main entry point
 ├── test_endpoints_stations.py            # 1 test - NOAA stations
