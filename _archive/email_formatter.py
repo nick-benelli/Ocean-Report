@@ -202,6 +202,3 @@ def format_wind_forecast_email(wind_data: List[WindForecastEntry]) -> str:
         return unavailable_text
 
     return "\n".join(lines)
-
-
-

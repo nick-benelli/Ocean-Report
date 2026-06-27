@@ -1,5 +1,7 @@
 """Format the email subject line for the ocean report."""
+
 from datetime import date
+
 
 def format_email_subject(today: date, test: bool = False) -> str:
     """Format the email subject line."""

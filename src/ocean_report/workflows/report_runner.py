@@ -90,8 +90,7 @@ def run_report(  # pylint: disable=too-many-locals,too-many-statements
     logger.info("[STEP 4/5] Rendering email from template...")
     step_start = time.time()
     email_body = render_email_template(
-        data=email_data, 
-        template_path=settings.reporting.template_path
+        data=email_data, template_path=settings.reporting.template_path
     )
     logger.info(
         "Email rendered in %.2f seconds (body length: %d chars)",
@@ -171,8 +170,6 @@ def _configure_logger_from_settings(settings) -> None:
             level=level,
             log_format=settings.logging.format,
         )
-
-
 
 
 __all__ = ["run_report"]

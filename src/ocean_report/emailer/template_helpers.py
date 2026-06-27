@@ -28,9 +28,7 @@ def format_water_temp_value(water_temperature: Optional[float]) -> Optional[str]
     unavailable_text = "Unavailable ⚠️"
 
     try:
-        if water_temperature is None or not isinstance(
-            water_temperature, (int, float)
-        ):
+        if water_temperature is None or not isinstance(water_temperature, (int, float)):
             return unavailable_text
 
         # Handle NaN or infinite values

@@ -6,7 +6,7 @@ Examples:
 # Preview HTML in browser
 uv run scripts/run_report_no_email.py --html
 
-# Preview text in terminal  
+# Preview text in terminal
 uv run scripts/run_report_no_email.py --text
 
 # Both previews
@@ -57,25 +57,25 @@ def main():
     """
     Run Ocean report without email
     """
-    parser = argparse.ArgumentParser(description="Run ocean report without sending email")
-    parser.add_argument(
-        "--html", "-H",
-        action="store_true",
-        help="Open HTML email preview in browser after generating report"
+    parser = argparse.ArgumentParser(
+        description="Run ocean report without sending email"
     )
     parser.add_argument(
-        "--text", "-T",
+        "--html",
+        "-H",
         action="store_true",
-        help="Display text email preview in terminal after generating report"
+        help="Open HTML email preview in browser after generating report",
     )
     parser.add_argument(
-        "--test",
+        "--text",
+        "-T",
         action="store_true",
-        help="Run in test mode"
+        help="Display text email preview in terminal after generating report",
     )
-    
+    parser.add_argument("--test", action="store_true", help="Run in test mode")
+
     args = parser.parse_args()
-    
+
     # Check to see if the package is installed
     ocean_report.hello()
 
@@ -86,7 +86,7 @@ def main():
     if args.html:
         print("\n" + "=" * 80)
         preview_html()
-    
+
     if args.text:
         print("\n" + "=" * 80)
         preview_text()

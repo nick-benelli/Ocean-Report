@@ -14,24 +14,18 @@ from ocean_report.models.email import EmailTemplateData
 
 def example_render_email():
     """Example: Create template data and render email."""
-    
+
     # Load config to get station info
     config = get_settings()
-    
+
     # Create the template data model
     email_data = EmailTemplateData(
         # Header
         long_date="Monday, June 24, 2026",
-        
         # Water temperature
         water_temp="64.4 °F",
-        
         # Tides
-        tide_info=(
-            "⬇️ Low Tide at 8:23 AM — 0.3 ft\n"
-            "⬆️ High Tide at 2:46 PM — 4.1 ft"
-        ),
-        
+        tide_info=("⬇️ Low Tide at 8:23 AM — 0.3 ft\n⬆️ High Tide at 2:46 PM — 4.1 ft"),
         # Wind forecast
         wind_info=(
             "•  8 AM:  4.8 mph ESE (108.0°) → Cross/Onshore\n"
@@ -39,7 +33,6 @@ def example_render_email():
             "•  3 PM: 11.1 mph SSE (151.0°) → Onshore\n"
             "•  6 PM:  8.9 mph S   (172.0°) → Cross/Onshore"
         ),
-        
         # Footer metadata
         station_name=config.reporting.station_name,
         station_city=config.reporting.station_city,
@@ -47,24 +40,24 @@ def example_render_email():
         date_retrieved="Jun 24 at 6:22 AM",
         water_temp_measured_at_date="2026-06-24 10:12",
     )
-    
+
     # Render the template
     email_body = render_email_template(email_data)
-    
+
     print("=" * 60)
     print("RENDERED EMAIL BODY:")
     print("=" * 60)
     print(email_body)
     print("=" * 60)
-    
+
     return email_body
 
 
 def example_with_missing_data():
     """Example: Handle missing data gracefully."""
-    
+
     config = get_settings()
-    
+
     # Create template data with some missing values
     email_data = EmailTemplateData(
         long_date="Monday, June 24, 2026",
@@ -77,10 +70,10 @@ def example_with_missing_data():
         date_retrieved="Jun 24 at 6:22 AM",
         water_temp_measured_at_date=None,
     )
-    
+
     # Template will show "Temporarily unavailable" for missing sections
     email_body = render_email_template(email_data)
-    
+
     print("\nEmail with missing data:")
     print(email_body)
 

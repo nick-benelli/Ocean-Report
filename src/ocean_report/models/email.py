@@ -45,7 +45,8 @@ class EmailTemplateData(BaseModel):
 
     # Metadata timestamps
     date_retrieved: str = Field(
-        ..., description="Formatted data retrieval timestamp (e.g., 'Jun 24 at 6:22 AM')"
+        ...,
+        description="Formatted data retrieval timestamp (e.g., 'Jun 24 at 6:22 AM')",
     )
     water_temp_measured_at_date: Optional[str] = Field(
         None, description="Water temp measurement timestamp from NOAA sensor"

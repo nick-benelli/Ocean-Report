@@ -298,6 +298,7 @@ class ApiConfig(StrictModel):
             )
         return backoff
 
+
 class ReportingConfig(StrictModel):
     """Report content configuration."""
 

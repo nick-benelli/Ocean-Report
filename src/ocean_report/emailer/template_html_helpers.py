@@ -1,8 +1,5 @@
-
-
 from typing import List
 from ..models.openmeteo.wind import WindForecastEntry
-
 
 
 def format_wind_forecast_html(wind_data: List[WindForecastEntry]) -> str:
