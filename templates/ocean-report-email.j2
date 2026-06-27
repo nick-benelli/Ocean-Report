@@ -1,0 +1,39 @@
+Daily Water Report – {{ long_date }}
+
+🌡️ Water Temperature: {% if water_temp -%}
+{{ water_temp }}
+{%- else -%}
+⚠️ Temporarily unavailable
+{%- endif %}
+
+
+🌊 Tides:
+{% if tide_info -%}
+{{ tide_info }}
+{%- else -%}
+⚠️ Temporarily unavailable
+{%- endif %}
+
+
+🌬️ Wind Forecast:
+{% if wind_info -%}
+{{ wind_info }}
+{%- else -%}
+⚠️ Temporarily unavailable
+{%- endif %}
+
+
+—
+Nick Benelli
+LBI Ocean Report
+
+────────────────────────
+
+📊 Data Retrieved: {{ date_retrieved }}
+{% if water_temp_measured_at_date %}
+🌡️ NOAA Observation Time: {{ water_temp_measured_at_date }}
+{% endif %}
+
+Data Sources:
+Tide & Water Temperature: {{ station_name | default("NOAA (Atlantic City Station 8534720)") }}
+Wind Forecast: {{ wind_provider | default("Open-Meteo") }}

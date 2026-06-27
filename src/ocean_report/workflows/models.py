@@ -27,13 +27,3 @@ class RawReportData:
     water_temp_data_time: str | None
     wind_forecast: list
     wind_timestamp: datetime | None
-
-
-@dataclass
-class FormattedReportData:
-    """Formatted report sections ready for email."""
-
-    tide_text: str
-    water_temp_text: str
-    wind_text: str
-    retrieval_timestamps: dict[str, datetime | str | None]

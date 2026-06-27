@@ -1,34 +1,44 @@
 """Data formatting operations for ocean report."""
 
-from ...emailer import email_formatter as formatter
-from ..models import RawReportData, FormattedReportData
+from ...config import get_settings
+from ...emailer import template_helpers
+from ...models.email import EmailTemplateData
+from ..models import RawReportData
 
 
-def format_report_data(raw_data: RawReportData) -> FormattedReportData:
-    """Format raw data into email-ready text sections.
+def format_report_data(raw_data: RawReportData) -> EmailTemplateData:
+    """Format raw data into email template data.
 
-    Pure formatting layer - takes raw data, returns formatted text.
+    Pure formatting layer - takes raw data, returns EmailTemplateData
+    ready for template rendering.
 
     Args:
         raw_data: Raw data from APIs
 
     Returns:
-        FormattedReportData with text sections ready for email
+        EmailTemplateData ready for template rendering
     """
-    tide_text = formatter.format_tide_for_email(raw_data.tides)
-    water_temp_text = formatter.format_water_temp(raw_data.water_temp)
-    wind_text = formatter.format_wind_forecast_email(raw_data.wind_forecast)
+    # Get config for station/provider info
+    config = get_settings()
 
-    retrieval_timestamps = {
-        "tides": raw_data.tide_timestamp,
-        "water_temp": raw_data.water_temp_timestamp,
-        "water_temp_data_time": raw_data.water_temp_data_time,
-        "wind": raw_data.wind_timestamp,
-    }
+    # Format all data sections
+    water_temp_str = template_helpers.format_water_temp_value(raw_data.water_temp)
+    tide_str = template_helpers.format_tide_info(raw_data.tides)
+    wind_str = template_helpers.format_wind_info(raw_data.wind_forecast)
 
-    return FormattedReportData(
-        tide_text=tide_text,
-        water_temp_text=water_temp_text,
-        wind_text=wind_text,
-        retrieval_timestamps=retrieval_timestamps,
+    # Format timestamps
+    retrieval_time = raw_data.water_temp_timestamp or raw_data.tide_timestamp
+    date_retrieved = template_helpers.format_retrieval_timestamp(retrieval_time)
+
+    # Build and return EmailTemplateData
+    return EmailTemplateData(
+        long_date=template_helpers.format_long_date(),
+        water_temp=water_temp_str,
+        tide_info=tide_str,
+        wind_info=wind_str,
+        station_name=config.reporting.station_name,
+        station_city=config.reporting.station_city,
+        wind_provider=config.reporting.wind_provider,
+        date_retrieved=date_retrieved,
+        water_temp_measured_at_date=raw_data.water_temp_data_time,
     )

@@ -26,6 +26,14 @@ location:
   latitude: ${LATITUDE}
   beach_orientation_degrees: 140
 
+# Reporting Settings
+reporting:
+  template_path: "templates/ocean-report-email.j2"
+  subject: "🌊 LBI Daily Water Report"
+  station_name: "NOAA Atlantic City (8534720)"
+  station_city: "Atlantic City, NJ"
+  wind_provider: "Open-Meteo"
+
 # Determine Summertime
 summer:
   memorial_day_offset: -4

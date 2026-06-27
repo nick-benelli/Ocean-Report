@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -298,6 +299,49 @@ class ApiConfig(StrictModel):
         return backoff
 
 
+class ReportingConfig(StrictModel):
+    """Report content configuration."""
+
+    template_path: str = "templates/ocean-report-email.j2"
+    subject: str = "🌊 xxxxLBI Daily Water Report"
+    station_name: str = "NOAA Atlantic City (8534720)"
+    station_city: str = "Atlantic City, NJ"
+    wind_provider: str = "Open-Meteo"
+
+    @field_validator(
+        "template_path",
+        "subject",
+        "station_name",
+        "station_city",
+        "wind_provider",
+        mode="before",
+    )
+    @classmethod
+    def normalize_string_defaults(cls, value: Any, info: Any) -> str:
+        """
+        If the value is None or an unresolved env placeholder, return the default.
+        This allows users to set env vars to empty or leave them unset to use defaults.
+        """
+        if value is None or _is_unresolved_env_placeholder(value):
+            return _field_default(cls, info.field_name)
+        return str(value)
+
+    def resolve_template_path(self, project_root: Path) -> Path:
+        """
+        Resolve template_path relative to project root.
+
+        Args:
+            project_root: Root directory of the project (typically where pyproject.toml lives)
+
+        Returns:
+            Absolute path to the template file
+        """
+        path = Path(self.template_path)
+        if path.is_absolute():
+            return path
+        return (project_root / path).resolve()
+
+
 class AppConfig(StrictModel):
     """Validated config root model."""
 
@@ -307,3 +351,4 @@ class AppConfig(StrictModel):
     summer: SummerConfig = Field(default_factory=SummerConfig)
     api: ApiConfig = Field(default_factory=ApiConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
+    reporting: ReportingConfig = Field(default_factory=ReportingConfig)

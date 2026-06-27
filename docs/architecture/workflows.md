@@ -49,13 +49,14 @@ workflows/
 ├── data/
 │   ├── __init__.py
 │   ├── fetcher.py       # Data fetching orchestration
-│   └── formatter.py     # Data formatting for email
+│   └── formatter.py     # Data formatting to EmailTemplateData
 └── email/
     ├── __init__.py
-    ├── preview.py       # Email preview (console output)
+    ├── preview.py       # Email preview (console + file output)
     ├── recipients.py    # Recipient list management
     ├── sender.py        # Email sending orchestration
-    └── validator.py     # Email validation (future)
+    ├── subject.py       # Email subject formatting
+    └── validator.py     # Email credential validation
 ```
 
 ### Layer Position
@@ -122,66 +123,53 @@ def run_report(...):
     # === STEP 1: Initialization ===
     logger.info("Starting Ocean Report Email Process...")
     context = create_application_context(config_path=cfg_path)
-    configure_logger(...)  # From config
+    configure_logger_from_settings(context.config)
     
     # === STEP 2: Get Recipients ===
     logger.info("Fetching email recipients...")
     bcc_recipients = get_bcc_recipients(
         test=test,
         use_url=context.config.email.use_recipient_url,
-        fallback_recipients=context.config.email.recipients
+        fallback_recipients=context.config.email.recipients or ""
     )
     
     # === STEP 3: Fetch Data ===
     logger.info("Fetching weather data from APIs...")
-    
-    # Water temperature
-    water_temp, water_temp_time, data_time = get_latest_water_temp(context)
-    
-    # Tides
-    today_yyyymmdd = datetime.now().strftime("%Y%m%d")
-    tides = get_tides_for_date(context, today_yyyymmdd)
-    
-    # Wind
-    wind_entries = get_hourly_wind_forecast(context, today_yyyymmdd)
+    fetch_params = FetchParams(
+        station_id=context.config.noaa.station_id,
+        date_str=datetime.now().strftime("%Y%m%d"),
+        latitude=context.config.location.latitude,
+        longitude=context.config.location.longitude,
+        beach_facing_deg=context.config.location.beach_orientation_degrees,
+        forecast_times={"08:00", "12:00", "15:00", "18:00"}
+    )
+    raw_data = fetch_raw_data(context, fetch_params)
     
     # === STEP 4: Format Data ===
-    logger.info("Formatting email sections...")
-    sections = [
-        format_water_temp(water_temp),
-        format_tide(tides),
-        format_wind_forecast_email(wind_entries)
-    ]
+    logger.info("Formatting data to EmailTemplateData...")
+    email_data = format_report_data(raw_data)
     
-    timestamps = {
-        "water_temp": water_temp_time,
-        "water_temp_data_time": data_time,
-    }
-    
-    # === STEP 5: Generate Email ===
-    body = generate_email_body(sections, timestamps)
-    subject = "Daily Water Report – Monday, June 16, 2026"
-    if test:
-        subject = f"TEST: {subject}"
+    # === STEP 5: Render Email ===
+    logger.info("Rendering email from template...")
+    email_body = render_email_template(
+        data=email_data,
+        template_path=context.config.reporting.template_path
+    )
+    email_subject = format_email_subject(
+        subject_name=context.config.reporting.subject,
+        today=date.today(),
+        test=test
+    )
     
     # === STEP 6: Deliver or Preview ===
-    if run_email:
-        logger.info("Sending email...")
-        send_email(
-            sender=context.config.email.sender,
-            password=context.config.email.password,
-            recipients=context.config.email.sender,  # Self in "To"
-            bcc_recipients=bcc_recipients,
-            subject=subject,
-            body=body,
-            host=context.config.email.smtp_server,
-            port=context.config.email.smtp_port
-        )
-        logger.info("✓ Email sent successfully!")
-    else:
-        logger.info("Preview mode - printing email:")
-        print(f"\nSubject: {subject}\n")
-        print(body)
+    logger.info("Sending email..." if run_email else "Displaying email...")
+    send_or_preview_email(
+        context=context,
+        run_email=run_email,
+        subject=email_subject,
+        body=email_body,
+        bcc_recipients=bcc_recipients
+    )
     
     logger.info("Ocean Report workflow completed successfully!")
 ```
@@ -231,24 +219,30 @@ class RawReportData:
 
 ### 3. Data Formatter (`data/formatter.py`)
 
-**Purpose**: Convert raw data into formatted email sections.
+**Purpose**: Convert raw data into EmailTemplateData for template rendering.
 
-#### `format_report_data(raw_data) → list[str]`
+#### `format_report_data(raw_data) → EmailTemplateData`
 
-**What It Does**: Transforms raw data into human-readable text sections.
+**What It Does**: Transforms raw data into structured EmailTemplateData model.
 
 **Example**:
 ```python
 from ocean_report.workflows.data.formatter import format_report_data
 
-sections = format_report_data(raw_data)
+email_data = format_report_data(raw_data)
 
-# Returns:
-# [
-#     "🌡️ Water Temperature: 72.5 °F\n\n",
-#     "🌊 Tides:\nHigh Tide at 7:32 AM — 3.1 ft\n\n",
-#     "🌬️ Wind Forecast:\n8 AM: 12 mph NW (Offshore)\n\n"
-# ]
+# Returns EmailTemplateData with formatted fields:
+# EmailTemplateData(
+#     long_date="Monday, June 16, 2026",
+#     water_temp="72.5 °F",
+#     tide_info="⬇️ Low Tide at 8:23 AM — 0.3 ft\n...",
+#     wind_info="•  8 AM:  4.8 mph ESE (108.0°) → Cross/Onshore\n...",
+#     station_name="Atlantic City Station 8534720",
+#     station_city="Atlantic City",
+#     wind_provider="Open-Meteo",
+#     date_retrieved="Jun 16 at 6:45 AM",
+#     water_temp_measured_at_date="Jun 16 at 6:30 AM"
+# )
 ```
 
 ---
@@ -257,24 +251,22 @@ sections = format_report_data(raw_data)
 
 **Purpose**: Determine which recipient list to use.
 
-#### `get_bcc_recipients(test, use_url, fallback_recipients) → str`
+#### `get_bcc_recipients(test, use_url, fallback_recipients) → list[str]`
 
 **What It Does**: Selects appropriate recipient list based on mode and configuration.
 
 **Logic**:
 ```python
 def get_bcc_recipients(test, use_url, fallback_recipients):
-    if test:
-        # Test mode → use test recipients from config
-        return config.email.test_recipients
-    
     if use_url:
-        # Production with URL → fetch from remote URL
-        # (seasonal: main URL in summer, offseason URL otherwise)
-        return fetch_recipients_from_url()
+        # Fetch from URL (uses seasonal or test URLs)
+        recipients_str = get_email_recipients(test_recips=test)
+    else:
+        # Use fallback from config
+        recipients_str = fallback_recipients or ""
     
-    # Fallback → use recipients from config
-    return fallback_recipients
+    # Parse and return as list
+    return [email.strip() for email in recipients_str.split(",") if email.strip()]
 ```
 
 ---
@@ -283,40 +275,107 @@ def get_bcc_recipients(test, use_url, fallback_recipients):
 
 **Purpose**: Orchestrate email sending with proper error handling.
 
-#### `send_or_preview_email(run_email, ...)`
+#### `send_or_preview_email(context, run_email, subject, body, bcc_recipients)`
 
 **What It Does**: Either sends email or prints preview based on mode.
 
+**Example**:
+```python
+from ocean_report.workflows.email.sender import send_or_preview_email
+
+send_or_preview_email(
+    context=context,
+    run_email=True,
+    subject="Daily Water Report",
+    body="Email content here...",
+    bcc_recipients=["user1@example.com", "user2@example.com"]
+)
+```
+
 ---
 
-### 6. Email Preview (`email/preview.py`)
+### 6. Email Subject Formatter (`email/subject.py`)
 
-**Purpose**: Display email content in console for testing.
+**Purpose**: Format email subject line with date and optional test prefix. The base subject text is provided from configuration.
 
-#### `preview_email(subject, body)`
+#### `format_email_subject(subject_name, today, test=False) → str`
 
-**What It Does**: Pretty-prints email to console.
+**Parameters**:
+- `subject_name`: Base subject text from `config.reporting.subject`
+- `today`: Date to append to subject
+- `test`: Whether to add "TEST:" prefix
 
-**Example Output**:
+**Example**:
+```python
+from ocean_report.workflows.email.subject import format_email_subject
+from datetime import date
+
+# Production
+subject = format_email_subject(
+    subject_name="🌊 LBI Daily Water Report",
+    today=date.today(),
+    test=False
+)
+# "🌊 LBI Daily Water Report: 2026-06-16"
+
+# Test mode
+subject = format_email_subject(
+    subject_name="🌊 LBI Daily Water Report",
+    today=date.today(),
+    test=True
+)
+# "TEST: 🌊 LBI Daily Water Report: 2026-06-16"
 ```
-========================================
-EMAIL PREVIEW
-========================================
-Subject: Daily Water Report – Monday, June 16, 2026
-To: surf@example.com
-BCC: [10 recipients]
-========================================
 
-Daily Water Report – Monday, June 16, 2026
+---
 
-🌡️ Water Temperature: 72.5 °F
+### 7. Email Preview (`email/preview.py`)
 
-🌊 Tides:
-High Tide at 7:32 AM — 3.1 ft
-Low Tide at 1:45 PM — 0.8 ft
+**Purpose**: Write email preview to console and HTML/text files for testing.
 
-...
-========================================
+#### `write_email_preview(subject, body, sender_email, email_recipients, bcc_recipients) → Path`
+
+**What It Does**: Writes email preview to both console and files in `logs/email-previews/`.
+
+**Creates**:
+- Plain text file: `email_preview_YYYYMMDD_HHMMSS.txt`
+- HTML file: `email_preview_YYYYMMDD_HHMMSS.html` (formatted for browser viewing)
+
+**Example**:
+```python
+from ocean_report.workflows.email.preview import write_email_preview
+
+html_path = write_email_preview(
+    subject="Daily Water Report",
+    body="Email content...",
+    sender_email="surf@example.com",
+    email_recipients="",
+    bcc_recipients=["user1@example.com", "user2@example.com"]
+)
+
+print(f"Preview saved to: {html_path}")
+# Opens in browser for easy review
+```
+
+---
+
+### 8. Email Validator (`email/validator.py`)
+
+**Purpose**: Validate email credentials before sending.
+
+#### `validate_email_credentials(sender, password) → None`
+
+**What It Does**: Ensures required email credentials are configured.
+
+**Example**:
+```python
+from ocean_report.workflows.email.validator import validate_email_credentials
+
+# Raises ValueError if missing
+validate_email_credentials(
+    sender="surf@example.com",
+    password="app_password_123"
+)
 ```
 
 ---
@@ -331,24 +390,27 @@ Low Tide at 1:45 PM — 0.8 ft
 @dataclass
 class FetchParams:
     station_id: str
-    date_str: str  # YYYYMMDD format
+    date_str: str              # YYYYMMDD format
     latitude: float
     longitude: float
-    beach_direction: float
+    beach_facing_deg: float    # Beach orientation in degrees
+    forecast_times: set[str]   # Times to fetch (e.g., {"08:00", "12:00"})
 ```
 
 ### RawReportData
 
-**Purpose**: Container for all fetched data.
+**Purpose**: Container for all fetched data before formatting.
 
 ```python
 @dataclass
 class RawReportData:
+    tides: list                      # List of NoaaTidePredictionRecord
+    tide_timestamp: datetime
     water_temp: float | None
-    water_temp_time: datetime
-    water_temp_data_time: str | None
-    tides: list[dict]
-    wind_entries: list[WindForecastEntry]
+    water_temp_timestamp: datetime
+    water_temp_data_time: str | None # Sensor measurement time
+    wind_forecast: list              # List of WindForecastEntry dicts
+    wind_timestamp: datetime | None
 ```
 
 ---
@@ -519,25 +581,73 @@ jobs:
 
 ```python
 from unittest.mock import patch, Mock
+from ocean_report.models.email import EmailTemplateData
 
-@patch('ocean_report.workflows.report_runner.get_latest_water_temp')
-@patch('ocean_report.workflows.report_runner.get_tides_for_date')
-@patch('ocean_report.workflows.report_runner.get_hourly_wind_forecast')
-def test_run_report_preview_mode(mock_wind, mock_tides, mock_water):
-    # Mock use case returns
-    mock_water.return_value = (72.5, datetime.now(), "2026-06-16 12:00")
-    mock_tides.return_value = [{"time": "7:32 AM", "type": "H", "height": "3.1"}]
-    mock_wind.return_value = [
-        WindForecastEntry(time="8 AM", speed_mph=12, direction="NW", wind_type="Offshore", direction_degrees=315)
-    ]
+@patch('ocean_report.workflows.report_runner.fetch_raw_data')
+@patch('ocean_report.workflows.report_runner.format_report_data')
+@patch('ocean_report.workflows.report_runner.render_email_template')
+@patch('ocean_report.workflows.report_runner.send_or_preview_email')
+def test_run_report_preview_mode(mock_send, mock_render, mock_format, mock_fetch):
+    # Mock data fetching
+    mock_fetch.return_value = Mock()  # RawReportData
     
-    # Run in preview mode (shouldn't actually send email)
+    # Mock formatting
+    mock_format.return_value = EmailTemplateData(
+        long_date="Monday, June 16, 2026",
+        water_temp="72.5 °F",
+        tide_info="Tide data",
+        wind_info="Wind data",
+        station_name="Test Station",
+        station_city="Test City",
+        wind_provider="Test Provider",
+        date_retrieved="Jun 16 at 6:45 AM",
+        water_temp_measured_at_date=None
+    )
+    
+    # Mock template rendering
+    mock_render.return_value = "Email body content"
+    
+    # Run in preview mode
     run_report(run_email=False, test=True)
     
-    # Verify use cases were called
-    mock_water.assert_called_once()
-    mock_tides.assert_called_once()
-    mock_wind.assert_called_once()
+    # Verify calls
+    mock_fetch.assert_called_once()
+    mock_format.assert_called_once()
+    mock_render.assert_called_once()
+    mock_send.assert_called_once_with(
+        context=Any,
+        run_email=False,
+        subject=Any,
+        body="Email body content",
+        bcc_recipients=Any
+    )
+```
+
+---
+
+### Unit Tests: Data Formatter
+
+```python
+from ocean_report.workflows.data.formatter import format_report_data
+from ocean_report.workflows.models import RawReportData
+
+def test_format_report_data():
+    """Test data formatting to EmailTemplateData."""
+    raw_data = RawReportData(
+        tides=[...],
+        tide_timestamp=datetime.now(),
+        water_temp=72.5,
+        water_temp_timestamp=datetime.now(),
+        water_temp_data_time="2026-06-16 12:00",
+        wind_forecast=[...],
+        wind_timestamp=datetime.now()
+    )
+    
+    email_data = format_report_data(raw_data)
+    
+    assert isinstance(email_data, EmailTemplateData)
+    assert "72.5" in email_data.water_temp
+    assert email_data.long_date is not None
 ```
 
 ---

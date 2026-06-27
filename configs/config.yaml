@@ -23,6 +23,16 @@ location:
   latitude: ${LATITUDE}
   beach_orientation_degrees: 140 # ${BEACH_ORIENTATION_DEGREES}
 
+# Reporting Settings
+reporting:
+  template_path: "templates/ocean-report-email-note.j2"
+  subject: "🌊 LBI Daily Water Report"
+  station_name: "NOAA Atlantic City (8534720)"
+  station_city: "Atlantic City, NJ"
+  wind_provider: "Open-Meteo"
+  
+
+
 # Deterimine Summertime
 summer:
   memorial_day_offset: -4   # days before Memorial Day (negative = before, positive = after)
@@ -42,3 +52,4 @@ logging:
   file_path: ${LOG_FILE_PATH:logs/ocean_report.log}  # Path for log file
   level: ${LOG_LEVEL:INFO}  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"  # Log message format
+

@@ -7,10 +7,10 @@ from pathlib import Path
 from typing import Union
 
 from ..application import create_application_context
-from ..emailer import email_formatter as formatter
+from ..emailer.template_renderer import render_email_template
 from ..logger import logger, configure_logger, LogOutput
 from .data import fetch_raw_data, format_report_data
-from .email import get_bcc_recipients, send_or_preview_email
+from .email import get_bcc_recipients, send_or_preview_email, format_email_subject
 from .models import FetchParams
 
 
@@ -39,38 +39,7 @@ def run_report(  # pylint: disable=too-many-locals,too-many-statements
     step_start = time.time()
     context = create_application_context(config_path=cfg_path)
     settings = context.config
-
-    # Configure logger from config
-    log_output_map = {
-        "console": LogOutput.CONSOLE,
-        "file": LogOutput.FILE,
-        "both": LogOutput.BOTH,
-    }
-    log_level_map = {
-        "DEBUG": logging.DEBUG,
-        "INFO": logging.INFO,
-        "WARNING": logging.WARNING,
-        "ERROR": logging.ERROR,
-        "CRITICAL": logging.CRITICAL,
-    }
-
-    output = log_output_map.get(settings.logging.output.lower(), LogOutput.CONSOLE)
-    level = log_level_map.get(settings.logging.level.upper(), logging.INFO)
-
-    if output in (LogOutput.FILE, LogOutput.BOTH):
-        configure_logger(
-            output=output,
-            log_file=settings.logging.file_path,
-            level=level,
-            log_format=settings.logging.format,
-        )
-    else:
-        configure_logger(
-            output=output,
-            level=level,
-            log_format=settings.logging.format,
-        )
-
+    _configure_logger_from_settings(settings)
     logger.info("Configuration loaded in %.2f seconds", time.time() - step_start)
 
     # Get email recipients
@@ -89,7 +58,6 @@ def run_report(  # pylint: disable=too-many-locals,too-many-statements
 
     station_id = settings.noaa.station_id
     today_yyyymmdd = datetime.now().strftime("%Y%m%d")
-    today_display = datetime.today().strftime("%Y-%m-%d")
 
     # Fetch all report data
     logger.info("[STEP 3/5] Fetching weather data from APIs...")
@@ -104,7 +72,7 @@ def run_report(  # pylint: disable=too-many-locals,too-many-statements
             forecast_times={"08:00", "12:00", "15:00", "18:00"},
         )
         raw_data = fetch_raw_data(context, fetch_params)
-        formatted_data = format_report_data(raw_data)
+        email_data = format_report_data(raw_data)
         logger.info(
             "All data fetched successfully in %.2f seconds", time.time() - step_start
         )
@@ -117,26 +85,22 @@ def run_report(  # pylint: disable=too-many-locals,too-many-statements
         )
         raise
 
-    # Format email
-    logger.info("[STEP 4/5] Formatting email content...")
+    # Format email using template
+    logger.info("[STEP 4/5] Rendering email from template...")
     step_start = time.time()
-    email_body = formatter.generate_email_body(
-        sections=[
-            formatted_data.water_temp_text,
-            formatted_data.tide_text,
-            formatted_data.wind_text,
-        ],
-        retrieval_timestamps=formatted_data.retrieval_timestamps,
+    email_body = render_email_template(
+        data=email_data, template_path=settings.reporting.template_path
     )
     logger.info(
-        "Email formatted in %.2f seconds (body length: %d chars)",
+        "Email rendered in %.2f seconds (body length: %d chars)",
         time.time() - step_start,
         len(email_body),
     )
 
-    email_subject = f"🌊 LBI Daily Water Report: {today_display}"
-    if test:
-        email_subject = f"TEST: {email_subject}"
+    # Get email subject line
+    email_subject = format_email_subject(
+        subject_name=settings.reporting.subject, today=date.today(), test=test
+    )
 
     # Send or display email
     logger.info("[STEP 5/5] %s email...", "Sending" if run_email else "Displaying")
@@ -172,3 +136,41 @@ def run_report(  # pylint: disable=too-many-locals,too-many-statements
         "Total execution time: %.2f seconds (%.1f minutes)", total_time, total_time / 60
     )
     logger.info("=" * 80)
+
+
+def _configure_logger_from_settings(settings) -> None:
+    """Configure logger based on application settings."""
+
+    # Configure logger from config
+    log_output_map = {
+        "console": LogOutput.CONSOLE,
+        "file": LogOutput.FILE,
+        "both": LogOutput.BOTH,
+    }
+    log_level_map = {
+        "DEBUG": logging.DEBUG,
+        "INFO": logging.INFO,
+        "WARNING": logging.WARNING,
+        "ERROR": logging.ERROR,
+        "CRITICAL": logging.CRITICAL,
+    }
+
+    output = log_output_map.get(settings.logging.output.lower(), LogOutput.CONSOLE)
+    level = log_level_map.get(settings.logging.level.upper(), logging.INFO)
+
+    if output in (LogOutput.FILE, LogOutput.BOTH):
+        configure_logger(
+            output=output,
+            log_file=settings.logging.file_path,
+            level=level,
+            log_format=settings.logging.format,
+        )
+    else:
+        configure_logger(
+            output=output,
+            level=level,
+            log_format=settings.logging.format,
+        )
+
+
+__all__ = ["run_report"]

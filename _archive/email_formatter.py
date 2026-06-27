@@ -1,12 +1,21 @@
-"""Email formatting module for ocean report."""
+"""Email formatting module for ocean report.
+
+DEPRECATION NOTICE: This module uses the old string-concatenation approach.
+For new code, use:
+  - template_helpers.py to format individual values
+  - template_renderer.py to render Jinja2 templates
+  - models.email.EmailTemplateData for type-safe template data
+
+This module is kept for backward compatibility with existing workflows.
+"""
 
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from typing import Dict, List, Optional
 
-from ..logger import logger
-from ..models.noaa.tides import NoaaTidePredictionRecord
-from ..models.openmeteo.wind import WindForecastEntry
+# from ..logger import logger
+# from ..models.noaa.tides import NoaaTidePredictionRecord
+# from ..models.openmeteo.wind import WindForecastEntry
 
 
 def generate_email_body(
@@ -14,6 +23,10 @@ def generate_email_body(
 ) -> str:
     """
     Generate the full email body including water temperature, tides, and wind data.
+
+    DEPRECATED: Use render_email_template() from template_renderer.py with
+    EmailTemplateData instead. This function uses string concatenation and
+    is harder to maintain than template-based rendering.
 
     Args:
         sections (List[str]): Sections to add to emails. Example:
@@ -97,18 +110,19 @@ def format_water_temp(water_temperature: Optional[float]) -> str:
     Returns:
         str: Formatted water temperature string.
     """
+    unavailable_text = "Unavailable ⚠️"
     try:
         if water_temperature is None or not isinstance(water_temperature, (int, float)):
-            return "🌡️ Water Temperature: unavailable\n\n"
+            return unavailable_text
 
         # Handle NaN or infinite values
         if water_temperature is None or abs(water_temperature) == float("inf"):
-            return "🌡️ Water Temperature: unavailable\n\n"
+            return unavailable_text
 
-        return f"🌡️ Water Temperature: {water_temperature:.1f} °F\n\n"
+        return f"{water_temperature:.1f} °F"
 
     except (TypeError, ValueError):
-        return "🌡️ Water Temperature: unavailable\n\n"
+        return unavailable_text
 
 
 # NOTE ---- Tide ----
@@ -130,10 +144,10 @@ def format_tide_for_email(tide_events: List[NoaaTidePredictionRecord]) -> str:
         time_str = dt.strftime("%-I:%M %p")
         tide_type = "⬆️ High Tide" if tide.event_type == "H" else "⬇️ Low Tide"
         height = float(tide.height_feet)
-        formatted.append(f"{tide_type} at {time_str} — {height:.1f} ft")
+        formatted.append(f"• {tide_type} at {time_str} — {height:.1f} ft")
 
     tide_text = "\n".join(formatted)
-    return f"🌊 Tides:\n{tide_text}\n\n"
+    return tide_text if tide_text else "Tide data unavailable ⚠️"
 
 
 # NOTE ---- Wind Forecast ----
@@ -147,7 +161,7 @@ def convert_wind_data_to_text(wind_data: List[WindForecastEntry]) -> str:
         lines.append(f"Wind Speed: {entry['speed_mph']} mph")
         lines.append(f"Wind Direction: {entry['direction']}")
         lines.append(f"Wind Type: {entry['wind_type']}\n")
-    return "\n".join(lines) + "\n"
+    return "\n".join(lines)
 
 
 def format_wind_forecast_email(wind_data: List[WindForecastEntry]) -> str:
@@ -161,13 +175,11 @@ def format_wind_forecast_email(wind_data: List[WindForecastEntry]) -> str:
     Returns:
         str: Plain text wind forecast section.
     """
-    if not wind_data:
-        return "🌬️ Wind Forecast: Temporarily unavailable\n\n"
 
-    lines = [
-        "🌬️ Wind Forecast:",
-        "Key times for your beach today:",
-    ]
+    lines = []
+    unavailable_text = "🌬️ Wind Forecast: Temporarily unavailable ⚠️"
+    if not wind_data:
+        return unavailable_text
 
     for entry in wind_data:
         try:
@@ -187,35 +199,6 @@ def format_wind_forecast_email(wind_data: List[WindForecastEntry]) -> str:
             continue
 
     if len(lines) < 3:
-        return "🌬️ Wind Forecast: Temporarily unavailable\n\n"
+        return unavailable_text
 
-    return "\n".join(lines) + "\n\n"
-
-
-def format_wind_forecast_html(wind_data: List[WindForecastEntry]) -> str:
-    """
-    Format wind forecast data as HTML for email clients.
-
-    Args:
-        wind_data (List[WindForecastEntry]): Wind forecast with keys 'time', 'speed_mph',
-            'direction', 'direction_deg', and 'wind_type'.
-
-    Returns:
-        str: HTML string of wind forecast.
-    """
-    lines = [
-        "<h2>Wind Forecast for Today 🌬️</h2>",
-        "<p>Here’s the wind forecast near your beach (facing 140°) for key times today:</p>",
-        "<ul>",
-    ]
-
-    for entry in wind_data:
-        line = (
-            f"<li><strong>{entry['time']}</strong> – {entry['speed_mph']} mph from "
-            f"<strong>{entry['direction']} ({entry['direction_deg']}°)</strong> → "
-            f"<strong>{entry['wind_type']}</strong></li>"
-        )
-        lines.append(line)
-
-    lines.append("</ul>")
     return "\n".join(lines)
