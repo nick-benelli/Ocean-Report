@@ -14,14 +14,14 @@ from ..models.email import EmailTemplateData
 
 def render_email_template(
     data: EmailTemplateData,
-    template_path: Optional[Path] = None,
+    template_path: Optional[str | Path] = None,
 ) -> str:
     """
     Render email body from Jinja2 template.
 
     Args:
         data: Template data containing all variables
-        template_path: Optional custom template path.
+        template_path: Optional custom template path (string or Path).
                       If None, uses path from config.
 
     Returns:
@@ -36,6 +36,9 @@ def render_email_template(
         template_path = get_template_path()
         logger.info("Using template from config: %s", template_path)
     else:
+        # Convert string to Path if necessary
+        if isinstance(template_path, str):
+            template_path = Path(template_path)
         logger.info("Using custom template: %s", template_path)
 
     # Validate template exists
@@ -75,14 +78,14 @@ def render_email_template(
         raise
 
 
-def load_template_content(template_path: Optional[Path] = None) -> str:
+def load_template_content(template_path: Optional[str | Path] = None) -> str:
     """
     Load raw template content without rendering.
 
     Useful for template validation, debugging, or preview.
 
     Args:
-        template_path: Optional custom template path.
+        template_path: Optional custom template path (string or Path).
                       If None, uses path from config.
 
     Returns:
@@ -93,9 +96,11 @@ def load_template_content(template_path: Optional[Path] = None) -> str:
     """
     if template_path is None:
         template_path = get_template_path()
+    elif isinstance(template_path, str):
+        template_path = Path(template_path)
 
     logger.debug("Loading template content: %s", template_path)
     return template_path.read_text(encoding="utf-8")
 
 
-__all__ = ["render_email_template", "load_template_content"]
+__all__ = ["EmailTemplateData", "render_email_template", "load_template_content"]
