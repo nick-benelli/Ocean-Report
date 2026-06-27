@@ -303,12 +303,18 @@ class ReportingConfig(StrictModel):
     """Report content configuration."""
 
     template_path: str = "templates/ocean-report-email-v2.j2"
+    subject: str = "🌊 xxxxLBI Daily Water Report"
     station_name: str = "NOAA Atlantic City (8534720)"
     station_city: str = "Atlantic City, NJ"
     wind_provider: str = "Open-Meteo"
 
     @field_validator(
-        "template_path", "station_name", "station_city", "wind_provider", mode="before"
+        "template_path",
+        "subject",
+        "station_name",
+        "station_city",
+        "wind_provider",
+        mode="before",
     )
     @classmethod
     def normalize_string_defaults(cls, value: Any, info: Any) -> str:

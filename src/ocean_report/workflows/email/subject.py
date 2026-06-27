@@ -3,9 +3,9 @@
 from datetime import date
 
 
-def format_email_subject(today: date, test: bool = False) -> str:
+def format_email_subject(subject_name: str, today: date, test: bool = False) -> str:
     """Format the email subject line."""
-    subject = f"🌊 LBI Daily Water Report: {today.strftime('%Y-%m-%d')}"
+    subject = f"{subject_name}: {today.strftime('%Y-%m-%d')}"
     if test:
         subject = f"TEST: {subject}"
     return subject

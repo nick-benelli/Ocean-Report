@@ -58,7 +58,6 @@ def run_report(  # pylint: disable=too-many-locals,too-many-statements
 
     station_id = settings.noaa.station_id
     today_yyyymmdd = datetime.now().strftime("%Y%m%d")
-    today_display = datetime.today().strftime("%Y-%m-%d")
 
     # Fetch all report data
     logger.info("[STEP 3/5] Fetching weather data from APIs...")
@@ -99,7 +98,9 @@ def run_report(  # pylint: disable=too-many-locals,too-many-statements
     )
 
     # Get email subject line
-    email_subject = format_email_subject(today=date.today(), test=test)
+    email_subject = format_email_subject(
+        subject_name=settings.reporting.subject, today=date.today(), test=test
+    )
 
     # Send or display email
     logger.info("[STEP 5/5] %s email...", "Sending" if run_email else "Displaying")

@@ -155,7 +155,11 @@ def run_report(...):
         data=email_data,
         template_path=context.config.reporting.template_path
     )
-    email_subject = format_email_subject(today=date.today(), test=test)
+    email_subject = format_email_subject(
+        subject_name=context.config.reporting.subject,
+        today=date.today(),
+        test=test
+    )
     
     # === STEP 6: Deliver or Preview ===
     logger.info("Sending email..." if run_email else "Displaying email...")
@@ -292,20 +296,34 @@ send_or_preview_email(
 
 ### 6. Email Subject Formatter (`email/subject.py`)
 
-**Purpose**: Format email subject line with test prefix if needed.
+**Purpose**: Format email subject line with date and optional test prefix. The base subject text is provided from configuration.
 
-#### `format_email_subject(today, test=False) → str`
+#### `format_email_subject(subject_name, today, test=False) → str`
+
+**Parameters**:
+- `subject_name`: Base subject text from `config.reporting.subject`
+- `today`: Date to append to subject
+- `test`: Whether to add "TEST:" prefix
 
 **Example**:
 ```python
 from ocean_report.workflows.email.subject import format_email_subject
+from datetime import date
 
 # Production
-subject = format_email_subject(date.today(), test=False)
+subject = format_email_subject(
+    subject_name="🌊 LBI Daily Water Report",
+    today=date.today(),
+    test=False
+)
 # "🌊 LBI Daily Water Report: 2026-06-16"
 
 # Test mode
-subject = format_email_subject(date.today(), test=True)
+subject = format_email_subject(
+    subject_name="🌊 LBI Daily Water Report",
+    today=date.today(),
+    test=True
+)
 # "TEST: 🌊 LBI Daily Water Report: 2026-06-16"
 ```
 

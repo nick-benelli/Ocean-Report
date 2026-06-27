@@ -1,3 +1,8 @@
+"""
+Helper functions to prepare data for email templates if
+switched to HTML templates.
+"""
+
 from typing import List
 from ..models.openmeteo.wind import WindForecastEntry
 
