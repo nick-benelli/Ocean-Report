@@ -25,7 +25,7 @@ location:
 
 # Reporting Settings
 reporting:
-  template_path: "templates/ocean-report-email-v2.j2"
+  template_path: "templates/ocean-report-email-note.j2"
   subject: "🌊 LBI Daily Water Report"
   station_name: "NOAA Atlantic City (8534720)"
   station_city: "Atlantic City, NJ"

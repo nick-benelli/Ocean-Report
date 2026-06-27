@@ -302,7 +302,7 @@ class ApiConfig(StrictModel):
 class ReportingConfig(StrictModel):
     """Report content configuration."""
 
-    template_path: str = "templates/ocean-report-email-v2.j2"
+    template_path: str = "templates/ocean-report-email.j2"
     subject: str = "🌊 xxxxLBI Daily Water Report"
     station_name: str = "NOAA Atlantic City (8534720)"
     station_city: str = "Atlantic City, NJ"

@@ -77,7 +77,8 @@ def format_wind_info(wind_data: list[WindForecastEntry]) -> Optional[str]:
 
     Returns:
         Formatted wind forecast (without section header) or None if empty.
-        Example: "•  8 AM:  4.8 mph ESE (108.0°) → Cross/Onshore\\n..."
+        Example:
+        •  8 AM:  4.8 mph ESE → Cross/Onshore (108.0°)
     """
 
     unavailable_text = "Wind data unavailable ⚠️"
@@ -86,16 +87,20 @@ def format_wind_info(wind_data: list[WindForecastEntry]) -> Optional[str]:
         return unavailable_text
 
     lines = []
+
     for entry in wind_data:
         try:
             time_str = entry["time"].rjust(5)
             speed_str = f"{entry['speed_mph']:.1f}".rjust(4)
             direction = entry["direction"].ljust(3)
-            deg = f"({entry['direction_deg']:>5.1f}°)"
             wind_type = entry["wind_type"]
+            bearing = f"({entry['direction_deg']:>5.1f}°)"
 
-            line = f"• {time_str}: {speed_str} mph {direction} {deg} → {wind_type}"
+            line = (
+                f"• {time_str}: {speed_str} mph {direction} → {wind_type:<14} {bearing}"
+            )
             lines.append(line)
+
         except (KeyError, TypeError, ValueError):
             continue
 
@@ -126,19 +131,19 @@ def format_retrieval_timestamp(retrieval_time: Optional[datetime]) -> str:
 
 
 def format_long_date(date: Optional[datetime] = None) -> str:
-    """
-    Format date as long format for email header.
-
-    Args:
-        date: Date to format. If None, uses current date.
-
-    Returns:
-        Formatted date string (e.g., "Monday, June 24, 2026")
-    """
+    """Saturday, June 27, 2026"""
     if date is None:
         date = datetime.now()
 
     return date.strftime("%A, %B %d, %Y")
+
+
+def format_short_date(date: Optional[datetime] = None) -> str:
+    """Sat, Jun 27, 2026"""
+    if date is None:
+        date = datetime.now()
+
+    return date.strftime("%a, %b %d, %Y")
 
 
 __all__ = [
@@ -147,4 +152,5 @@ __all__ = [
     "format_wind_info",
     "format_retrieval_timestamp",
     "format_long_date",
+    "format_short_date",
 ]

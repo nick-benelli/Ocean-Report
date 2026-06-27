@@ -4,9 +4,6 @@ Example script demonstrating how to use the new template rendering system.
 This shows the end-to-end flow from creating EmailTemplateData to rendering.
 """
 
-from datetime import datetime
-from pathlib import Path
-
 from ocean_report.config import get_settings
 from ocean_report.emailer.template_renderer import render_email_template
 from ocean_report.models.email import EmailTemplateData

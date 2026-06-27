@@ -69,7 +69,7 @@ location:
 # -----------------------------------------------------------------------------
 reporting:
   # Path to Jinja2 email template (relative to project root)
-  template_path: "templates/ocean-report-email-v2.j2"
+  template_path: "templates/ocean-report-email.j2"
   
   # Base email subject line (date will be appended automatically)
   # Example result: "🌊 LBI Daily Water Report: 2026-06-26"
