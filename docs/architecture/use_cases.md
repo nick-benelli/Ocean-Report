@@ -389,19 +389,16 @@ def generate_daily_report(context):
     """Orchestrate all use cases to generate report."""
     date_str = datetime.now().strftime("%Y%m%d")
     
-    # Call use cases
+    # Call use cases to fetch data
     water_temp, _, _ = get_latest_water_temp(context)
     tides = get_tides_for_date(context, date_str)
     wind = get_hourly_wind_forecast(context, date_str)
     
-    # Format and send
-    sections = [
-        format_water_temp(water_temp),
-        format_tide(tides),
-        format_wind_forecast_email(wind),
-    ]
+    # Format data into EmailTemplateData model
+    template_data = format_report_data(raw_data)
     
-    body = generate_email_body(sections)
+    # Render email using Jinja2 template
+    body = render_email_template(template_data)
     send_email(..., body=body)
 ```
 

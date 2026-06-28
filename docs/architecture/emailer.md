@@ -49,10 +49,12 @@ Then it sends this email to everyone on the subscriber list.
 
 ```
 emailer/
-├── __init__.py              # Public exports
-├── email_formatter.py       # Converts data to email body text
-├── sender.py                # SMTP delivery via smtplib
-└── address_fetcher.py       # Fetches recipient lists from remote URLs
+├── __init__.py                  # Public exports (currently empty)
+├── template_renderer.py         # Jinja2 template rendering
+├── template_helpers.py          # Data formatting helpers for templates
+├── template_html_helpers.py     # HTML formatting helpers
+├── sender.py                    # SMTP delivery via smtplib
+└── address_fetcher.py           # Fetches recipient lists from remote URLs
 ```
 
 ### Component Flow
@@ -64,11 +66,22 @@ emailer/
        │
        ↓
 ┌──────────────────────────┐
-│  email_formatter.py      │  Formats sections with emojis & labels
-│  - format_water_temp()   │
-│  - format_tide()          │
-│  - format_wind_forecast() │
-│  - generate_email_body()  │
+│  template_helpers.py     │  Format individual values
+│  - format_water_temp_value()
+│  - format_tide_info()    │
+│  - format_wind_info()    │
+└──────┬───────────────────┘
+       │
+       ↓
+┌──────────────────────────┐
+│  EmailTemplateData       │  Structured data model
+│  (models/email.py)       │
+└──────┬───────────────────┘
+       │
+       ↓
+┌──────────────────────────┐
+│  template_renderer.py    │  Jinja2 rendering
+│  - render_email_template()
 └──────┬───────────────────┘
        │
        ↓
@@ -92,174 +105,193 @@ emailer/
 
 ## Core Components
 
-### 1. Email Formatter (`email_formatter.py`)
+### 1. Template Renderer (`template_renderer.py`)
 
-**Purpose**: Convert ocean data into human-readable plain text.
+**Purpose**: Render email body from Jinja2 templates with structured data.
 
 #### Key Functions
 
-##### `generate_email_body(sections, retrieval_timestamps) → str`
+##### `render_email_template(data, template_path=None) → str`
 
-**What It Does**: Assembles the complete email body from pre-formatted sections.
+**What It Does**: Renders email body from Jinja2 template using `EmailTemplateData`.
 
 **Example**:
 ```python
-from ocean_report.emailer.email_formatter import generate_email_body
+from ocean_report.emailer.template_renderer import render_email_template
+from ocean_report.models.email import EmailTemplateData
 
-sections = [
-    "🌡️ Water Temperature: 72.5 °F\n\n",
-    "🌊 Tides:\nHigh Tide at 7:32 AM — 3.1 ft\n\n",
-    "🌬️ Wind Forecast:\n8 AM: 12 mph NW (Offshore)\n\n"
-]
+data = EmailTemplateData(
+    long_date="Monday, June 16, 2026",
+    water_temp="72.5 °F",
+    tide_info="⬇️ Low Tide at 8:23 AM — 0.3 ft\n⬆️ High Tide at 2:46 PM — 4.1 ft",
+    wind_info="•  8 AM:  4.8 mph ESE (108.0°) → Cross/Onshore",
+    station_name="Atlantic City Station 8534720",
+    station_city="Atlantic City",
+    wind_provider="Open-Meteo",
+    date_retrieved="Jun 16 at 6:45 AM",
+    water_temp_measured_at_date="Jun 16 at 6:30 AM"
+)
 
-timestamps = {
-    "water_temp": datetime.now(),
-    "tides": datetime.now(),
-    "wind": datetime.now(),
-}
-
-body = generate_email_body(sections, timestamps)
+body = render_email_template(data)
 print(body)
 ```
 
-**Output**:
-```
-Daily Water Report – Monday, June 16, 2026 
-
-🌡️ Water Temperature: 72.5 °F
-
-🌊 Tides:
-High Tide at 7:32 AM — 3.1 ft
-
-🌬️ Wind Forecast:
-8 AM: 12 mph NW (Offshore)
-
---------
-Tide & water temp from NOAA (Atlantic City Station 8534720) | Wind by Open-Meteo
-
-📊 Data Retrieved: Jun 16 at 6:45 AM
-```
+**Features**:
+- Jinja2 templating with auto-escaping disabled (plain text)
+- Trim blocks and lstrip blocks for clean output
+- Template path from config or custom path
+- Validates template file exists before rendering
 
 ---
 
-##### `format_water_temp(water_temperature) → str`
+### 2. Template Helpers (`template_helpers.py`)
 
-**What It Does**: Formats water temperature with emoji and units.
+**Purpose**: Format individual data values for template consumption (NOT complete sections).
+
+#### Key Functions
+
+##### `format_water_temp_value(water_temperature) → str | None`
+
+**What It Does**: Formats water temperature value with units.
 
 **Example**:
 ```python
-from ocean_report.emailer.email_formatter import format_water_temp
+from ocean_report.emailer.template_helpers import format_water_temp_value
 
 # With data
-result = format_water_temp(72.5)
-# "🌡️ Water Temperature: 72.5 °F\n\n"
+result = format_water_temp_value(72.5)
+# "72.5 °F"
 
 # Without data (None)
-result = format_water_temp(None)
-# "🌡️ Water Temperature: unavailable\n\n"
+result = format_water_temp_value(None)
+# "Unavailable ⚠️"
 ```
 
 ---
 
-##### `format_tide(tides) → str`
+##### `format_tide_info(tide_events) → str | None`
 
-**What It Does**: Formats tide predictions into readable text.
+**What It Does**: Formats tide predictions as multi-line string.
 
 **Example**:
 ```python
-from ocean_report.emailer.email_formatter import format_tide
+from ocean_report.emailer.template_helpers import format_tide_info
 
 tides = [
-    {"type": "H", "t": "2026-06-16 07:32", "v": "3.1"},
-    {"type": "L", "t": "2026-06-16 13:45", "v": "0.8"},
+    NoaaTidePredictionRecord(timestamp="2026-06-16 07:32", event_type="H", height_feet="3.1"),
+    NoaaTidePredictionRecord(timestamp="2026-06-16 13:45", event_type="L", height_feet="0.8"),
 ]
 
-result = format_tide(tides)
+result = format_tide_info(tides)
 ```
 
 **Output**:
 ```
-🌊 Tides:
-High Tide at 7:32 AM — 3.1 ft
-Low Tide at 1:45 PM — 0.8 ft
+• ⬆️ High Tide at 7:32 AM — 3.1 ft
+• ⬇️ Low Tide at 1:45 PM — 0.8 ft
 ```
 
 ---
 
-##### `format_wind_forecast_email(wind_data) → str`
+##### `format_wind_info(wind_data) → str | None`
 
-**What It Does**: Formats hourly wind forecast with direction arrows.
+**What It Does**: Formats hourly wind forecast as multi-line string.
 
 **Example**:
 ```python
-from ocean_report.emailer.email_formatter import format_wind_forecast_email
+from ocean_report.emailer.template_helpers import format_wind_info
 
 wind_data = [
-    {
-        "time": "8 AM",
-        "speed_mph": 12,
-        "direction": "NW",
-        "wind_type": "Offshore"
-    },
-    {
-        "time": "12 PM",
-        "speed_mph": 10,
-        "direction": "W",
-        "wind_type": "Cross-shore"
-    }
+    {"time": "8 AM", "speed_mph": 12.0, "direction": "NW", 
+     "direction_deg": 315.0, "wind_type": "Offshore"},
 ]
 
-result = format_wind_forecast_email(wind_data)
+result = format_wind_info(wind_data)
 ```
 
 **Output**:
 ```
-🌬️ Wind Forecast:
-8 AM: 12 mph NW (Offshore) ⬇️
-12 PM: 10 mph W (Cross-shore) ↔️
+•  8 AM: 12.0 mph NW  (315.0°) → Offshore
 ```
-
-**Wind Type Indicators**:
-- `⬇️` Offshore (good for surfing - clean waves)
-- `⬆️` Onshore (choppy conditions)
-- `↔️` Cross-shore (sideways wind)
 
 ---
 
-### 2. Email Sender (`sender.py`)
+##### `format_retrieval_timestamp(retrieval_time) → str`
+
+**What It Does**: Formats data retrieval timestamp to Eastern Time.
+
+**Example**:
+```python
+from ocean_report.emailer.template_helpers import format_retrieval_timestamp
+
+timestamp = datetime.now(timezone.utc)
+result = format_retrieval_timestamp(timestamp)
+# "Jun 16 at 6:45 AM"
+```
+
+---
+
+##### `format_long_date(date=None) → str`
+
+**What It Does**: Formats date as long format for email header.
+
+**Example**:
+```python
+from ocean_report.emailer.template_helpers import format_long_date
+
+result = format_long_date()
+# "Monday, June 16, 2026"
+```
+
+---
+
+### 3. Email Sender (`sender.py`)
 
 **Purpose**: Deliver formatted emails via SMTP.
 
+#### EmailRecipients Dataclass
+
+```python
+@dataclass(frozen=True)
+class EmailRecipients:
+    """Container for primary and BCC recipients."""
+    to_email: str = ""
+    bcc_list: List[str] = field(default_factory=list)
+```
+
 #### Key Function
 
-##### `send_email(sender, password, recipients, bcc_recipients, subject, body, host, port) → None`
+##### `send_email(subject, body, sender_email, email_password, recipients, smtp_server, smtp_port) → None`
 
 **What It Does**: Creates and sends an email using SMTP with STARTTLS encryption.
 
 **Example**:
 ```python
-from ocean_report.emailer.sender import send_email
+from ocean_report.emailer.sender import send_email, EmailRecipients
 
 send_email(
-    sender="surf@example.com",
-    password="app_password_123",
-    recipients="primary@example.com",
-    bcc_recipients="sub1@example.com,sub2@example.com",
-    subject="Daily Water Report – Monday, June 16",
-    body="🌡️ Water Temperature: 72.5 °F\n...",
-    host="smtp.gmail.com",
-    port=587
+    subject="Daily Water Report",
+    body="Here is today's report...",
+    sender_email="surf@example.com",
+    email_password="app_password_123",
+    recipients=EmailRecipients(
+        to_email="",  # Empty for BCC-only
+        bcc_list=["user1@example.com", "user2@example.com"]
+    ),
+    smtp_server="smtp.gmail.com",
+    smtp_port=587
 )
 ```
 
 **What Happens Internally**:
-1. Creates `MIMEText` message with UTF-8 encoding
-2. Sets `From`, `To`, `Bcc`, `Subject` headers
-3. Connects to SMTP server
-4. Starts TLS encryption (`starttls()`)
-5. Authenticates with username/password
-6. Sends email to all recipients (To + Bcc)
-7. Closes connection
+1. Validates email password is provided
+2. Creates `MIMEText` message with UTF-8 encoding
+3. Sets `From`, `To`, `Bcc`, `Subject` headers
+4. Connects to SMTP server
+5. Starts TLS encryption (`starttls()`)
+6. Authenticates with username/password
+7. Sends email to all recipients (To + Bcc)
+8. Closes connection
 
 **Security**:
 - Uses `STARTTLS` for encryption
@@ -268,7 +300,7 @@ send_email(
 
 ---
 
-### 3. Address Fetcher (`address_fetcher.py`)
+### 4. Address Fetcher (`address_fetcher.py`)
 
 **Purpose**: Fetch recipient email lists from remote URLs (e.g., GitHub Gists).
 
@@ -279,41 +311,48 @@ Instead of hardcoding email lists in the codebase:
 - Can have seasonal lists (summer vs offseason)
 - Keeps email addresses private (not in public repo)
 
-#### Key Function
+#### Key Functions
 
-##### `get_recipients(use_url, fallback_recipients, test=False) → str`
+##### `fetch_recipients_from_gist(client, url) → str`
 
-**What It Does**: Fetches and normalizes a comma-separated list of email addresses.
+**What It Does**: Fetches raw email recipient list from a public Gist URL.
 
 **Example**:
 ```python
-from ocean_report.emailer.address_fetcher import get_recipients
+from ocean_report.emailer.address_fetcher import fetch_recipients_from_gist
+from ocean_report.api_client.client import ApiClient
 
-# Fetch from URL
-recipients = get_recipients(
-    use_url=True,
-    fallback_recipients="backup@example.com",
-    test=False
+client = ApiClient()
+raw_text = fetch_recipients_from_gist(
+    client=client,
+    url="https://gist.githubusercontent.com/.../recipients.txt"
 )
-# Returns: "subscriber1@example.com,subscriber2@example.com,..."
-
-# Use fallback (no URL)
-recipients = get_recipients(
-    use_url=False,
-    fallback_recipients="user1@example.com,user2@example.com",
-    test=False
-)
-# Returns: "user1@example.com,user2@example.com"
+# Returns: "email1@example.com,email2@example.com\nuser3@example.com"
 ```
 
-**Seasonal Logic**:
-- Checks if today is in "summer" season (Memorial Day → Labor Day)
-- Uses `main` URL during summer
-- Uses `offseason` URL during offseason
-- Uses `test` URL when `test=True`
+---
+
+##### `parse_recipients(text, verbose=False) → str`
+
+**What It Does**: Cleans and normalizes a comma-separated list of email addresses.
+
+**Example**:
+```python
+from ocean_report.emailer.address_fetcher import parse_recipients
+
+raw_text = """
+subscriber1@example.com,
+subscriber2@example.com
+user3@example.com
+"""
+
+recipients = parse_recipients(raw_text)
+# Returns: "subscriber1@example.com,subscriber2@example.com,user3@example.com"
+```
 
 **Normalization**:
 - Converts all addresses to lowercase
+- Replaces commas with newlines for splitting
 - Removes duplicate addresses
 - Returns comma-separated string
 
@@ -350,38 +389,41 @@ export MAIN_RECIPIENT_URL="https://gist.githubusercontent.com/.../main_recipient
 
 ## Usage Patterns
 
-### Pattern 1: Full Workflow (Production)
+### Pattern 1: Full Workflow (Template-Based)
 
 ```python
-from ocean_report.emailer import generate_email_body, send_email, get_recipients
+from ocean_report.emailer.template_renderer import render_email_template
+from ocean_report.emailer.sender import send_email, EmailRecipients
+from ocean_report.models.email import EmailTemplateData
 
-# 1. Format sections
-sections = [
-    format_water_temp(72.5),
-    format_tide(tide_data),
-    format_wind_forecast_email(wind_data),
-]
-
-# 2. Generate body
-body = generate_email_body(sections, timestamps)
-
-# 3. Get recipients
-bcc_recipients = get_recipients(
-    use_url=config.email.use_recipient_url,
-    fallback_recipients=config.email.recipients,
-    test=False
+# 1. Create template data model
+email_data = EmailTemplateData(
+    long_date="Monday, June 16, 2026",
+    water_temp="72.5 °F",
+    tide_info="⬇️ Low Tide at 8:23 AM — 0.3 ft\n⬆️ High Tide at 2:46 PM — 4.1 ft",
+    wind_info="•  8 AM:  4.8 mph ESE (108.0°) → Cross/Onshore",
+    station_name="Atlantic City Station 8534720",
+    station_city="Atlantic City",
+    wind_provider="Open-Meteo",
+    date_retrieved="Jun 16 at 6:45 AM",
+    water_temp_measured_at_date="Jun 16 at 6:30 AM"
 )
 
-# 4. Send email
+# 2. Render template
+body = render_email_template(email_data)
+
+# 3. Send email
 send_email(
-    sender=config.email.sender,
-    password=config.email.password,
-    recipients=config.email.sender,  # Send to self in "To" field
-    bcc_recipients=bcc_recipients,
     subject="Daily Water Report",
     body=body,
-    host=config.email.smtp_server,
-    port=config.email.smtp_port
+    sender_email="surf@example.com",
+    email_password="app_password_123",
+    recipients=EmailRecipients(
+        to_email="",
+        bcc_list=["user1@example.com", "user2@example.com"]
+    ),
+    smtp_server="smtp.gmail.com",
+    smtp_port=587
 )
 ```
 
@@ -390,28 +432,67 @@ send_email(
 ### Pattern 2: Preview Mode (Testing)
 
 ```python
-# Instead of sending, just print
-body = generate_email_body(sections, timestamps)
+from ocean_report.emailer.template_renderer import render_email_template
+
+# Render and print without sending
+body = render_email_template(email_data)
 print(body)
 # No email sent - useful for testing formatting
 ```
 
 ---
 
-### Pattern 3: Test Recipients
+### Pattern 3: Custom Template
 
 ```python
-# Send to test list instead of production list
-bcc_recipients = get_recipients(
-    use_url=config.email.use_recipient_url,
-    fallback_recipients=config.email.test_recipients,
-    test=True  # Uses test URL
+from pathlib import Path
+
+# Use custom template instead of config default
+body = render_email_template(
+    email_data,
+    template_path=Path("templates/custom_report.txt.jinja")
 )
 ```
 
 ---
 
+### Pattern 4: Fetching Recipients from URL
+
+```python
+from ocean_report.emailer.address_fetcher import (
+    fetch_recipients_from_gist,
+    parse_recipients
+)
+from ocean_report.api_client.client import ApiClient
+
+# Fetch from remote URL
+client = ApiClient()
+raw_text = fetch_recipients_from_gist(
+    client=client,
+    url="https://gist.githubusercontent.com/.../recipients.txt"
+)
+
+# Parse and normalize
+recipients_str = parse_recipients(raw_text)
+recipient_list = [email.strip() for email in recipients_str.split(",")]
+```
+
+---
+
 ## Design Decisions
+
+### Decision: Jinja2 Templates Instead of String Formatting
+
+**Chose**: Jinja2 templates with structured data models
+
+**Reasoning**:
+- **Separation of Concerns**: Template designers can modify layout without touching Python code
+- **Type Safety**: `EmailTemplateData` model validates data before rendering
+- **Testability**: Can test data formatting separately from template rendering
+- **Flexibility**: Easy to create multiple email formats (HTML, plain text, etc.)
+- **Professional**: Industry-standard templating engine
+
+---
 
 ### Decision: Plain Text Instead of HTML
 
@@ -452,13 +533,45 @@ bcc_recipients = get_recipients(
 
 ## Testing Guidelines
 
-### Unit Tests: Formatting
+### Unit Tests: Template Helpers
 
 ```python
+from ocean_report.emailer.template_helpers import format_water_temp_value
+
 def test_format_water_temp_with_value():
-    result = format_water_temp(72.5)
-    assert "72.5 °F" in result
-    assert "🌡️" in result
+    result = format_water_temp_value(72.5)
+    assert result == "72.5 °F"
+
+def test_format_water_temp_none():
+    result = format_water_temp_value(None)
+    assert "Unavailable" in result
+```
+
+### Unit Tests: Template Rendering
+
+```python
+from ocean_report.emailer.template_renderer import render_email_template
+from ocean_report.models.email import EmailTemplateData
+
+def test_render_email_template():
+    data = EmailTemplateData(
+        long_date="Monday, June 16, 2026",
+        water_temp="72.5 °F",
+        tide_info="Tide data here",
+        wind_info="Wind data here",
+        station_name="Test Station",
+        station_city="Test City",
+        wind_provider="Test Provider",
+        date_retrieved="Jun 16 at 6:45 AM",
+        water_temp_measured_at_date=None
+    )
+    
+    body = render_email_template(data)
+    
+    assert "Monday, June 16, 2026" in body
+    assert "72.5 °F" in body
+    assert "Test Station" in body
+```
 
 def test_format_water_temp_without_value():
     result = format_water_temp(None)

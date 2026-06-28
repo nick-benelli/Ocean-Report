@@ -219,3 +219,13 @@ __marimo__/
 
 # Application logs and email previews
 logs/
+
+# Local configuration files (user-specific configs with real credentials)
+# Template and example configs are tracked, but local overrides are not
+# configs/config.local.yaml
+# configs/*.local.yaml
+# configs/config.dev.yaml
+# configs/config.test.yaml
+# configs/config.prod.yaml
+.env
+.env.local

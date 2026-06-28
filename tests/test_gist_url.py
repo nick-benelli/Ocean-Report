@@ -46,16 +46,17 @@ def test_parse_recipients_verbose(capsys):
 def test_fetch_recipients_from_gist_success():
     """Test successful fetching from gist URL using mock client."""
     url = "https://example.com/gist.txt"
-    
+
     from unittest.mock import Mock
+
     mock_response = Mock()
     mock_response.text = "test@example.com\nfoo@bar.com"
-    
+
     mock_client = Mock()
     mock_client.get.return_value = mock_response
-    
+
     result = address_fetcher.fetch_recipients_from_gist(client=mock_client, url=url)
-    
+
     assert result == "test@example.com\nfoo@bar.com"
     assert "test@example.com" in result
     assert "foo@bar.com" in result
@@ -64,6 +65,7 @@ def test_fetch_recipients_from_gist_success():
 
 def test_fetch_recipients_from_gist_no_url():
     from unittest.mock import Mock
+
     mock_client = Mock()
     with pytest.raises(ValueError):
         address_fetcher.fetch_recipients_from_gist(client=mock_client, url="")

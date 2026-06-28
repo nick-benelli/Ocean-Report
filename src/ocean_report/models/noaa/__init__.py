@@ -10,6 +10,7 @@ from .water_temperature import (
     NoaaWaterTemperatureResponse,
 )
 
+# pylint: disable=duplicate-code  # Standard re-export pattern for package organization
 __all__ = [
     "NoaaStation",
     "NoaaStationsParams",

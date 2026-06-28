@@ -114,6 +114,50 @@ def get_config_dict(path: str | Path | None = None) -> dict[str, Any]:
     return get_settings(path).model_dump(exclude_none=True)
 
 
+def get_project_root() -> Path:
+    """
+    Find the project root directory.
+
+    Returns:
+        Path to project root (where pyproject.toml lives)
+
+    Raises:
+        FileNotFoundError: If pyproject.toml cannot be found
+    """
+    pyproject_path = find_dotenv("pyproject.toml")
+    if not pyproject_path:
+        raise FileNotFoundError(
+            "Could not find pyproject.toml. Unable to determine project root."
+        )
+    return Path(pyproject_path).parent
+
+
+def get_template_path(config_path: str | Path | None = None) -> Path:
+    """
+    Get the resolved absolute path to the email template.
+
+    Args:
+        config_path: Optional explicit config path. If None, uses default resolution.
+
+    Returns:
+        Absolute Path to the template file
+
+    Raises:
+        FileNotFoundError: If project root or template file cannot be found
+    """
+    config = get_settings(config_path)
+    project_root = get_project_root()
+    template_path = config.reporting.resolve_template_path(project_root)
+
+    if not template_path.exists():
+        raise FileNotFoundError(
+            f"Template file not found: {template_path}\n"
+            f"Configured as: {config.reporting.template_path}"
+        )
+
+    return template_path
+
+
 def clear_config_cache() -> None:
     """Clear the cache, forcing next get_settings() to reload from disk."""
     _cached_load.cache_clear()
@@ -139,4 +183,6 @@ __all__ = [
     "reload_config",
     "resolve_config_path",
     "get_config_dict",
+    "get_project_root",
+    "get_template_path",
 ]

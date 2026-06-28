@@ -406,7 +406,7 @@ preview_dir = Path("previews")  # Save in top-level previews/ folder
 
 ```bash
 # 1. Make changes to code or config
-vim src/ocean_report/emailer/formatter.py
+vim src/ocean_report/emailer/template_renderer.py
 
 # 2. Generate preview
 uv run scripts/run_report_no_email.py

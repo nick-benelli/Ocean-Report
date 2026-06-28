@@ -1,0 +1,162 @@
+# =============================================================================
+# Ocean Report Configuration Template
+# =============================================================================
+# Copy this file to create your own config (e.g., config.yaml)
+# Replace ${VARIABLE} placeholders with environment variables or direct values
+#
+# Environment variables can be set in your shell or .env file:
+#   export EMAIL_SENDER="your-email@gmail.com"
+#   export EMAIL_PASSWORD="your-app-password"
+#
+# Or you can replace them with direct values (not recommended for secrets):
+#   sender: "your-email@gmail.com"
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# NOAA Station Information
+# -----------------------------------------------------------------------------
+# Configure which NOAA stations to use for data collection
+noaa:
+  # Station ID for tide and water temperature data
+  # Default: "8534720" (Atlantic City, NJ)
+  # Find stations at: https://tidesandcurrents.noaa.gov/
+  station_id: "8534720"
+  
+  # Buoy ID for offshore wind data
+  # Default: "44091" (Barnegat Buoy)
+  # Find buoys at: https://www.ndbc.noaa.gov/
+  buoy_id: "44091"
+
+# -----------------------------------------------------------------------------
+# Email Configuration
+# -----------------------------------------------------------------------------
+email:
+  # SMTP server settings
+  smtp_server: "smtp.gmail.com"  # Gmail SMTP (use smtp.office365.com for Outlook)
+  smtp_port: 587                 # TLS port (use 465 for SSL)
+  
+  # REQUIRED: Email credentials (use environment variables for security)
+  sender: ${EMAIL_SENDER}        # Your sending email address
+  password: ${EMAIL_PASSWORD}    # Your email password or app-specific password
+  
+  # Email recipients
+  recipients: ${EMAIL_RECIPIENTS}           # Comma-separated production recipients
+  test_recipients: ${TEST_RECIPIENTS}       # Comma-separated test recipients (optional)
+  
+  # URL-based recipient management (recommended for multiple recipients)
+  use_recipient_url: true        # If true, fetch recipients from URLs; if false, use recipients field
+  recipient_urls:
+    main: ${RECIPIENTS_GIST_URL}           # URL for main recipient list (e.g., GitHub Gist)
+    test: ${TEST_RECIPIENTS_GIST_URL}      # URL for test recipient list
+    offseason: ${OFFSEASON_RECIPIENTS_GIST_URL}  # URL for off-season recipient list
+
+# -----------------------------------------------------------------------------
+# Location Settings
+# -----------------------------------------------------------------------------
+# Configure your beach location for accurate wind direction calculations
+location:
+  # Geographic coordinates
+  longitude: ${LONGITUDE}        # Example: -74.2 (West is negative)
+  latitude: ${LATITUDE}          # Example: 39.5 (North is positive)
+  
+  # Beach orientation in degrees (0-360, where 0 is North, 90 is East)
+  # Used to calculate onshore/offshore wind direction
+  # Default: 140 (LBI faces Southeast)
+  beach_orientation_degrees: 140
+
+# -----------------------------------------------------------------------------
+# Report Configuration
+# -----------------------------------------------------------------------------
+reporting:
+  # Path to Jinja2 email template (relative to project root)
+  template_path: "templates/ocean-report-email.j2"
+  
+  # Base email subject line (date will be appended automatically)
+  # Example result: "🌊 LBI Daily Water Report: 2026-06-26"
+  subject: "🌊 LBI Daily Water Report"
+  
+  # Station display names for the report
+  station_name: "NOAA Atlantic City (8534720)"
+  station_city: "Atlantic City, NJ"
+  
+  # Wind data provider name (for attribution in report)
+  wind_provider: "Open-Meteo"
+
+# -----------------------------------------------------------------------------
+# Season Configuration
+# -----------------------------------------------------------------------------
+# Define when "summer season" starts and ends for recipient list selection
+summer:
+  # Days before Memorial Day to start summer season (negative = before, positive = after)
+  memorial_day_offset: -4    # Start 4 days before Memorial Day
+  
+  # Days after Labor Day to end summer season
+  labor_day_offset: 7        # End 7 days after Labor Day
+
+# -----------------------------------------------------------------------------
+# API Client Settings
+# -----------------------------------------------------------------------------
+# Configure HTTP client behavior for external API calls
+api:
+  # SSL/TLS certificate verification
+  verify_ssl: true           # Set to false only if you encounter SSL errors
+  
+  # Request timeout in seconds
+  timeout_seconds: 30.0      # How long to wait for API responses
+  
+  # Retry logic
+  retry_insecure_on_ssl_error: true  # Retry without SSL verification on SSL errors
+  max_retries: 3             # Number of retry attempts after initial request
+  backoff_seconds: 0.8       # Base delay between retries (exponential backoff)
+
+# -----------------------------------------------------------------------------
+# Logging Settings
+# -----------------------------------------------------------------------------
+logging:
+  # Output destination
+  # Options: "console" (terminal only), "file" (file only), "both" (terminal + file)
+  output: ${LOG_OUTPUT:console}
+  
+  # Log file path (used when output is "file" or "both")
+  file_path: ${LOG_FILE_PATH:logs/ocean_report.log}
+  
+  # Logging level
+  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  # Use DEBUG for troubleshooting, INFO for normal operation
+  level: ${LOG_LEVEL:INFO}
+  
+  # Log message format (Python logging format string)
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# =============================================================================
+# Configuration Tips
+# =============================================================================
+#
+# 1. ENVIRONMENT VARIABLES:
+#    Create a .env file or set in your shell:
+#      export EMAIL_SENDER="your-email@gmail.com"
+#      export EMAIL_PASSWORD="your-app-password"
+#      export RECIPIENTS_GIST_URL="https://gist.githubusercontent.com/..."
+#
+# 2. GMAIL APP PASSWORDS:
+#    Don't use your regular Gmail password. Create an app-specific password:
+#    https://myaccount.google.com/apppasswords
+#
+# 3. RECIPIENT LISTS:
+#    For URL-based recipients, create a GitHub Gist with one email per line:
+#      user1@example.com
+#      user2@example.com
+#    Then use the raw Gist URL
+#
+# 4. TESTING:
+#    - Set test_recipients for safe testing
+#    - Run with --test flag to use test recipients
+#    - Use LOG_LEVEL=DEBUG for troubleshooting
+#
+# 5. MULTIPLE CONFIGS:
+#    Create different config files for different environments:
+#      - config.yaml (production)
+#      - config.test.yaml (testing)
+#      - config.dev.yaml (development)
+#
+# =============================================================================

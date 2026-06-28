@@ -12,10 +12,9 @@ from ocean_report.emailer.sender import EmailRecipients, send_email
 def test_email_recipients_creation():
     """Test EmailRecipients dataclass creation."""
     recipients = EmailRecipients(
-        to_email="test@example.com",
-        bcc_list=["user1@example.com", "user2@example.com"]
+        to_email="test@example.com", bcc_list=["user1@example.com", "user2@example.com"]
     )
-    
+
     assert recipients.to_email == "test@example.com"
     assert len(recipients.bcc_list) == 2
     assert "user1@example.com" in recipients.bcc_list
@@ -24,7 +23,7 @@ def test_email_recipients_creation():
 def test_email_recipients_immutable():
     """Test that EmailRecipients is immutable (frozen)."""
     recipients = EmailRecipients(to_email="test@example.com")
-    
+
     with pytest.raises(Exception):  # FrozenInstanceError
         recipients.to_email = "new@example.com"
 
@@ -45,14 +44,13 @@ def test_send_email_requires_password():
 def test_send_email_with_valid_params():
     """Test send_email with valid parameters (mocked SMTP)."""
     recipients = EmailRecipients(
-        to_email="recipient@example.com",
-        bcc_list=["bcc1@example.com"]
+        to_email="recipient@example.com", bcc_list=["bcc1@example.com"]
     )
-    
+
     with patch("smtplib.SMTP") as mock_smtp:
         mock_server = MagicMock()
         mock_smtp.return_value.__enter__.return_value = mock_server
-        
+
         send_email(
             subject="Test Subject",
             body="Test Body",
@@ -62,7 +60,7 @@ def test_send_email_with_valid_params():
             smtp_server="smtp.example.com",
             smtp_port=587,
         )
-        
+
         # Verify SMTP was called
         mock_smtp.assert_called_once_with("smtp.example.com", 587)
         mock_server.starttls.assert_called_once()
