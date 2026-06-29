@@ -33,7 +33,7 @@ RUN_EMAIL = False
 
 def preview_html():
     """Open the latest HTML email preview in the browser."""
-    script_path = Path(__file__).parent.parent / "help" / "bin" / "preview-email.sh"
+    script_path = Path(__file__).parent / "shell" / "preview-email.sh"
     try:
         subprocess.run(["bash", str(script_path)], check=True)
     except subprocess.CalledProcessError as e:
@@ -44,7 +44,7 @@ def preview_html():
 
 def preview_text():
     """Display the latest text email preview in the terminal."""
-    script_path = Path(__file__).parent.parent / "help" / "bin" / "preview-email-txt.sh"
+    script_path = Path(__file__).parent / "shell" / "preview-email-txt.sh"
     try:
         subprocess.run(["bash", str(script_path)], check=True)
     except subprocess.CalledProcessError as e:
