@@ -2,14 +2,15 @@
 
 from datetime import datetime
 from unittest.mock import Mock, patch
+
 import pytest
 
+from ocean_report.api_client.exceptions import ApiClientError
 from ocean_report.application.context import ApplicationContext
 from ocean_report.config.schemas import AppConfig
-from ocean_report.workflows.models import FetchParams, RawReportData
-from ocean_report.workflows.data.fetcher import fetch_raw_data
 from ocean_report.models.noaa.tides import NoaaTidePredictionRecord
-from ocean_report.api_client.exceptions import ApiClientError
+from ocean_report.workflows.data.fetcher import fetch_raw_data
+from ocean_report.workflows.models import FetchParams, RawReportData
 
 
 @pytest.fixture
@@ -36,9 +37,7 @@ def test_fetch_raw_data_success(mock_context, fetch_params):
     """Test successful data fetching from all APIs."""
 
     mock_tides = [
-        NoaaTidePredictionRecord(
-            timestamp="2025-07-04 08:00", height_feet=4.2, event_type="H"
-        )
+        NoaaTidePredictionRecord(timestamp="2025-07-04 08:00", height_feet=4.2, event_type="H")
     ]
 
     with (

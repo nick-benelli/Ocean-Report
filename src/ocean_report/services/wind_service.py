@@ -1,6 +1,7 @@
 """Wind forecast data fetching module for ocean report."""
 
 import time
+
 from ..api_client.exceptions import ApiClientError
 from ..application.factory import ApplicationContext
 from ..endpoints.openmeteo.forecast import OpenMeteoForecastEndpoint

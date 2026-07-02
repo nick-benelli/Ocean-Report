@@ -1,15 +1,14 @@
 """Water temperature data fetching module for ocean report."""
 
 import time
-from typing import Optional
 
 from ..api_client.exceptions import ApiClientError
 from ..application.factory import ApplicationContext
 from ..endpoints.noaa.water_temperature import WaterTemperatureEndpoint
 from ..logger import logger
 from ..models.noaa.water_temperature import (
-    NoaaWaterTempParams,
     NoaaWaterTemperatureRecord,
+    NoaaWaterTempParams,
 )
 
 
@@ -17,7 +16,7 @@ def fetch_water_temp(
     *,
     context: ApplicationContext,
     params: NoaaWaterTempParams,
-) -> Optional[NoaaWaterTemperatureRecord]:
+) -> NoaaWaterTemperatureRecord | None:
     """
     Fetch water temperature data from the NOAA API.
 
@@ -53,9 +52,7 @@ def fetch_water_temp(
         )
 
         if not response.data:
-            logger.warning(
-                "No water temperature data returned for station %s", params.station
-            )
+            logger.warning("No water temperature data returned for station %s", params.station)
             return None
 
         return response.data[0]  # Return the latest record

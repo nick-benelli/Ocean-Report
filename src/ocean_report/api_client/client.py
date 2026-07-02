@@ -19,7 +19,6 @@ from .exceptions import (
     ApiSslError,
 )
 
-
 RequestTimeout = float | tuple[float, float]
 VerifyOption = bool | str
 
@@ -123,9 +122,7 @@ class ApiClient:
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as exc:
-            raise ApiResponseError(
-                f"HTTP {response.status_code} returned for GET {url}"
-            ) from exc
+            raise ApiResponseError(f"HTTP {response.status_code} returned for GET {url}") from exc
         return response
 
     def get(  # pylint: disable=too-many-arguments
@@ -225,7 +222,7 @@ class ApiClient:
         self.session.close()
         self._closed = True
 
-    def __enter__(self) -> "ApiClient":
+    def __enter__(self) -> ApiClient:
         """Enter a context manager scope for this client."""
 
         return self

@@ -1,6 +1,7 @@
 """Tests for workflow email operations."""
 
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
+
 import pytest
 
 from ocean_report.application.context import ApplicationContext
@@ -29,9 +30,7 @@ def mock_context():
 def test_get_bcc_recipients_fetches_from_url_when_enabled():
     """Test that recipients are fetched from URL when use_url=True."""
 
-    with patch(
-        "ocean_report.workflows.email.recipients.get_email_recipients"
-    ) as mock_get:
+    with patch("ocean_report.workflows.email.recipients.get_email_recipients") as mock_get:
         mock_get.return_value = "user1@example.com,user2@example.com,user3@example.com"
 
         result = get_bcc_recipients(
@@ -50,9 +49,7 @@ def test_get_bcc_recipients_fetches_from_url_when_enabled():
 def test_get_bcc_recipients_uses_fallback_when_url_disabled():
     """Test that fallback recipients are used when use_url=False."""
 
-    with patch(
-        "ocean_report.workflows.email.recipients.get_email_recipients"
-    ) as mock_get:
+    with patch("ocean_report.workflows.email.recipients.get_email_recipients") as mock_get:
         result = get_bcc_recipients(
             test=False,
             use_url=False,
@@ -70,9 +67,7 @@ def test_get_bcc_recipients_uses_fallback_when_url_disabled():
 def test_get_bcc_recipients_uses_test_mode_when_flag_set():
     """Test that test=True is passed to recipient fetcher."""
 
-    with patch(
-        "ocean_report.workflows.email.recipients.get_email_recipients"
-    ) as mock_get:
+    with patch("ocean_report.workflows.email.recipients.get_email_recipients") as mock_get:
         mock_get.return_value = "test@example.com"
 
         result = get_bcc_recipients(test=True, use_url=True, fallback_recipients="")
@@ -84,12 +79,8 @@ def test_get_bcc_recipients_uses_test_mode_when_flag_set():
 def test_get_bcc_recipients_strips_whitespace():
     """Test that email addresses are stripped of whitespace."""
 
-    with patch(
-        "ocean_report.workflows.email.recipients.get_email_recipients"
-    ) as mock_get:
-        mock_get.return_value = (
-            "  user1@example.com  , user2@example.com ,  user3@example.com  "
-        )
+    with patch("ocean_report.workflows.email.recipients.get_email_recipients") as mock_get:
+        mock_get.return_value = "  user1@example.com  , user2@example.com ,  user3@example.com  "
 
         result = get_bcc_recipients(test=False, use_url=True, fallback_recipients="")
 
@@ -100,9 +91,7 @@ def test_get_bcc_recipients_strips_whitespace():
 def test_get_bcc_recipients_filters_empty_strings():
     """Test that empty strings are filtered out."""
 
-    with patch(
-        "ocean_report.workflows.email.recipients.get_email_recipients"
-    ) as mock_get:
+    with patch("ocean_report.workflows.email.recipients.get_email_recipients") as mock_get:
         mock_get.return_value = "user1@example.com,,,user2@example.com,"
 
         result = get_bcc_recipients(test=False, use_url=True, fallback_recipients="")
@@ -123,9 +112,7 @@ def test_get_bcc_recipients_handles_empty_fallback():
 # Tests for send_or_preview_email
 
 
-def test_send_or_preview_email_prints_preview_when_run_email_false(
-    mock_context, capsys
-):
+def test_send_or_preview_email_prints_preview_when_run_email_false(mock_context, capsys):
     """Test that email preview is printed when run_email=False."""
 
     send_or_preview_email(

@@ -1,6 +1,7 @@
 """Tests for wind service layer."""
 
 from unittest.mock import Mock, patch
+
 import pytest
 
 from ocean_report.api_client.client import ApiClient
@@ -23,9 +24,7 @@ def test_fetch_wind_forecast_success():
 
     params = OpenMeteoForecastParams(latitude=39.5, longitude=-74.2)
 
-    with patch(
-        "ocean_report.services.wind_service.OpenMeteoForecastEndpoint"
-    ) as MockEndpoint:
+    with patch("ocean_report.services.wind_service.OpenMeteoForecastEndpoint") as MockEndpoint:
         mock_endpoint = MockEndpoint.return_value
 
         mock_hourly = OpenMeteoHourlyForecast(
@@ -56,9 +55,7 @@ def test_fetch_wind_forecast_api_error():
 
     params = OpenMeteoForecastParams(latitude=39.5, longitude=-74.2)
 
-    with patch(
-        "ocean_report.services.wind_service.OpenMeteoForecastEndpoint"
-    ) as MockEndpoint:
+    with patch("ocean_report.services.wind_service.OpenMeteoForecastEndpoint") as MockEndpoint:
         mock_endpoint = MockEndpoint.return_value
         mock_endpoint.fetch.side_effect = ApiClientError("API unavailable")
 

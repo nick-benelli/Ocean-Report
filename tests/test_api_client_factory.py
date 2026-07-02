@@ -142,5 +142,5 @@ class TestFactoryIntegration:
         assert client_insecure.verify_ssl is False
 
         # Verify _resolve_verify returns correct values
-        assert client_secure._resolve_verify() != False  # Should return cert path
+        assert client_secure._resolve_verify()  # Should return cert path
         assert client_insecure._resolve_verify() is False

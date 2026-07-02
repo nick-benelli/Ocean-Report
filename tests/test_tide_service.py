@@ -1,6 +1,7 @@
 """Tests for tide service layer."""
 
 from unittest.mock import Mock, patch
+
 import pytest
 
 from ocean_report.api_client.client import ApiClient
@@ -28,12 +29,8 @@ def test_fetch_tide_data_success():
     with patch("ocean_report.services.tide_service.NoaaTidesEndpoint") as MockEndpoint:
         mock_endpoint = MockEndpoint.return_value
         mock_predictions = [
-            NoaaTidePredictionRecord(
-                timestamp="2025-07-04 06:00", height_feet=4.5, event_type="H"
-            ),
-            NoaaTidePredictionRecord(
-                timestamp="2025-07-04 12:30", height_feet=0.8, event_type="L"
-            ),
+            NoaaTidePredictionRecord(timestamp="2025-07-04 06:00", height_feet=4.5, event_type="H"),
+            NoaaTidePredictionRecord(timestamp="2025-07-04 12:30", height_feet=0.8, event_type="L"),
         ]
 
         mock_response = Mock()

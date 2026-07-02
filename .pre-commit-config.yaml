@@ -1,0 +1,46 @@
+# Pre-commit hooks for Ocean Report
+# Install with: pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: mixed-line-ending
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      # Run the linter
+      - id: ruff
+        args: [ --fix ]
+        exclude: ^notebooks/
+      # Run the formatter
+      - id: ruff-format
+        exclude: ^notebooks/
+
+  # Note: mypy is disabled in pre-commit to avoid blocking commits
+  # Type checking still runs in CI/CD pipeline
+  # To enable locally, uncomment the section below:
+  #
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.13.0
+  #   hooks:
+  #     - id: mypy
+  #       additional_dependencies: [
+  #         types-requests,
+  #         types-PyYAML,
+  #         pydantic>=2.0.0,
+  #       ]
+  #       args: [--ignore-missing-imports, --no-strict-optional, --allow-untyped-calls, --allow-untyped-defs]
+  #       files: ^src/
+  #       exclude: ^tests/

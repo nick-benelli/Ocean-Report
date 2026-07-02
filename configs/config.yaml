@@ -30,7 +30,7 @@ reporting:
   station_name: "NOAA Atlantic City (8534720)"
   station_city: "Atlantic City, NJ"
   wind_provider: "Open-Meteo"
-  
+
 
 
 # Deterimine Summertime
@@ -52,4 +52,3 @@ logging:
   file_path: ${LOG_FILE_PATH:logs/ocean_report.log}  # Path for log file
   level: ${LOG_LEVEL:INFO}  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"  # Log message format
-

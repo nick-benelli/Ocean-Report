@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from unittest.mock import Mock, patch
+
 import pytest
 
 from ocean_report.application.context import ApplicationContext
@@ -17,9 +18,7 @@ from ocean_report.use_cases.wind import get_daily_wind_forecast
 def mock_context():
     """Create a mock application context."""
     config = AppConfig(
-        location=LocationConfig(
-            latitude=39.5, longitude=-74.2, beach_orientation_degrees=140.0
-        )
+        location=LocationConfig(latitude=39.5, longitude=-74.2, beach_orientation_degrees=140.0)
     )
     return ApplicationContext(config=config, client=Mock())
 
@@ -122,9 +121,7 @@ def test_get_daily_wind_forecast_calculates_wind_type(mock_context, mock_wind_re
             assert entry["wind_type"] in valid_types
 
 
-def test_get_daily_wind_forecast_converts_speed_to_mph(
-    mock_context, mock_wind_response
-):
+def test_get_daily_wind_forecast_converts_speed_to_mph(mock_context, mock_wind_response):
     """Test that wind speed is converted from km/h to mph."""
 
     with patch("ocean_report.use_cases.wind.fetch_wind_forecast") as mock_fetch:

@@ -202,7 +202,7 @@ result = format_tide_info(tides)
 from ocean_report.emailer.template_helpers import format_wind_info
 
 wind_data = [
-    {"time": "8 AM", "speed_mph": 12.0, "direction": "NW", 
+    {"time": "8 AM", "speed_mph": 12.0, "direction": "NW",
      "direction_deg": 315.0, "wind_type": "Offshore"},
 ]
 
@@ -565,9 +565,9 @@ def test_render_email_template():
         date_retrieved="Jun 16 at 6:45 AM",
         water_temp_measured_at_date=None
     )
-    
+
     body = render_email_template(data)
-    
+
     assert "Monday, June 16, 2026" in body
     assert "72.5 °F" in body
     assert "Test Station" in body

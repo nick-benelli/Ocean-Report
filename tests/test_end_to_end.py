@@ -8,12 +8,13 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock, patch
+
 import pytest
 
-from ocean_report.workflows.report_runner import run_report
-from ocean_report.workflows.models import RawReportData
 from ocean_report.models.email import EmailTemplateData
 from ocean_report.models.noaa.tides import NoaaTidePredictionRecord
+from ocean_report.workflows.models import RawReportData
+from ocean_report.workflows.report_runner import run_report
 
 
 @pytest.fixture
@@ -23,14 +24,14 @@ def temp_config_file():
 noaa:
   station_id: "8534720"
   buoy_id: "44091"
-  
+
 email:
   smtp_server: "smtp.example.com"
   smtp_port: 587
   sender: "test@example.com"
   recipients: "recipient@example.com"
   use_recipient_url: false
-  
+
 location:
   longitude: -74.2
   latitude: 39.5
@@ -41,7 +42,7 @@ reporting:
   station_city: "Test City"
   wind_provider: "Open-Meteo"
   template_path: null
-  
+
 logging:
   level: "INFO"
   output: "console"
@@ -63,12 +64,8 @@ def mock_data_responses():
     """Mock responses for all data fetching operations."""
     return {
         "tides": [
-            NoaaTidePredictionRecord(
-                timestamp="2025-07-04 06:30", height_feet=4.2, event_type="H"
-            ),
-            NoaaTidePredictionRecord(
-                timestamp="2025-07-04 12:45", height_feet=0.5, event_type="L"
-            ),
+            NoaaTidePredictionRecord(timestamp="2025-07-04 06:30", height_feet=4.2, event_type="H"),
+            NoaaTidePredictionRecord(timestamp="2025-07-04 12:45", height_feet=0.5, event_type="L"),
         ],
     }
 
@@ -80,15 +77,9 @@ def test_run_report_preview_mode(temp_config_file, mock_data_responses):
     with (
         patch("ocean_report.workflows.report_runner.fetch_raw_data") as mock_fetch,
         patch("ocean_report.workflows.report_runner.format_report_data") as mock_format,
-        patch(
-            "ocean_report.workflows.report_runner.send_or_preview_email"
-        ) as mock_send,
-        patch(
-            "ocean_report.workflows.report_runner.get_bcc_recipients"
-        ) as mock_recipients,
-        patch(
-            "ocean_report.workflows.report_runner.render_email_template"
-        ) as mock_render,
+        patch("ocean_report.workflows.report_runner.send_or_preview_email") as mock_send,
+        patch("ocean_report.workflows.report_runner.get_bcc_recipients") as mock_recipients,
+        patch("ocean_report.workflows.report_runner.render_email_template") as mock_render,
     ):
         # Setup mocks
         mock_fetch.return_value = RawReportData(
@@ -131,20 +122,12 @@ def test_run_report_with_default_config(mock_data_responses):
     """Test report workflow using default config path."""
 
     with (
-        patch(
-            "ocean_report.workflows.report_runner.create_application_context"
-        ) as mock_context,
+        patch("ocean_report.workflows.report_runner.create_application_context") as mock_context,
         patch("ocean_report.workflows.report_runner.fetch_raw_data") as mock_fetch,
         patch("ocean_report.workflows.report_runner.format_report_data") as mock_format,
-        patch(
-            "ocean_report.workflows.report_runner.send_or_preview_email"
-        ) as mock_send,
-        patch(
-            "ocean_report.workflows.report_runner.get_bcc_recipients"
-        ) as mock_recipients,
-        patch(
-            "ocean_report.workflows.report_runner.render_email_template"
-        ) as mock_render,
+        patch("ocean_report.workflows.report_runner.send_or_preview_email"),
+        patch("ocean_report.workflows.report_runner.get_bcc_recipients") as mock_recipients,
+        patch("ocean_report.workflows.report_runner.render_email_template") as mock_render,
     ):
         # Setup mock context
         mock_ctx = Mock()
@@ -199,15 +182,9 @@ def test_run_report_test_mode(temp_config_file, mock_data_responses):
     with (
         patch("ocean_report.workflows.report_runner.fetch_raw_data") as mock_fetch,
         patch("ocean_report.workflows.report_runner.format_report_data") as mock_format,
-        patch(
-            "ocean_report.workflows.report_runner.send_or_preview_email"
-        ) as mock_send,
-        patch(
-            "ocean_report.workflows.report_runner.get_bcc_recipients"
-        ) as mock_recipients,
-        patch(
-            "ocean_report.workflows.report_runner.render_email_template"
-        ) as mock_render,
+        patch("ocean_report.workflows.report_runner.send_or_preview_email"),
+        patch("ocean_report.workflows.report_runner.get_bcc_recipients") as mock_recipients,
+        patch("ocean_report.workflows.report_runner.render_email_template") as mock_render,
     ):
         mock_fetch.return_value = RawReportData(
             tides=mock_data_responses["tides"],

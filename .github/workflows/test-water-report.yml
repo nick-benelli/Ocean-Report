@@ -39,7 +39,7 @@ jobs:
         env:
           # Configuration
           OCEAN_REPORT_CONFIG: configs/config.yaml
-          
+
           # Environment
           EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}

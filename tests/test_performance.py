@@ -4,17 +4,18 @@ Tests that verify key operations complete within acceptable time limits.
 Run with: pytest tests/test_performance.py -m performance
 """
 
-import pytest
 import time
 from datetime import datetime
 from unittest.mock import Mock, patch
 
+import pytest
+
 from ocean_report.application.context import ApplicationContext
 from ocean_report.config.schemas import AppConfig
+from ocean_report.models.noaa.tides import NoaaTidePredictionRecord
 from ocean_report.workflows.data.fetcher import fetch_raw_data
 from ocean_report.workflows.data.formatter import format_report_data
 from ocean_report.workflows.models import FetchParams, RawReportData
-from ocean_report.models.noaa.tides import NoaaTidePredictionRecord
 
 
 @pytest.fixture
@@ -75,9 +76,7 @@ def test_fetch_raw_data_performance(mock_context, fetch_params):
         elapsed = time.time() - start_time
 
         # Should complete in under 100ms (mocked)
-        assert elapsed < 0.1, (
-            f"fetch_raw_data took {elapsed * 1000:.2f}ms (expected <100ms)"
-        )
+        assert elapsed < 0.1, f"fetch_raw_data took {elapsed * 1000:.2f}ms (expected <100ms)"
 
 
 @pytest.mark.performance
@@ -96,9 +95,7 @@ def test_format_report_data_performance_large_dataset(large_tide_dataset):
 
     with (
         patch("ocean_report.emailer.template_helpers.format_tide_info") as mock_tide,
-        patch(
-            "ocean_report.emailer.template_helpers.format_water_temp_value"
-        ) as mock_temp,
+        patch("ocean_report.emailer.template_helpers.format_water_temp_value") as mock_temp,
         patch("ocean_report.emailer.template_helpers.format_wind_info") as mock_wind,
     ):
         mock_tide.return_value = "Tide text"
@@ -110,9 +107,7 @@ def test_format_report_data_performance_large_dataset(large_tide_dataset):
         elapsed = time.time() - start_time
 
         # Should handle large dataset quickly
-        assert elapsed < 0.05, (
-            f"format_report_data took {elapsed * 1000:.2f}ms with large dataset"
-        )
+        assert elapsed < 0.05, f"format_report_data took {elapsed * 1000:.2f}ms with large dataset"
 
 
 @pytest.mark.performance
@@ -139,15 +134,13 @@ def test_wind_classification_performance():
     beach_facing = 140.0
 
     start_time = time.time()
-    results = [
-        classify_wind_relative_to_beach(angle, beach_facing) for angle in test_angles
-    ]
+    results = [classify_wind_relative_to_beach(angle, beach_facing) for angle in test_angles]
     elapsed = time.time() - start_time
 
     # Should classify 72 wind directions quickly
-    assert elapsed < 0.01, (
-        f"classify_wind_relative_to_beach took {elapsed * 1000:.2f}ms for 72 classifications"
-    )
+    assert (
+        elapsed < 0.01
+    ), f"classify_wind_relative_to_beach took {elapsed * 1000:.2f}ms for 72 classifications"
     assert len(results) == 72
     assert all(
         r in ["Onshore", "Offshore", "Cross-shore", "Cross/Onshore", "Cross/Offshore"]
@@ -233,9 +226,7 @@ def test_pydantic_model_validation_performance():
     elapsed = time.time() - start_time
 
     # Should validate 100 records quickly
-    assert elapsed < 0.05, (
-        f"Pydantic validation took {elapsed * 1000:.2f}ms for 100 records"
-    )
+    assert elapsed < 0.05, f"Pydantic validation took {elapsed * 1000:.2f}ms for 100 records"
     assert len(records) == 100
 
 
@@ -254,15 +245,9 @@ def test_full_report_workflow_performance_benchmark(mock_context, fetch_params):
         patch(
             "ocean_report.workflows.data.fetcher.wind_use_case.get_daily_wind_forecast"
         ) as mock_wind,
-        patch(
-            "ocean_report.emailer.template_helpers.format_tide_info"
-        ) as mock_fmt_tide,
-        patch(
-            "ocean_report.emailer.template_helpers.format_water_temp_value"
-        ) as mock_fmt_temp,
-        patch(
-            "ocean_report.emailer.template_helpers.format_wind_info"
-        ) as mock_fmt_wind,
+        patch("ocean_report.emailer.template_helpers.format_tide_info") as mock_fmt_tide,
+        patch("ocean_report.emailer.template_helpers.format_water_temp_value") as mock_fmt_temp,
+        patch("ocean_report.emailer.template_helpers.format_wind_info") as mock_fmt_wind,
     ):
         mock_tides.return_value = ([], datetime.now())
         mock_temp.return_value = (73.5, datetime.now(), None)
@@ -277,7 +262,5 @@ def test_full_report_workflow_performance_benchmark(mock_context, fetch_params):
         elapsed = time.time() - start_time
 
         # Full workflow should be fast
-        assert elapsed < 0.15, (
-            f"Full workflow took {elapsed * 1000:.2f}ms (expected <150ms)"
-        )
+        assert elapsed < 0.15, f"Full workflow took {elapsed * 1000:.2f}ms (expected <150ms)"
         assert formatted_data is not None

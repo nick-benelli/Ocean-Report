@@ -317,12 +317,12 @@ from ocean_report.logger import logger
 def fetch_all_data(context):
     start_time = time.time()
     logger.info("[STEP 3/6] Fetching weather data from APIs...")
-    
+
     # Fetch data
     water_temp = get_latest_water_temp(context)
     tides = get_tides_for_date(context, date_str)
     wind = get_hourly_wind_forecast(context, date_str)
-    
+
     duration = time.time() - start_time
     logger.info("Data fetched in %.2f seconds", duration)
 ```
@@ -348,9 +348,9 @@ def run_report(context):
     logger.info("Today is %s", date.today().strftime("%A, %B %d, %Y"))
     logger.info("Run mode: %s", "TEST" if test else "PRODUCTION")
     logger.info("=" * 80)
-    
+
     # ... workflow steps ...
-    
+
     logger.info("Ocean Report workflow completed successfully!")
 ```
 
@@ -403,16 +403,16 @@ def configure_logger(
     log_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 ) -> logging.Logger:
     """Configure logger with flexible output options.
-    
+
     Args:
         output: Where to send logs (CONSOLE, FILE, or BOTH)
         log_file: Path to log file (required if output is FILE or BOTH)
         level: Logging level (default: logging.INFO)
         log_format: Log message format string
-        
+
     Returns:
         Configured logger instance
-        
+
     Raises:
         ValueError: If log_file is not provided when output requires file writing
     """
@@ -583,10 +583,10 @@ configure_logger(LogOutput.FILE, log_file="logs/app.log")
 3. **For file output, check the file path is correct:**
    ```python
    from pathlib import Path
-   
+
    log_file = Path("logs/app.log")
    configure_logger(LogOutput.FILE, log_file=log_file)
-   
+
    # Verify file exists after logging
    assert log_file.exists(), f"Log file not created: {log_file}"
    ```

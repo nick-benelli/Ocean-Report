@@ -1,7 +1,7 @@
 """Wind use cases - orchestration layer for wind forecast workflows."""
 
 from datetime import datetime
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any
 
 from ..application.factory import ApplicationContext
 from ..logger import logger
@@ -20,8 +20,8 @@ def get_daily_wind_forecast(
     latitude: float | None = None,
     longitude: float | None = None,
     beach_facing_deg: float | None = None,
-    times_to_get: Set[str] | None = None,
-) -> Tuple[List[Dict[str, Any]], datetime]:
+    times_to_get: set[str] | None = None,
+) -> tuple[list[dict[str, Any]], datetime]:
     """
     Get daily wind forecast for specified times.
 
@@ -91,14 +91,12 @@ def get_daily_wind_forecast(
         forecast_response.hourly.time,
         forecast_response.hourly.wind_speed_10m,
         forecast_response.hourly.wind_direction_10m,
+        strict=False,
     ):
         forecast_time = datetime.fromisoformat(timestamp)
 
         # Filter: only specified times and current date
-        if (
-            forecast_time.strftime("%H:%M") in times_to_get
-            and forecast_time.date() == current_date
-        ):
+        if forecast_time.strftime("%H:%M") in times_to_get and forecast_time.date() == current_date:
             wind_entry = _build_wind_entry(
                 timestamp=timestamp,
                 speed_kmh=speed_kmh,
@@ -120,7 +118,7 @@ def _build_wind_entry(
     speed_kmh: float,
     direction_deg: float,
     beach_facing_deg: float,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Build a normalized wind forecast entry with all derived fields.
 

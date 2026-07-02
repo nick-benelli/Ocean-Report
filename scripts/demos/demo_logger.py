@@ -96,7 +96,7 @@ def demo_timestamped_logs():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     log_file = f"logs/demos/runs/ocean_report_{timestamp}.log"
 
-    print(f"Setting: LOG_OUTPUT=both")
+    print("Setting: LOG_OUTPUT=both")
     print(f"         LOG_FILE_PATH={log_file}")
     print("=" * 70)
 

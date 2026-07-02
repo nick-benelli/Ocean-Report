@@ -1,9 +1,8 @@
 """Ocean Report package initialization."""
 
 from . import config
-from .logger import configure_logger, logger, LogOutput
-from .services import tide_service
-from .services import water_temp_service
+from .logger import LogOutput, configure_logger, logger
+from .services import tide_service, water_temp_service
 from .workflows.report_runner import run_report
 
 

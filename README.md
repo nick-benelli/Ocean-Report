@@ -2,7 +2,7 @@
 
 [![GitHub Actions Status](https://github.com/nick-benelli/ocean-report/actions/workflows/daily-water-report.yml/badge.svg)](https://github.com/nick-benelli/ocean-report/actions)
 
-Automated daily surf, wind, and water temperature forecast originally designed for Long Beach Island, NJ.  
+Automated daily surf, wind, and water temperature forecast originally designed for Long Beach Island, NJ.
 This tool can be adapted to any coastal location by updating the following parameters:
 
 - **Longitude**
@@ -120,7 +120,7 @@ Example output:
 
 💨 Wind Forecast:
 - 8 AM:  13.0 mph from NW  (312°) → Offshore
-- 12 PM:  4.0 mph from NNW (333°) → Offshore  
+- 12 PM:  4.0 mph from NNW (333°) → Offshore
 - 3 PM:  11.9 mph from ENE ( 68°) → Cross-shore
 - 6 PM:   7.5 mph from ESE (113°) → Onshore/Cross-shore
 ```

@@ -1,8 +1,8 @@
 """Tide data fetching module for ocean report."""
 
 import time
-from datetime import datetime, time as time_obj
-from typing import List
+from datetime import datetime
+from datetime import time as time_obj
 
 from ..api_client.exceptions import ApiClientError
 from ..application.factory import ApplicationContext
@@ -15,7 +15,7 @@ def fetch_tide_data(
     *,
     context: ApplicationContext,
     params: NoaaTideParams,
-) -> List[NoaaTidePredictionRecord]:
+) -> list[NoaaTidePredictionRecord]:
     """
     Fetch tide prediction data from the NOAA API.
 
@@ -58,10 +58,10 @@ def fetch_tide_data(
 
 
 def filter_daytime_tides(
-    tides: List[NoaaTidePredictionRecord],
+    tides: list[NoaaTidePredictionRecord],
     start_time: time_obj = time_obj(6, 0),
     end_time: time_obj = time_obj(20, 30),
-) -> List[NoaaTidePredictionRecord]:
+) -> list[NoaaTidePredictionRecord]:
     """
     Filter tide events to only include those occurring during daytime hours.
 

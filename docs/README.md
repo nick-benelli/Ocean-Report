@@ -464,5 +464,5 @@ When contributing to Ocean Report:
 
 ---
 
-**Last Updated:** June 17, 2026  
+**Last Updated:** June 17, 2026
 **Ocean Report Version:** 2.0 (remodel branch)

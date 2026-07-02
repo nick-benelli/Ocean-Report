@@ -1,10 +1,9 @@
 """Tests for email template helpers module."""
 
-from datetime import datetime
 from ocean_report.emailer.template_helpers import (
-    format_wind_info,
-    format_water_temp_value,
     format_tide_info,
+    format_water_temp_value,
+    format_wind_info,
 )
 from ocean_report.models.noaa.tides import NoaaTidePredictionRecord
 
@@ -85,15 +84,9 @@ def test_format_water_temp_with_none():
 def test_format_tide_for_email_with_events():
     """Test tide formatting with valid tide events."""
     tide_events = [
-        NoaaTidePredictionRecord(
-            timestamp="2025-07-04 08:30", height_feet=4.2, event_type="H"
-        ),
-        NoaaTidePredictionRecord(
-            timestamp="2025-07-04 14:45", height_feet=0.5, event_type="L"
-        ),
-        NoaaTidePredictionRecord(
-            timestamp="2025-07-04 20:15", height_feet=3.8, event_type="H"
-        ),
+        NoaaTidePredictionRecord(timestamp="2025-07-04 08:30", height_feet=4.2, event_type="H"),
+        NoaaTidePredictionRecord(timestamp="2025-07-04 14:45", height_feet=0.5, event_type="L"),
+        NoaaTidePredictionRecord(timestamp="2025-07-04 20:15", height_feet=3.8, event_type="H"),
     ]
 
     result = format_tide_info(tide_events)

@@ -3,7 +3,8 @@
 These tests demonstrate the pattern for testing the emailer module.
 """
 
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 import pytest
 
 from ocean_report.emailer.sender import EmailRecipients, send_email
@@ -24,7 +25,7 @@ def test_email_recipients_immutable():
     """Test that EmailRecipients is immutable (frozen)."""
     recipients = EmailRecipients(to_email="test@example.com")
 
-    with pytest.raises(Exception):  # FrozenInstanceError
+    with pytest.raises((AttributeError, TypeError)):  # FrozenInstanceError
         recipients.to_email = "new@example.com"
 
 
@@ -43,9 +44,7 @@ def test_send_email_requires_password():
 
 def test_send_email_with_valid_params():
     """Test send_email with valid parameters (mocked SMTP)."""
-    recipients = EmailRecipients(
-        to_email="recipient@example.com", bcc_list=["bcc1@example.com"]
-    )
+    recipients = EmailRecipients(to_email="recipient@example.com", bcc_list=["bcc1@example.com"])
 
     with patch("smtplib.SMTP") as mock_smtp:
         mock_server = MagicMock()

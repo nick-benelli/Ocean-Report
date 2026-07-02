@@ -366,13 +366,13 @@ def test_classify_wind_cross_shore():
 def test_degrees_to_compass_edge_cases():
     # Exactly on boundary
     assert degrees_to_compass(22.5) == "NNE"
-    
+
     # Negative degrees
     assert degrees_to_compass(-45) == "NW"
-    
+
     # Greater than 360
     assert degrees_to_compass(405) == "NE"
-    
+
     # Zero
     assert degrees_to_compass(0) == "N"
 ```
@@ -394,14 +394,14 @@ def test_degrees_to_compass_edge_cases():
 
 def celsius_to_fahrenheit(celsius: float) -> float:
     """Convert Celsius to Fahrenheit.
-    
+
     Formula: F = C * 9/5 + 32
     """
     return celsius * 9 / 5 + 32
 
 def fahrenheit_to_celsius(fahrenheit: float) -> float:
     """Convert Fahrenheit to Celsius.
-    
+
     Formula: C = (F - 32) * 5/9
     """
     return (fahrenheit - 32) * 5 / 9

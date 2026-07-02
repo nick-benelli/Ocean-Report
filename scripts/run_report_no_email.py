@@ -57,9 +57,7 @@ def main():
     """
     Run Ocean report without email
     """
-    parser = argparse.ArgumentParser(
-        description="Run ocean report without sending email"
-    )
+    parser = argparse.ArgumentParser(description="Run ocean report without sending email")
     parser.add_argument(
         "--html",
         "-H",

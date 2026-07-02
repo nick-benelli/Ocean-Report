@@ -79,22 +79,22 @@ BaseEndpoint (base.py)
 ```python
 class BaseEndpoint:
     BASE_URL: str = ""  # Override in subclass
-    
+
     def __init__(self, client: ApiClient, *, base_url: str | None = None):
         self.client = client
         self.base_url = base_url or self.BASE_URL
-    
+
     def build_url(self, path: str = "") -> str:
         """Build absolute URL from base + path."""
         return f"{self.base_url.rstrip('/')}/{path.lstrip('/')}"
-    
+
     @staticmethod
     def serialize_params(params: BaseModel | Mapping | None):
         """Convert Pydantic model to query params dict."""
         if isinstance(params, BaseModel):
             return params.model_dump(by_alias=True, exclude_none=True)
         return params
-    
+
     def get_json(self, path: str, *, params=None, headers=None):
         """Execute GET request and return JSON."""
         return self.client.get_json(
@@ -139,7 +139,7 @@ class NoaaEndpoint(BaseEndpoint):
 ```python
 class WaterTemperatureEndpoint(NoaaEndpoint):
     PATH = "/datagetter"
-    
+
     def fetch(
         self,
         params: NoaaWaterTempParams,
@@ -185,7 +185,7 @@ print(response.data[0].temperature)  # 72.5
 ```python
 class TidesEndpoint(NoaaEndpoint):
     PATH = "/datagetter"
-    
+
     def fetch(
         self,
         params: NoaaTidesParams,
@@ -231,7 +231,7 @@ for tide in response.predictions:
 ```python
 class StationsEndpoint(BaseEndpoint):
     BASE_URL = "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi"
-    
+
     def fetch(
         self,
         station_id: str,
@@ -263,11 +263,11 @@ class ObservationsEndpoint(NdbcEndpoint):
         # NDBC uses text files, not JSON
         path = f"/{buoy_id}.txt"
         response = self.get_response(path)
-        
+
         # Parse text file into observation
         lines = response.text.split("\n")
         # ... parsing logic ...
-        
+
         return NdbcObservation.model_validate(parsed_data)
 ```
 
@@ -285,7 +285,7 @@ class ObservationsEndpoint(NdbcEndpoint):
 ```python
 class ForecastEndpoint(OpenMeteoEndpoint):
     PATH = "/forecast"
-    
+
     def fetch(
         self,
         params: OpenMeteoForecastParams,
@@ -417,7 +417,7 @@ endpoint = WaterTemperatureEndpoint(context.client)
    ```python
    class MyNewEndpoint(ProviderEndpoint):
        PATH = "/api/path"
-       
+
        def fetch(self, params: MyParams) -> MyResponse:
            data = self.get_json(self.PATH, params=params)
            return MyResponse.model_validate(data)
@@ -439,18 +439,18 @@ def test_water_temp_endpoint():
     mock_client.get_json.return_value = {
         "data": [{"t": "2026-06-16 12:00", "v": "72.5"}]
     }
-    
+
     # Create endpoint with mock
     endpoint = WaterTemperatureEndpoint(mock_client)
-    
+
     # Call endpoint
     params = NoaaWaterTempParams(station="8534720")
     response = endpoint.fetch(params)
-    
+
     # Verify
     assert len(response.data) == 1
     assert response.data[0].temperature == 72.5
-    
+
     # Verify API client was called correctly
     mock_client.get_json.assert_called_once_with(
         "/datagetter",
@@ -468,16 +468,16 @@ def test_water_temp_endpoint():
 def test_water_temp_endpoint_real_api():
     client = ApiClient(timeout=5.0)
     endpoint = WaterTemperatureEndpoint(client)
-    
+
     params = NoaaWaterTempParams(
         station="8534720",
         date="latest",
         product="water_temperature",
         format="json"
     )
-    
+
     response = endpoint.fetch(params)
-    
+
     # Verify we got real data
     assert len(response.data) > 0
     assert 30 <= response.data[0].temperature <= 90  # Reasonable range

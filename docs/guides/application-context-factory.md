@@ -213,16 +213,16 @@ from ocean_report.application import create_application_context, ApplicationCont
 
 class ApplicationService:
     """Service that maintains a single application context."""
-    
+
     _context: ApplicationContext | None = None
-    
+
     @classmethod
     def get_context(cls) -> ApplicationContext:
         """Get or create the singleton application context."""
         if cls._context is None:
             cls._context = create_application_context()
         return cls._context
-    
+
     @classmethod
     def reset(cls) -> None:
         """Reset the singleton (useful for testing)."""
@@ -246,7 +246,7 @@ from ocean_report.application import create_application_context
 def get_context_for_environment():
     """Get context based on APP_ENV environment variable."""
     env = os.getenv("APP_ENV", "dev")
-    
+
     if env == "prod":
         return create_application_context(config_path="config/prod.yaml")
     elif env == "staging":
@@ -273,7 +273,7 @@ def application_context(config_path: str | None = None):
         context = create_application_context(config_path=config_path)
     else:
         context = create_application_context()
-    
+
     try:
         yield context
     finally:
@@ -474,7 +474,7 @@ create_application_context(config_path="missing.yaml")
 
 **Error message example:**
 ```
-ValueError: Only one of 'context', 'config', or 'config_path' may be 
+ValueError: Only one of 'context', 'config', or 'config_path' may be
 provided. Multiple parameters create ambiguous configuration sources.
 ```
 
@@ -685,7 +685,7 @@ new_context = create_application_context(config=other_config)
    for item in items:
        context = create_application_context()  # Bad!
        process(item, context)
-   
+
    # ✅ Better - create once
    context = create_application_context()
    for item in items:

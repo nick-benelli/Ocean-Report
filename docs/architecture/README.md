@@ -1,6 +1,6 @@
 # Ocean Report Architecture
 
-**Version:** 2.0  
+**Version:** 2.0
 **Last Updated:** 2026-06-16
 
 ---
@@ -107,25 +107,25 @@ flowchart TD
     A[scripts/run_report_*.py] -->|1. Creates| B[ApplicationContext]
     B -->|Contains| C[Configuration]
     B -->|Contains| D[ApiClient]
-    
+
     A -->|2. Calls| E[run_report]
     E -->|Uses| B
-    
+
     E -->|3. Fetches Data| F[Use Cases]
     F -->|Calls| G[Services]
     G -->|Uses| H[Endpoints]
     H -->|Uses| D
-    
+
     H -->|Fetches from| I[NOAA APIs]
     H -->|Fetches from| J[Open-Meteo API]
-    
+
     E -->|4. Formats| K[Template Renderer]
     E -->|5. Sends| L[Email Sender]
-    
+
     I -->|Returns| M[Tide Data]
     I -->|Returns| N[Water Temp Data]
     J -->|Returns| O[Wind Data]
-    
+
     M -->|Validated by| P[Models]
     N -->|Validated by| P
     O -->|Validated by| P
@@ -138,25 +138,25 @@ graph LR
     subgraph "Entry Point"
         Script[run_report.py]
     end
-    
+
     subgraph "Orchestration"
         Workflow[Report Runner]
         UseCase[Use Cases]
     end
-    
+
     subgraph "Business Logic"
         Service[Services]
     end
-    
+
     subgraph "Integration"
         Endpoint[Endpoints]
         Client[API Client]
     end
-    
+
     subgraph "External"
         API[External APIs]
     end
-    
+
     Script -->|creates context| Context[Application Context]
     Script -->|executes| Workflow
     Workflow -->|coordinates| UseCase
@@ -319,7 +319,7 @@ def fetch_water_temp(context: ApplicationContext, params: NoaaWaterTempParams):
 class NoaaWaterTemperatureRecord(BaseModel):
     timestamp: str = Field(alias="t")
     temperature: float = Field(alias="v")
-    
+
 # If API returns bad data, Pydantic raises ValidationError immediately
 ```
 

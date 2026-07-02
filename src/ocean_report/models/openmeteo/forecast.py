@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Dict
+from typing import Literal
 
 from pydantic import Field
 
@@ -45,4 +45,4 @@ class OpenMeteoForecastResponse(ApiSchema):
     timezone: str | None = None
     timezone_abbreviation: str | None = None
     utc_offset_seconds: int | None = None
-    hourly_units: Dict | None = None
+    hourly_units: dict | None = None

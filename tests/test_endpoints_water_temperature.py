@@ -3,12 +3,12 @@ from unittest.mock import Mock
 import pytest
 from pydantic import ValidationError
 
+from ocean_report.endpoints.noaa.water_temperature import (
+    WaterTemperatureEndpoint,
+)
 from ocean_report.models.noaa.water_temperature import (
     NoaaWaterTemperatureParams,
     NoaaWaterTemperatureResponse,
-)
-from ocean_report.endpoints.noaa.water_temperature import (
-    WaterTemperatureEndpoint,
 )
 
 

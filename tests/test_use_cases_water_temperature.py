@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from unittest.mock import Mock, patch
+
 import pytest
 
 from ocean_report.application.context import ApplicationContext
@@ -20,13 +21,9 @@ def mock_context():
 def test_get_latest_water_temp_uses_config_default(mock_context):
     """Test that get_latest_water_temp uses config station_id by default."""
 
-    mock_record = NoaaWaterTemperatureRecord(
-        timestamp="2025-07-04 15:30", temperature=73.5
-    )
+    mock_record = NoaaWaterTemperatureRecord(timestamp="2025-07-04 15:30", temperature=73.5)
 
-    with patch(
-        "ocean_report.use_cases.water_temperature.fetch_water_temp"
-    ) as mock_fetch:
+    with patch("ocean_report.use_cases.water_temperature.fetch_water_temp") as mock_fetch:
         mock_fetch.return_value = mock_record
 
         temp, timestamp, data_time = get_latest_water_temp(context=mock_context)
@@ -45,13 +42,9 @@ def test_get_latest_water_temp_uses_config_default(mock_context):
 def test_get_latest_water_temp_with_custom_station(mock_context):
     """Test that custom station_id overrides config."""
 
-    mock_record = NoaaWaterTemperatureRecord(
-        timestamp="2025-07-04 15:30", temperature=72.0
-    )
+    mock_record = NoaaWaterTemperatureRecord(timestamp="2025-07-04 15:30", temperature=72.0)
 
-    with patch(
-        "ocean_report.use_cases.water_temperature.fetch_water_temp"
-    ) as mock_fetch:
+    with patch("ocean_report.use_cases.water_temperature.fetch_water_temp") as mock_fetch:
         mock_fetch.return_value = mock_record
 
         temp, timestamp, data_time = get_latest_water_temp(
@@ -67,9 +60,7 @@ def test_get_latest_water_temp_with_custom_station(mock_context):
 def test_get_latest_water_temp_handles_no_data(mock_context):
     """Test handling when no water temperature data is available."""
 
-    with patch(
-        "ocean_report.use_cases.water_temperature.fetch_water_temp"
-    ) as mock_fetch:
+    with patch("ocean_report.use_cases.water_temperature.fetch_water_temp") as mock_fetch:
         mock_fetch.return_value = None
 
         temp, timestamp, data_time = get_latest_water_temp(context=mock_context)
@@ -82,13 +73,9 @@ def test_get_latest_water_temp_handles_no_data(mock_context):
 def test_get_latest_water_temp_always_requests_latest(mock_context):
     """Test that date parameter is always 'latest'."""
 
-    mock_record = NoaaWaterTemperatureRecord(
-        timestamp="2025-07-04 15:30", temperature=74.0
-    )
+    mock_record = NoaaWaterTemperatureRecord(timestamp="2025-07-04 15:30", temperature=74.0)
 
-    with patch(
-        "ocean_report.use_cases.water_temperature.fetch_water_temp"
-    ) as mock_fetch:
+    with patch("ocean_report.use_cases.water_temperature.fetch_water_temp") as mock_fetch:
         mock_fetch.return_value = mock_record
 
         get_latest_water_temp(context=mock_context)

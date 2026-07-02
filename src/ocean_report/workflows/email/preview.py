@@ -1,7 +1,7 @@
 """Email preview utility for ocean report workflows."""
 
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 
 def write_email_preview(

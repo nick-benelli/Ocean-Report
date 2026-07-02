@@ -3,11 +3,11 @@
 from .stations import NoaaStation, NoaaStationsParams, NoaaStationsResponse
 from .tides import NoaaTideParams, NoaaTidePredictionRecord, NoaaTideResponse
 from .water_temperature import (
-    NoaaWaterTempParams,
     NoaaWaterTemperatureDatum,
     NoaaWaterTemperatureParams,
     NoaaWaterTemperatureRecord,
     NoaaWaterTemperatureResponse,
+    NoaaWaterTempParams,
 )
 
 # pylint: disable=duplicate-code  # Standard re-export pattern for package organization
