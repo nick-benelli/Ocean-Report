@@ -4,6 +4,9 @@ notebooks/run.ipynb
 # Notebooks - Private/scratch folder for local testing
 notebooks/scratch/
 
+# Archive directory (old/deprecated code)
+_archive/
+
 # DS_Store files
 #  These files are created by macOS to store custom attributes of a folder, such as
 .DS_Store

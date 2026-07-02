@@ -1,9 +1,7 @@
 # Ocean Report Architecture
 
-**Version:** 2.0
-**Last Updated:** 2026-06-16
-
----
+**Version:** 2.1
+**Last Updated:** 2026-07-02
 
 ## Table of Contents
 
@@ -100,70 +98,195 @@ Every API response is validated through Pydantic models. If the data doesn't mat
 
 ## System Architecture
 
-### High-Level View
+### Layered Architecture Diagram
 
 ```mermaid
-flowchart TD
-    A[scripts/run_report_*.py] -->|1. Creates| B[ApplicationContext]
-    B -->|Contains| C[Configuration]
-    B -->|Contains| D[ApiClient]
+graph TB
+    subgraph "Entry Points"
+        Script[CLI Scripts<br/>run_report.py]
+        GHA[GitHub Actions<br/>Daily Workflow]
+    end
 
-    A -->|2. Calls| E[run_report]
-    E -->|Uses| B
+    subgraph "Workflow Layer"
+        Runner[Report Runner<br/>workflows/report_runner.py]
+        Fetcher[Data Fetcher<br/>workflows/data/fetcher.py]
+        Formatter[Data Formatter<br/>workflows/data/formatter.py]
+        EmailWF[Email Workflow<br/>workflows/email/]
+    end
 
-    E -->|3. Fetches Data| F[Use Cases]
-    F -->|Calls| G[Services]
-    G -->|Uses| H[Endpoints]
-    H -->|Uses| D
+    subgraph "Use Cases Layer - Business Logic"
+        TideUC[Tide Use Case<br/>get_daytime_tides_for_date]
+        WaterUC[Water Temp Use Case<br/>get_latest_water_temp]
+        WindUC[Wind Use Case<br/>get_daily_wind_forecast]
+        EmailUC[Email Use Case<br/>get_email_recipients]
+    end
 
-    H -->|Fetches from| I[NOAA APIs]
-    H -->|Fetches from| J[Open-Meteo API]
+    subgraph "Services Layer - Data Fetching"
+        TideSvc[Tide Service<br/>fetch_tide_data]
+        WaterSvc[Water Service<br/>fetch_water_temp]
+        WindSvc[Wind Service<br/>fetch_wind_forecast]
+    end
 
-    E -->|4. Formats| K[Template Renderer]
-    E -->|5. Sends| L[Email Sender]
+    subgraph "Endpoints Layer - API Integration"
+        NoaaTide[NOAA Tides<br/>NoaaTidesEndpoint]
+        NoaaWater[NOAA Water Temp<br/>WaterTemperatureEndpoint]
+        NoaaStation[NOAA Stations<br/>NoaaStationsEndpoint]
+        OpenMeteo[Open-Meteo<br/>OpenMeteoForecastEndpoint]
+    end
 
-    I -->|Returns| M[Tide Data]
-    I -->|Returns| N[Water Temp Data]
-    J -->|Returns| O[Wind Data]
+    subgraph "Infrastructure Layer"
+        Client[API Client<br/>Retry, SSL, Timeout]
+        Models[Pydantic Models<br/>Type Validation]
+        Config[Configuration<br/>YAML + Env]
+        Logger[Logger<br/>Configurable Output]
+    end
 
-    M -->|Validated by| P[Models]
-    N -->|Validated by| P
-    O -->|Validated by| P
+    subgraph "External APIs"
+        NOAA[NOAA APIs<br/>tidesandcurrents.noaa.gov]
+        OM[Open-Meteo API<br/>api.open-meteo.com]
+    end
+
+    Script --> Runner
+    GHA --> Runner
+    Runner --> Fetcher
+    Runner --> Formatter
+    Runner --> EmailWF
+
+    Fetcher --> TideUC
+    Fetcher --> WaterUC
+    Fetcher --> WindUC
+    EmailWF --> EmailUC
+
+    TideUC --> TideSvc
+    WaterUC --> WaterSvc
+    WindUC --> WindSvc
+
+    TideSvc --> NoaaTide
+    WaterSvc --> NoaaWater
+    WindSvc --> OpenMeteo
+
+    NoaaTide --> Client
+    NoaaWater --> Client
+    NoaaStation --> Client
+    OpenMeteo --> Client
+
+    Client --> NOAA
+    Client --> OM
+
+    NoaaTide -.validates.-> Models
+    NoaaWater -.validates.-> Models
+    OpenMeteo -.validates.-> Models
+
+    Runner -.uses.-> Config
+    Client -.uses.-> Config
+    Runner -.logs to.-> Logger
+
+    style Runner fill:#e1f5ff
+    style Client fill:#ffe1e1
+    style Models fill:#e1ffe1
+    style Config fill:#fff4e1
 ```
 
-### Component Interaction
+### Component Interaction Flow
 
 ```mermaid
-graph LR
-    subgraph "Entry Point"
-        Script[run_report.py]
+sequenceDiagram
+    participant User as 👤 User/Scheduler
+    participant Script as Entry Script
+    participant Context as Application Context
+    participant Runner as Report Runner
+    participant UseCase as Use Case Layer
+    participant Service as Service Layer
+    participant Endpoint as Endpoint Layer
+    participant Client as API Client
+    participant API as External API
+    participant Email as Email Sender
+
+    User->>Script: Execute run_report()
+    Script->>Context: create_application_context()
+    Context->>Context: Load config.yaml
+    Context->>Context: Create API Client
+    Context-->>Script: Return context
+
+    Script->>Runner: run_report(context)
+    Runner->>UseCase: get_latest_water_temp()
+
+    Note over UseCase: Resolve defaults<br/>from config
+
+    UseCase->>Service: fetch_water_temp(params)
+    Service->>Endpoint: endpoint.fetch(params)
+    Endpoint->>Client: client.get_json(url)
+
+    Note over Client: Retry logic<br/>SSL handling<br/>Timeout control
+
+    Client->>API: HTTP GET request
+    API-->>Client: JSON response
+    Client-->>Endpoint: Raw JSON
+
+    Note over Endpoint: Validate with<br/>Pydantic model
+
+    Endpoint-->>Service: Validated data
+    Service-->>UseCase: Parsed data
+    UseCase-->>Runner: Business result
+
+    Runner->>Runner: Format report
+    Runner->>Email: send_email(report)
+    Email-->>User: 📧 Email delivered
+```
+
+### Data Flow Architecture
+
+```mermaid
+flowchart LR
+    subgraph Input
+        ENV[Environment<br/>Variables]
+        YAML[config.yaml]
     end
 
-    subgraph "Orchestration"
-        Workflow[Report Runner]
-        UseCase[Use Cases]
+    subgraph Processing
+        Config[Configuration<br/>Loader]
+        Context[Application<br/>Context]
+
+        subgraph "Data Pipeline"
+            Fetch[Fetch<br/>Raw Data]
+            Validate[Validate<br/>w/ Pydantic]
+            Transform[Transform<br/>& Format]
+        end
     end
 
-    subgraph "Business Logic"
-        Service[Services]
+    subgraph Output
+        Template[Jinja2<br/>Template]
+        HTML[HTML<br/>Email]
+        SMTP[SMTP<br/>Delivery]
     end
 
-    subgraph "Integration"
-        Endpoint[Endpoints]
-        Client[API Client]
+    subgraph External
+        API1[NOAA<br/>Tides]
+        API2[NOAA<br/>Water Temp]
+        API3[Open-Meteo<br/>Wind]
     end
 
-    subgraph "External"
-        API[External APIs]
-    end
+    ENV --> Config
+    YAML --> Config
+    Config --> Context
 
-    Script -->|creates context| Context[Application Context]
-    Script -->|executes| Workflow
-    Workflow -->|coordinates| UseCase
-    UseCase -->|fetches via| Service
-    Service -->|calls| Endpoint
-    Endpoint -->|uses| Client
-    Client -->|requests| API
+    Context --> Fetch
+    Fetch --> API1
+    Fetch --> API2
+    Fetch --> API3
+
+    API1 --> Validate
+    API2 --> Validate
+    API3 --> Validate
+
+    Validate --> Transform
+    Transform --> Template
+    Template --> HTML
+    HTML --> SMTP
+
+    style Validate fill:#e1ffe1
+    style Transform fill:#ffe1e1
+    style Template fill:#e1f5ff
 ```
 
 ---
@@ -325,6 +448,151 @@ class NoaaWaterTemperatureRecord(BaseModel):
 
 ---
 
+## Deployment Architecture
+
+### Production Deployment (GitHub Actions)
+
+```mermaid
+flowchart TB
+    subgraph "GitHub Infrastructure"
+        Schedule[Cron Schedule<br/>Daily at 8:17 AM UTC]
+        Action[GitHub Actions<br/>Runner]
+        Secrets[GitHub Secrets<br/>Credentials & Config]
+    end
+
+    subgraph "Build Environment"
+        UV[UV Package Manager<br/>Python 3.12]
+        Deps[Dependencies<br/>Install & Cache]
+        Tests[Run Tests<br/>Pytest + Coverage]
+    end
+
+    subgraph "Application Execution"
+        Config[Load Config<br/>configs/config.yaml]
+        Runner[Report Runner<br/>Main Execution]
+        Logs[Logging<br/>GitHub Actions Output]
+    end
+
+    subgraph "External Services"
+        NOAA[NOAA APIs<br/>Tides & Water Temp]
+        OpenMeteo[Open-Meteo<br/>Wind Forecast]
+        SMTP[SMTP Server<br/>Email Delivery]
+    end
+
+    subgraph "Recipients"
+        Users[Email Recipients<br/>Subscribers List]
+    end
+
+    Schedule -->|Triggers| Action
+    Action -->|Loads| Secrets
+    Action -->|Runs| UV
+    UV -->|Installs| Deps
+    Deps -->|Optional| Tests
+
+    Action -->|Executes| Runner
+    Secrets -->|Injects| Config
+    Runner -->|Fetches| NOAA
+    Runner -->|Fetches| OpenMeteo
+    Runner -->|Logs to| Logs
+    Runner -->|Sends via| SMTP
+    SMTP -->|Delivers| Users
+
+    style Schedule fill:#e1f5ff
+    style Runner fill:#ffe1e1
+    style SMTP fill:#e1ffe1
+    style Users fill:#fff4e1
+```
+
+### Development & CI/CD Pipeline
+
+```mermaid
+flowchart LR
+    subgraph "Developer Machine"
+        Dev[Developer]
+        PreCommit[Pre-commit Hooks<br/>11 checks]
+        LocalTest[Local Tests<br/>pytest]
+    end
+
+    subgraph "Version Control"
+        Git[Git Commit]
+        PR[Pull Request]
+    end
+
+    subgraph "CI Pipeline"
+        Lint[Lint Job<br/>ruff check/format]
+        Test[Test Job<br/>pytest + coverage]
+        Coverage[Coverage Check<br/>85% minimum]
+    end
+
+    subgraph "Deployment"
+        Merge[Merge to main]
+        Deploy[Daily Schedule<br/>Auto-runs]
+    end
+
+    subgraph "Monitoring"
+        Logs[Action Logs]
+        Email[Email Delivery<br/>Success/Failure]
+        Dependabot[Dependabot<br/>Weekly Updates]
+    end
+
+    Dev -->|git commit| PreCommit
+    PreCommit -->|Pass| LocalTest
+    LocalTest -->|Pass| Git
+    Git -->|Push| PR
+
+    PR -->|Triggers| Lint
+    PR -->|Triggers| Test
+    Test --> Coverage
+
+    Lint -->|Pass| Merge
+    Coverage -->|Pass| Merge
+
+    Merge --> Deploy
+    Deploy --> Logs
+    Deploy --> Email
+
+    Dependabot -.->|Creates PRs| PR
+
+    style PreCommit fill:#e1f5ff
+    style Lint fill:#ffe1e1
+    style Test fill:#ffe1e1
+    style Deploy fill:#e1ffe1
+```
+
+### Configuration Management
+
+```mermaid
+flowchart TD
+    subgraph "Configuration Sources"
+        YAML[configs/config.yaml<br/>Base Config]
+        Env[Environment Variables<br/>Secrets]
+        Gist[GitHub Gist<br/>Recipient Lists]
+    end
+
+    subgraph "Configuration Layer"
+        Loader[Config Loader<br/>config/loader.py]
+        Schema[Config Schema<br/>Pydantic Validation]
+        Context[Application Context<br/>Runtime State]
+    end
+
+    subgraph "Application"
+        App[Ocean Report<br/>Main Application]
+    end
+
+    YAML -->|Read| Loader
+    Env -->|Override| Loader
+    Loader -->|Validate| Schema
+    Schema -->|Create| Context
+
+    Gist -.->|Fetch at runtime| App
+    Context -->|Inject| App
+
+    style Loader fill:#e1f5ff
+    style Schema fill:#e1ffe1
+    style Context fill:#ffe1e1
+```
+
+---
+
 ## Quick Start Guide
 
 ### For Developers Adding New Features
@@ -401,14 +669,25 @@ Without it, you'd need to pass `config` and `client` separately to every functio
 
 ## Evolution Notes
 
-This is **Architecture v2.0**. The major improvements over v1:
+This is **Architecture v2.1** (updated 2026-07-02). Recent improvements:
 
+### v2.1 Changes:
+- ✅ Added comprehensive Mermaid architecture diagrams
+- ✅ Added deployment architecture visualization
+- ✅ Added CI/CD pipeline diagram
+- ✅ Enhanced layered architecture visualization
+- ✅ Improved documentation structure
+
+### v2.0 Improvements (over v1):
 - ✅ Separated API client from business logic
 - ✅ Introduced proper layering (use cases, services, endpoints)
 - ✅ Added type-safe models with Pydantic
 - ✅ Centralized configuration management
 - ✅ Improved testability with dependency injection
 - ✅ Better error handling and retry logic
+- ✅ Automated linting and testing with Ruff
+- ✅ Pre-commit hooks for code quality
+- ✅ Dependabot for security updates
 
 See [architecture_v1.md](./architecture_v1.md) for the original design and [architecture_v2.md](./architecture_v2.md) for migration notes.
 
