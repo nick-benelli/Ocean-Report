@@ -229,3 +229,6 @@ logs/
 # configs/config.prod.yaml
 .env
 .env.local
+
+# html covr
+htmlcov/
