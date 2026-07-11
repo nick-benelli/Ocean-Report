@@ -9,7 +9,6 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "certifi>=2025.6.15",
-    "ipykernel>=6.29.5",
     "jinja2>=3.1.6",
     "pandas>=2.3.0",
     "pydantic>=2.13.4",
@@ -23,6 +22,7 @@ dev = [
     "pytest>=8.4.1",
     "pytest-cov>=4.0.0",
     "ruff>=0.8.0",
+    "ipykernel>=6.29.5",
     "mypy>=1.13.0",
 ]
 

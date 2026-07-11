@@ -651,7 +651,6 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "certifi" },
-    { name = "ipykernel" },
     { name = "jinja2" },
     { name = "pandas" },
     { name = "pydantic" },
@@ -662,6 +661,7 @@ dependencies = [
 
 [package.optional-dependencies]
 dev = [
+    { name = "ipykernel" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -671,7 +671,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "certifi", specifier = ">=2025.6.15" },
-    { name = "ipykernel", specifier = ">=6.29.5" },
+    { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=6.29.5" },
     { name = "jinja2", specifier = ">=3.1.6" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.13.0" },
     { name = "pandas", specifier = ">=2.3.0" },
