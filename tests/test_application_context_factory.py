@@ -4,15 +4,15 @@ Comprehensive test suite for create_application_context() covering all rules,
 validation, and error cases.
 """
 
-import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from ocean_report.application.factory import create_application_context
-from ocean_report.application.context import ApplicationContext
-from ocean_report.config.schemas import AppConfig, ApiConfig
-from ocean_report.api_client.client import ApiClient
+import pytest
 
+from ocean_report.api_client.client import ApiClient
+from ocean_report.application.context import ApplicationContext
+from ocean_report.application.factory import create_application_context
+from ocean_report.config.schemas import ApiConfig, AppConfig
 
 # =============================================================================
 # Fixtures
@@ -348,10 +348,10 @@ def test_none_values_treated_as_not_provided():
         mock_get.return_value = mock_config
 
         # These should all behave the same (use default)
-        result1 = create_application_context()
-        result2 = create_application_context(context=None)
-        result3 = create_application_context(config=None)
-        result4 = create_application_context(config_path=None)
+        create_application_context()
+        create_application_context(context=None)
+        create_application_context(config=None)
+        create_application_context(config_path=None)
 
         # All should use get_settings
         assert mock_get.call_count == 4

@@ -35,7 +35,7 @@ if response.status_code == 500:
     # Retry? How many times? With what backoff?
     ...
 
-# Water temp module  
+# Water temp module
 response = requests.get(url, timeout=10)
 if response.status_code == 500:
     # Same retry logic duplicated here
@@ -56,7 +56,7 @@ client = ApiClient()
 data = client.get_json(url, params={"station": "8534720"})
 
 # Water temp module
-client = ApiClient()  
+client = ApiClient()
 data = client.get_json(url, params={"station": "8534720"})
 ```
 
@@ -92,7 +92,7 @@ ApiClient (client.py)
 Exceptions (exceptions.py):
     ApiClientError (base)
     ├── ApiConnectionError
-    ├── ApiResponseError  
+    ├── ApiResponseError
     └── ApiSslError
 ```
 
@@ -342,10 +342,10 @@ from ocean_report.api_client import ApiClient
 def test_endpoint():
     mock_client = Mock(spec=ApiClient)
     mock_client.get_json.return_value = {"data": [{"v": 72.5}]}
-    
+
     endpoint = WaterTemperatureEndpoint(mock_client)
     response = endpoint.fetch(params)
-    
+
     assert response.data[0].temperature == 72.5
 ```
 
@@ -479,10 +479,10 @@ def test_get_json_retries_on_500():
         Mock(status_code=500),  # First attempt fails
         Mock(status_code=200, json=lambda: {"data": []})  # Retry succeeds
     ]
-    
+
     client = ApiClient(session=session, max_retries=2)
     data = client.get_json("http://example.com/api")
-    
+
     assert session.get.call_count == 2
     assert data == {"data": []}
 ```

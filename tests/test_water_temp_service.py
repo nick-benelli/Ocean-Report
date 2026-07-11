@@ -1,6 +1,7 @@
 """Tests for water temperature service layer."""
 
 from unittest.mock import Mock, patch
+
 import pytest
 
 from ocean_report.api_client.client import ApiClient
@@ -8,8 +9,8 @@ from ocean_report.api_client.exceptions import ApiClientError
 from ocean_report.application.context import ApplicationContext
 from ocean_report.config.schemas import AppConfig
 from ocean_report.models.noaa.water_temperature import (
-    NoaaWaterTempParams,
     NoaaWaterTemperatureRecord,
+    NoaaWaterTempParams,
 )
 from ocean_report.services.water_temp_service import fetch_water_temp
 
@@ -22,13 +23,9 @@ def test_fetch_water_temp_success():
 
     params = NoaaWaterTempParams(station="8534720")
 
-    with patch(
-        "ocean_report.services.water_temp_service.WaterTemperatureEndpoint"
-    ) as MockEndpoint:
+    with patch("ocean_report.services.water_temp_service.WaterTemperatureEndpoint") as MockEndpoint:
         mock_endpoint = MockEndpoint.return_value
-        mock_record = NoaaWaterTemperatureRecord(
-            timestamp="2025-07-04 15:00", temperature=73.5
-        )
+        mock_record = NoaaWaterTemperatureRecord(timestamp="2025-07-04 15:00", temperature=73.5)
 
         mock_response = Mock()
         mock_response.data = [mock_record]
@@ -52,9 +49,7 @@ def test_fetch_water_temp_no_data():
 
     params = NoaaWaterTempParams(station="8534720")
 
-    with patch(
-        "ocean_report.services.water_temp_service.WaterTemperatureEndpoint"
-    ) as MockEndpoint:
+    with patch("ocean_report.services.water_temp_service.WaterTemperatureEndpoint") as MockEndpoint:
         mock_endpoint = MockEndpoint.return_value
         mock_response = Mock()
         mock_response.data = []
@@ -73,9 +68,7 @@ def test_fetch_water_temp_api_error():
 
     params = NoaaWaterTempParams(station="8534720")
 
-    with patch(
-        "ocean_report.services.water_temp_service.WaterTemperatureEndpoint"
-    ) as MockEndpoint:
+    with patch("ocean_report.services.water_temp_service.WaterTemperatureEndpoint") as MockEndpoint:
         mock_endpoint = MockEndpoint.return_value
         mock_endpoint.fetch.side_effect = ApiClientError("Connection failed")
 

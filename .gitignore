@@ -4,6 +4,9 @@ notebooks/run.ipynb
 # Notebooks - Private/scratch folder for local testing
 notebooks/scratch/
 
+# Archive directory (old/deprecated code)
+_archive/
+
 # DS_Store files
 #  These files are created by macOS to store custom attributes of a folder, such as
 .DS_Store
@@ -52,6 +55,7 @@ htmlcov/
 .tox/
 .nox/
 .coverage
+*.coverage
 .coverage.*
 .cache
 nosetests.xml
@@ -193,9 +197,9 @@ cython_debug/
 .abstra/
 
 # Visual Studio Code
-#  Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore 
+#  Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore
 #  that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
-#  and can be added to the global gitignore or merged into this file. However, if you prefer, 
+#  and can be added to the global gitignore or merged into this file. However, if you prefer,
 #  you could uncomment the following to ignore the entire vscode folder
 # .vscode/
 
@@ -229,3 +233,6 @@ logs/
 # configs/config.prod.yaml
 .env
 .env.local
+
+# html covr
+htmlcov/

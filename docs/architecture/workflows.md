@@ -124,7 +124,7 @@ def run_report(...):
     logger.info("Starting Ocean Report Email Process...")
     context = create_application_context(config_path=cfg_path)
     configure_logger_from_settings(context.config)
-    
+
     # === STEP 2: Get Recipients ===
     logger.info("Fetching email recipients...")
     bcc_recipients = get_bcc_recipients(
@@ -132,7 +132,7 @@ def run_report(...):
         use_url=context.config.email.use_recipient_url,
         fallback_recipients=context.config.email.recipients or ""
     )
-    
+
     # === STEP 3: Fetch Data ===
     logger.info("Fetching weather data from APIs...")
     fetch_params = FetchParams(
@@ -144,11 +144,11 @@ def run_report(...):
         forecast_times={"08:00", "12:00", "15:00", "18:00"}
     )
     raw_data = fetch_raw_data(context, fetch_params)
-    
+
     # === STEP 4: Format Data ===
     logger.info("Formatting data to EmailTemplateData...")
     email_data = format_report_data(raw_data)
-    
+
     # === STEP 5: Render Email ===
     logger.info("Rendering email from template...")
     email_body = render_email_template(
@@ -160,7 +160,7 @@ def run_report(...):
         today=date.today(),
         test=test
     )
-    
+
     # === STEP 6: Deliver or Preview ===
     logger.info("Sending email..." if run_email else "Displaying email...")
     send_or_preview_email(
@@ -170,7 +170,7 @@ def run_report(...):
         body=email_body,
         bcc_recipients=bcc_recipients
     )
-    
+
     logger.info("Ocean Report workflow completed successfully!")
 ```
 
@@ -264,7 +264,7 @@ def get_bcc_recipients(test, use_url, fallback_recipients):
     else:
         # Use fallback from config
         recipients_str = fallback_recipients or ""
-    
+
     # Parse and return as list
     return [email.strip() for email in recipients_str.split(",") if email.strip()]
 ```
@@ -427,10 +427,10 @@ def run_report(context, ...):
     # Coordinate use cases
     water_temp, _, _ = get_latest_water_temp(context)  # ← Use case handles logic
     tides = get_tides_for_date(context, date_str)       # ← Use case handles logic
-    
+
     # Coordinate formatting
     sections = format_report_data(...)
-    
+
     # Coordinate sending
     send_or_preview_email(...)
 
@@ -452,15 +452,15 @@ def run_report(...):
     # Step 1
     logger.info("[STEP 1/6] Loading configuration...")
     context = create_application_context(...)
-    
+
     # Step 2
     logger.info("[STEP 2/6] Fetching email recipients...")
     recipients = get_bcc_recipients(...)
-    
+
     # Step 3
     logger.info("[STEP 3/6] Fetching weather data...")
     data = fetch_raw_data(...)
-    
+
     # And so on...
 ```
 
@@ -480,11 +480,11 @@ def run_report(...):
     try:
         # Execute workflow steps
         ...
-        
+
     except ApiClientError as e:
         logger.error(f"API error during report generation: {e}")
         # Decide: retry, send partial report, or fail completely
-        
+
     except Exception as e:
         logger.exception("Unexpected error in workflow")
         raise
@@ -499,14 +499,14 @@ def run_report(...):
 ```python
 def run_report(...):
     workflow_start = time.time()
-    
+
     logger.info("[STEP 3/6] Fetching weather data...")
     step_start = time.time()
     data = fetch_raw_data(...)
     logger.info(f"Data fetched in {time.time() - step_start:.2f} seconds")
-    
+
     # ...
-    
+
     logger.info(f"Total workflow time: {time.time() - workflow_start:.2f} seconds")
 ```
 
@@ -590,7 +590,7 @@ from ocean_report.models.email import EmailTemplateData
 def test_run_report_preview_mode(mock_send, mock_render, mock_format, mock_fetch):
     # Mock data fetching
     mock_fetch.return_value = Mock()  # RawReportData
-    
+
     # Mock formatting
     mock_format.return_value = EmailTemplateData(
         long_date="Monday, June 16, 2026",
@@ -603,13 +603,13 @@ def test_run_report_preview_mode(mock_send, mock_render, mock_format, mock_fetch
         date_retrieved="Jun 16 at 6:45 AM",
         water_temp_measured_at_date=None
     )
-    
+
     # Mock template rendering
     mock_render.return_value = "Email body content"
-    
+
     # Run in preview mode
     run_report(run_email=False, test=True)
-    
+
     # Verify calls
     mock_fetch.assert_called_once()
     mock_format.assert_called_once()
@@ -642,9 +642,9 @@ def test_format_report_data():
         wind_forecast=[...],
         wind_timestamp=datetime.now()
     )
-    
+
     email_data = format_report_data(raw_data)
-    
+
     assert isinstance(email_data, EmailTemplateData)
     assert "72.5" in email_data.water_temp
     assert email_data.long_date is not None
@@ -658,13 +658,13 @@ def test_format_report_data():
 @pytest.mark.integration
 def test_run_report_end_to_end():
     """Test complete workflow with real APIs but preview mode."""
-    
+
     # Run with real API calls but don't send email
     run_report(
         run_email=False,  # Preview only
         test=True
     )
-    
+
     # If we get here without exceptions, workflow succeeded
     assert True
 ```
@@ -705,7 +705,7 @@ def run_report(...):
         log_file="logs/report.log",
         level=logging.INFO
     )
-    
+
     # Now logging works
     logger.info("Starting workflow...")
 ```

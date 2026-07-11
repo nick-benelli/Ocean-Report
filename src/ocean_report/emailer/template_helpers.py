@@ -7,15 +7,14 @@ these return just the formatted values that templates can compose.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 from zoneinfo import ZoneInfo
 
 from ..models.noaa.tides import NoaaTidePredictionRecord
 from ..models.openmeteo.wind import WindForecastEntry
 
 
-def format_water_temp_value(water_temperature: Optional[float]) -> Optional[str]:
+def format_water_temp_value(water_temperature: float | None) -> str | None:
     """
     Format water temperature value for template.
 
@@ -28,7 +27,7 @@ def format_water_temp_value(water_temperature: Optional[float]) -> Optional[str]
     unavailable_text = "Unavailable ⚠️"
 
     try:
-        if water_temperature is None or not isinstance(water_temperature, (int, float)):
+        if water_temperature is None or not isinstance(water_temperature, int | float):
             return unavailable_text
 
         # Handle NaN or infinite values
@@ -41,7 +40,7 @@ def format_water_temp_value(water_temperature: Optional[float]) -> Optional[str]
         return unavailable_text
 
 
-def format_tide_info(tide_events: list[NoaaTidePredictionRecord]) -> Optional[str]:
+def format_tide_info(tide_events: list[NoaaTidePredictionRecord]) -> str | None:
     """
     Format tide events as multi-line string for template.
 
@@ -68,7 +67,7 @@ def format_tide_info(tide_events: list[NoaaTidePredictionRecord]) -> Optional[st
     return "\n".join(formatted)
 
 
-def format_wind_info(wind_data: list[WindForecastEntry]) -> Optional[str]:
+def format_wind_info(wind_data: list[WindForecastEntry]) -> str | None:
     """
     Format wind forecast as multi-line string for template.
 
@@ -96,9 +95,7 @@ def format_wind_info(wind_data: list[WindForecastEntry]) -> Optional[str]:
             wind_type = entry["wind_type"]
             bearing = f"({entry['direction_deg']:>5.1f}°)"
 
-            line = (
-                f"• {time_str}: {speed_str} mph {direction} → {wind_type:<14} {bearing}"
-            )
+            line = f"• {time_str}: {speed_str} mph {direction} → {wind_type:<14} {bearing}"
             lines.append(line)
 
         except (KeyError, TypeError, ValueError):
@@ -107,7 +104,7 @@ def format_wind_info(wind_data: list[WindForecastEntry]) -> Optional[str]:
     return "\n".join(lines) if lines else unavailable_text
 
 
-def format_retrieval_timestamp(retrieval_time: Optional[datetime]) -> str:
+def format_retrieval_timestamp(retrieval_time: datetime | None) -> str:
     """
     Format data retrieval timestamp for template.
 
@@ -124,13 +121,13 @@ def format_retrieval_timestamp(retrieval_time: Optional[datetime]) -> str:
     eastern = ZoneInfo("America/New_York")
     if retrieval_time.tzinfo is None:
         # Naive datetime - assume UTC
-        retrieval_time = retrieval_time.replace(tzinfo=timezone.utc)
+        retrieval_time = retrieval_time.replace(tzinfo=UTC)
 
     retrieval_time_et = retrieval_time.astimezone(eastern)
     return retrieval_time_et.strftime("%b %-d at %-I:%M %p")
 
 
-def format_long_date(date: Optional[datetime] = None) -> str:
+def format_long_date(date: datetime | None = None) -> str:
     """Saturday, June 27, 2026"""
     if date is None:
         date = datetime.now()
@@ -138,7 +135,7 @@ def format_long_date(date: Optional[datetime] = None) -> str:
     return date.strftime("%A, %B %d, %Y")
 
 
-def format_short_date(date: Optional[datetime] = None) -> str:
+def format_short_date(date: datetime | None = None) -> str:
     """Sat, Jun 27, 2026"""
     if date is None:
         date = datetime.now()

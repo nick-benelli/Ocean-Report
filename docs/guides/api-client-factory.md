@@ -135,7 +135,7 @@ def test_api_interaction():
     mock_response.status_code = 200
     mock_response.json.return_value = {"data": "test"}
     mock_session.get.return_value = mock_response
-    
+
     # Create minimal config for testing
     config = AppConfig(
         api=ApiConfig(
@@ -144,15 +144,15 @@ def test_api_interaction():
             max_retries=1
         )
     )
-    
+
     # Create client with mock
     client = create_api_client(config, session=mock_session)
-    
+
     # Test behavior
     response = client.get("https://api.example.com/test")
     assert response.status_code == 200
     assert response.json() == {"data": "test"}
-    
+
     # Verify session was called correctly
     mock_session.get.assert_called_once()
 ```
@@ -232,14 +232,14 @@ def create_client_with_overrides(base_config: AppConfig, **overrides):
     """Create client with specific config overrides."""
     # Extract current API config
     api_dict = base_config.api.model_dump()
-    
+
     # Apply overrides
     api_dict.update(overrides)
-    
+
     # Create new config with overrides
     new_api_config = ApiConfig(**api_dict)
     new_app_config = base_config.model_copy(update={"api": new_api_config})
-    
+
     return create_api_client(new_app_config)
 
 # Usage
@@ -382,14 +382,14 @@ def create_api_client(
     session: requests.Session | None = None,
 ) -> ApiClient:
     """Create an ApiClient instance from configuration.
-    
+
     Args:
         config: Validated application configuration
         session: Optional requests.Session instance (creates one if None)
-        
+
     Returns:
         Configured ApiClient instance
-        
+
     Example:
         >>> config = load_app_config("config.yaml")
         >>> client = create_api_client(config)
@@ -541,9 +541,9 @@ def test_config():
 def test_client_makes_request(mock_session, test_config):
     """Test that client makes requests correctly."""
     client = create_api_client(test_config, session=mock_session)
-    
+
     response = client.get("https://api.example.com/test")
-    
+
     assert response.status_code == 200
     assert response.json() == {"test": "data"}
     mock_session.get.assert_called_once()
@@ -563,7 +563,7 @@ def test_client_with_real_config():
     """Test client creation with real configuration."""
     config = load_app_config("config/test.yaml")
     client = create_api_client(config)
-    
+
     # Verify client is configured correctly
     assert client.timeout == config.api.timeout_seconds
     assert client.verify_ssl == config.api.verify_ssl

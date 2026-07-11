@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import requests
 
-from .client import ApiClient
 from ..config.schemas import AppConfig
+from .client import ApiClient
 
 
 def create_api_client(

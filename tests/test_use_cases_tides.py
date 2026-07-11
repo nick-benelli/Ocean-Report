@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from unittest.mock import Mock, patch
+
 import pytest
 
 from ocean_report.application.context import ApplicationContext
@@ -21,12 +22,8 @@ def test_get_daytime_tides_uses_config_defaults(mock_context):
     """Test that get_daytime_tides_for_date uses config defaults when not provided."""
 
     mock_tides = [
-        NoaaTidePredictionRecord(
-            timestamp="2025-07-04 08:00", height_feet=4.2, event_type="H"
-        ),
-        NoaaTidePredictionRecord(
-            timestamp="2025-07-04 14:30", height_feet=0.5, event_type="L"
-        ),
+        NoaaTidePredictionRecord(timestamp="2025-07-04 08:00", height_feet=4.2, event_type="H"),
+        NoaaTidePredictionRecord(timestamp="2025-07-04 14:30", height_feet=0.5, event_type="L"),
     ]
 
     with (

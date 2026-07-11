@@ -1,10 +1,12 @@
 """Email use case for sending ocean reports."""
 
 import datetime as dt
+
 from ocean_report.emailer.address_fetcher import (
     fetch_recipients_from_gist,
     parse_recipients,
 )
+
 from ..application.context import ApplicationContext
 from ..application.factory import create_application_context
 from ..logger import logger

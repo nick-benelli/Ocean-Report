@@ -101,11 +101,11 @@ from ..config.schemas import AppConfig
 @dataclass(frozen=True)
 class ApplicationContext:
     """Immutable container for application dependencies.
-    
+
     This context holds everything needed to execute application workflows:
     - Configuration (settings, API keys, station IDs, etc.)
     - API client (HTTP transport with retry logic)
-    
+
     Being frozen (immutable) prevents accidental modification during
     the workflow execution.
     """
@@ -355,14 +355,14 @@ def fetch_report_data(
     station_id: str | None = None,
 ):
     """Fetch report data. Accept context or create one if missing."""
-    
+
     # Create context only if not provided
     ctx = create_application_context(context=context)
-    
+
     # Use defaults from context config if parameters not provided
     if station_id is None:
         station_id = ctx.config.noaa.station_id
-    
+
     # Now proceed with fetching...
     water_temp = fetch_water_temp(ctx, station_id)
     ...
@@ -435,7 +435,7 @@ Test that the factory creates contexts correctly:
 ```python
 def test_create_default_context():
     context = create_application_context()
-    
+
     assert context.config is not None
     assert context.client is not None
     assert isinstance(context.config, AppConfig)
@@ -443,7 +443,7 @@ def test_create_default_context():
 
 def test_create_from_config_path():
     context = create_application_context(config_path="tests/fixtures/test.yaml")
-    
+
     assert context.config.noaa.station_id == "TEST_STATION"
 
 def test_mutual_exclusivity():
@@ -464,10 +464,10 @@ Test that context works in real workflows:
 @pytest.mark.integration
 def test_context_in_workflow():
     context = create_application_context()
-    
+
     # Use context in real use case
     temp, _, _ = get_latest_water_temp(context=context)
-    
+
     # Verify we got real data
     assert temp is not None
     assert isinstance(temp, float)

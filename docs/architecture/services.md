@@ -172,7 +172,7 @@ def fetch_water_temp(context, station_id=None):
     # ❌ Service chooses default station
     if station_id is None:
         station_id = "8534720"  # Business logic in service!
-    
+
     params = NoaaWaterTempParams(station=station_id, date="latest")
     ...
 ```
@@ -190,7 +190,7 @@ def get_latest_water_temp(context, station_id=None):
     # ✅ Use case chooses default
     if station_id is None:
         station_id = context.config.noaa.station_id
-    
+
     params = NoaaWaterTempParams(station=station_id, date="latest")
     return fetch_water_temp(context, params)
 ```
@@ -204,7 +204,7 @@ def get_latest_water_temp(context, station_id=None):
 def fetch_tides(context, params):
     endpoint = TidesEndpoint(context.client)
     response = endpoint.fetch(params)
-    
+
     # ❌ Filtering is business logic!
     daytime_tides = [t for t in response.predictions if is_daytime(t.timestamp)]
     return daytime_tides
@@ -227,7 +227,7 @@ def fetch_tides(context, params):
 def fetch_water_temp(context, params):
     endpoint = WaterTemperatureEndpoint(context.client)
     response = endpoint.fetch(params)
-    
+
     # ❌ Formatting is presentation logic!
     temp = response.data[0].temperature
     return f"Water Temperature: {temp}°F"
@@ -274,10 +274,10 @@ def fetch_water_temp(context, params):
 ```python
 def fetch_water_temp(context, params):
     endpoint = WaterTemperatureEndpoint(context.client)
-    
+
     # No try/except - let errors propagate
     response = endpoint.fetch(params)
-    
+
     return response.data[0] if response.data else None
 ```
 
@@ -355,22 +355,22 @@ def test_fetch_water_temp():
     # Mock context
     context = Mock()
     context.client = Mock()
-    
+
     # Mock endpoint
     with patch('ocean_report.services.water_temp_service.WaterTemperatureEndpoint') as MockEndpoint:
         mock_endpoint = Mock()
         MockEndpoint.return_value = mock_endpoint
-        
+
         # Mock response
         mock_response = NoaaWaterTempResponse(
             data=[NoaaWaterTemperatureRecord(t="2026-06-16 12:00", v=72.5)]
         )
         mock_endpoint.fetch.return_value = mock_response
-        
+
         # Call service
         params = NoaaWaterTempParams(station="8534720")
         record = fetch_water_temp(context, params)
-        
+
         # Verify
         assert record.temperature == 72.5
         mock_endpoint.fetch.assert_called_once_with(params)
@@ -384,14 +384,14 @@ def test_fetch_water_temp():
 @pytest.mark.integration
 def test_fetch_water_temp_real_api():
     context = create_application_context()
-    
+
     params = NoaaWaterTempParams(
         station="8534720",
         date="latest"
     )
-    
+
     record = fetch_water_temp(context, params)
-    
+
     assert record is not None
     assert isinstance(record.temperature, float)
     assert 30 <= record.temperature <= 90  # Reasonable range
@@ -419,7 +419,7 @@ def fetch_wind_forecast(context, params):
 
 def process_hourly_wind(forecast_response, target_hours):
     """Extract specific hours from forecast.
-    
+
     Note: This might be borderline business logic.
     Consider moving to Use Cases if it gets complex.
     """
@@ -456,7 +456,7 @@ def fetch_water_temp(context, params):
 def fetch_tides(context, params):
     endpoint = TidesEndpoint(context.client)
     response = endpoint.fetch(params)
-    
+
     # Business rule: only show high tides above 3ft
     return [t for t in response.predictions if t.type == "H" and t.height_ft > 3.0]
 

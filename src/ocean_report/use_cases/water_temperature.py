@@ -1,7 +1,6 @@
 """Water temperature use cases - orchestration layer for water temperature workflows."""
 
 from datetime import datetime
-from typing import Optional, Tuple
 
 from ..application.factory import ApplicationContext
 from ..logger import logger
@@ -13,7 +12,7 @@ def get_latest_water_temp(
     *,
     context: ApplicationContext,
     station_id: str | None = None,
-) -> Tuple[Optional[float], datetime, Optional[str]]:
+) -> tuple[float | None, datetime, str | None]:
     """
     Get the latest water temperature for a station.
 
@@ -60,9 +59,7 @@ def get_latest_water_temp(
 
     temperature = water_temp_record.temperature
     data_timestamp = water_temp_record.timestamp
-    logger.info(
-        "Latest water temperature: %.1f°F (measured at %s)", temperature, data_timestamp
-    )
+    logger.info("Latest water temperature: %.1f°F (measured at %s)", temperature, data_timestamp)
 
     return temperature, retrieval_time, data_timestamp
 

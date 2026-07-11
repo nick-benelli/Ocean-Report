@@ -184,7 +184,7 @@ for entry in wind_entries:
 
 **What It Does**: Determines if wind is offshore, onshore, or cross-shore.
 
-**Business Rule**: 
+**Business Rule**:
 - **Offshore**: Wind blows from land to sea (good for surfing)
 - **Onshore**: Wind blows from sea to land (choppy conditions)
 - **Cross-shore**: Wind blows parallel to beach
@@ -226,7 +226,7 @@ def get_latest_water_temp(
     if station_id is None:
         station_id = context.config.noaa.station_id
         logger.debug("Using station_id from config: %s", station_id)
-    
+
     # Now call service with resolved value
     params = NoaaWaterTempParams(station=station_id, date="latest")
     return fetch_water_temp(context, params)
@@ -246,7 +246,7 @@ def get_latest_water_temp(
 ```python
 def filter_daytime_tides(tides):
     """Filter to tides between 6 AM and 8 PM.
-    
+
     Business rule: Users only care about tides during beach hours.
     """
     daytime_tides = []
@@ -266,14 +266,14 @@ def filter_daytime_tides(tides):
 ```python
 def get_complete_beach_report(context, date_str):
     """Fetch all data needed for beach report.
-    
+
     Orchestrates multiple service calls.
     """
     # Call multiple services
     water_temp, _, _ = get_latest_water_temp(context)
     tides = get_tides_for_date(context, date_str)
     wind = get_hourly_wind_forecast(context, date_str)
-    
+
     # Combine into report
     return {
         "water_temp": water_temp,
@@ -292,7 +292,7 @@ def get_complete_beach_report(context, date_str):
 def get_hourly_wind_forecast(context, date_str, ...):
     # Service returns complex nested response
     forecast = fetch_wind_forecast(context, params)
-    
+
     # ✅ Transform into simple list of WindForecastEntry objects
     entries = []
     for i, time_str in enumerate(forecast.hourly.time):
@@ -305,7 +305,7 @@ def get_hourly_wind_forecast(context, date_str, ...):
                 direction_degrees=forecast.hourly.wind_direction_10m[i]
             )
             entries.append(entry)
-    
+
     return entries  # Clean, simple list
 ```
 
@@ -323,13 +323,13 @@ def get_latest_water_temp(context, station_id=None):
         # Call service
         params = NoaaWaterTempParams(...)
         record = fetch_water_temp(context, params)
-        
+
         if record is None:
             logger.warning("No water temperature data available")
             return None, datetime.now(), None
-        
+
         return record.temperature, datetime.now(), record.timestamp
-        
+
     except ApiClientError as e:
         # ✅ Use case decides: log and return None (graceful degradation)
         logger.error(f"Failed to fetch water temperature: {e}")
@@ -388,15 +388,15 @@ wind = get_hourly_wind_forecast(
 def generate_daily_report(context):
     """Orchestrate all use cases to generate report."""
     date_str = datetime.now().strftime("%Y%m%d")
-    
+
     # Call use cases to fetch data
     water_temp, _, _ = get_latest_water_temp(context)
     tides = get_tides_for_date(context, date_str)
     wind = get_hourly_wind_forecast(context, date_str)
-    
+
     # Format data into EmailTemplateData model
     template_data = format_report_data(raw_data)
-    
+
     # Render email using Jinja2 template
     body = render_email_template(template_data)
     send_email(..., body=body)
@@ -416,9 +416,9 @@ def test_filter_daytime_tides():
         {"time": "03:45 PM"},  # Good
         {"time": "10:22 PM"},  # Too late
     ]
-    
+
     daytime = filter_daytime_tides(tides)
-    
+
     assert len(daytime) == 2
     assert daytime[0]["time"] == "09:30 AM"
     assert daytime[1]["time"] == "03:45 PM"
@@ -443,14 +443,14 @@ def test_get_latest_water_temp_with_default(mock_fetch):
     mock_record.temperature = 72.5
     mock_record.timestamp = "2026-06-16 12:00"
     mock_fetch.return_value = mock_record
-    
+
     # Mock context
     context = Mock()
     context.config.noaa.station_id = "8534720"
-    
+
     # Call use case (no station_id provided)
     temp, _, data_time = get_latest_water_temp(context)
-    
+
     # Verify default was used
     assert temp == 72.5
     mock_fetch.assert_called_once()
@@ -466,9 +466,9 @@ def test_get_latest_water_temp_with_default(mock_fetch):
 @pytest.mark.integration
 def test_get_latest_water_temp_real():
     context = create_application_context()
-    
+
     temp, retrieval_time, data_time = get_latest_water_temp(context)
-    
+
     assert temp is not None
     assert isinstance(temp, float)
     assert 30 <= temp <= 90  # Reasonable range
@@ -491,32 +491,32 @@ def test_get_latest_water_temp_real():
 
 def get_surf_conditions(context, date_str):
     """Determine surf conditions based on wind, waves, tides.
-    
+
     Business logic: Combine multiple data sources to rate surf conditions.
     """
     # Fetch data from services
     wind = get_hourly_wind_forecast(context, date_str)
     tides = get_tides_for_date(context, date_str)
     # waves = get_wave_forecast(context, date_str)  # Future
-    
+
     # Apply business rules
     conditions = []
     for hour in [8, 12, 16, 20]:
         wind_entry = find_wind_for_hour(wind, hour)
         tide_state = find_tide_state(tides, hour)
-        
+
         rating = rate_surf_conditions(
             wind_type=wind_entry.wind_type,
             wind_speed=wind_entry.speed_mph,
             tide_state=tide_state,
         )
-        
+
         conditions.append({
             "hour": hour,
             "rating": rating,  # "Excellent", "Good", "Fair", "Poor"
             "explanation": explain_rating(...)
         })
-    
+
     return conditions
 ```
 
@@ -572,7 +572,7 @@ def get_latest_water_temp(context):
 def get_latest_water_temp(context):
     ...
     return temp, retrieval_time, data_time  # ✅ Raw data
-    
+
 # Formatting happens in Emailer layer
 formatted = format_water_temp(temp)  # ✅ Separate concern
 ```

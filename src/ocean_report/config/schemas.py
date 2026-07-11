@@ -142,9 +142,7 @@ class LocationConfig(StrictModel):
     latitude: float = 39.5
     beach_orientation_degrees: float = 140
 
-    @field_validator(
-        "longitude", "latitude", "beach_orientation_degrees", mode="before"
-    )
+    @field_validator("longitude", "latitude", "beach_orientation_degrees", mode="before")
     @classmethod
     def normalize_float_defaults(cls, value: Any, info: Any) -> float:
         """
@@ -190,9 +188,7 @@ class LoggingConfig(StrictModel):
             return _field_default(cls, "output")
         output = str(value).lower()
         if output not in {"console", "file", "both"}:
-            raise ValueError(
-                f"logging.output must be 'console', 'file', or 'both', got: {output}"
-            )
+            raise ValueError(f"logging.output must be 'console', 'file', or 'both', got: {output}")
         return output
 
     @field_validator("file_path", mode="before")
@@ -212,9 +208,7 @@ class LoggingConfig(StrictModel):
         level = str(value).upper()
         valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
         if level not in valid_levels:
-            raise ValueError(
-                f"logging.level must be one of {valid_levels}, got: {level}"
-            )
+            raise ValueError(f"logging.level must be one of {valid_levels}, got: {level}")
         return level
 
     @field_validator("format", mode="before")
@@ -293,9 +287,7 @@ class ApiConfig(StrictModel):
             return _field_default(cls, "backoff_seconds")
         backoff = float(value)
         if backoff < 0:
-            raise ValueError(
-                "api.backoff_seconds must be greater than or equal to zero"
-            )
+            raise ValueError("api.backoff_seconds must be greater than or equal to zero")
         return backoff
 
 

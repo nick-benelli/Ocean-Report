@@ -7,13 +7,13 @@ validation, and caching. Uses pathlib for modern path handling.
 from __future__ import annotations
 
 import os
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 from string import Template
 from typing import Any
 
 import yaml
-from dotenv import load_dotenv, find_dotenv
+from dotenv import find_dotenv, load_dotenv
 
 from .schemas import AppConfig
 
@@ -41,9 +41,7 @@ def _get_default_config_path() -> Path:
         path = Path(env_config).expanduser().resolve()
         if path.exists():
             return path
-        raise FileNotFoundError(
-            f"Config path from OCEAN_REPORT_CONFIG not found: {path}"
-        )
+        raise FileNotFoundError(f"Config path from OCEAN_REPORT_CONFIG not found: {path}")
 
     # 2. Check project-relative path (works for repo checkouts, GitHub Actions)
     pyproject_path = find_dotenv("pyproject.toml")
@@ -59,9 +57,7 @@ def _get_default_config_path() -> Path:
 
     # 4. Nothing found - provide helpful error
     project_str = (
-        str(project_config)
-        if pyproject_path
-        else "configs/config.yaml (no pyproject.toml found)"
+        str(project_config) if pyproject_path else "configs/config.yaml (no pyproject.toml found)"
     )
     raise FileNotFoundError(
         f"No config file found. Tried:\n"
@@ -126,9 +122,7 @@ def get_project_root() -> Path:
     """
     pyproject_path = find_dotenv("pyproject.toml")
     if not pyproject_path:
-        raise FileNotFoundError(
-            "Could not find pyproject.toml. Unable to determine project root."
-        )
+        raise FileNotFoundError("Could not find pyproject.toml. Unable to determine project root.")
     return Path(pyproject_path).parent
 
 
@@ -169,7 +163,7 @@ def reload_config(path: str | Path | None = None) -> AppConfig:
     return get_settings(path)
 
 
-@lru_cache(maxsize=None)
+@cache
 def _cached_load(resolved_path: Path) -> AppConfig:
     """Internal cached loader."""
     return load_app_config(resolved_path)

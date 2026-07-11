@@ -85,6 +85,6 @@ See the [Testing Guide](./guide.md) section on "Writing New Tests" for:
 
 ---
 
-**Last Updated:** 2026-06-17  
-**Test Suite Version:** v2.0 (160 tests)  
+**Last Updated:** 2026-06-17
+**Test Suite Version:** v2.0 (160 tests)
 **Documentation Status:** Official ✅

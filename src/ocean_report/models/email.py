@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from pydantic import BaseModel, Field
 
 
@@ -17,38 +15,32 @@ class EmailTemplateData(BaseModel):
     """
 
     # Header
-    long_date: str = Field(
-        ..., description="Full date string (e.g., 'Monday, June 24, 2026')"
-    )
+    long_date: str = Field(..., description="Full date string (e.g., 'Monday, June 24, 2026')")
 
     # Water temperature section
-    water_temp: Optional[str] = Field(
+    water_temp: str | None = Field(
         None, description="Formatted water temperature with unit (e.g., '64.4 °F')"
     )
 
     # Tides section
-    tide_info: Optional[str] = Field(
+    tide_info: str | None = Field(
         None, description="Formatted tide information with emoji and times"
     )
 
     # Wind section
-    wind_info: Optional[str] = Field(
-        None, description="Formatted wind forecast with bullet points"
-    )
+    wind_info: str | None = Field(None, description="Formatted wind forecast with bullet points")
 
     # Footer - station/provider info
     station_name: str = Field(..., description="NOAA station name and ID")
     station_city: str = Field(..., description="Station city name")
-    wind_provider: str = Field(
-        default="Open-Meteo", description="Wind data provider name"
-    )
+    wind_provider: str = Field(default="Open-Meteo", description="Wind data provider name")
 
     # Metadata timestamps
     date_retrieved: str = Field(
         ...,
         description="Formatted data retrieval timestamp (e.g., 'Jun 24 at 6:22 AM')",
     )
-    water_temp_measured_at_date: Optional[str] = Field(
+    water_temp_measured_at_date: str | None = Field(
         None, description="Water temp measurement timestamp from NOAA sensor"
     )
 

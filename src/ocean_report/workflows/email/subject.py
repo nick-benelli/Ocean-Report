@@ -1,12 +1,11 @@
 """Format the email subject line for the ocean report."""
 
 from datetime import date
+
 from ...emailer.template_helpers import format_short_date
 
 
-def format_email_subject(
-    subject_name: str, today: date = None, test: bool = False
-) -> str:
+def format_email_subject(subject_name: str, today: date = None, test: bool = False) -> str:
     """
     Format the email subject line.
 

@@ -3,7 +3,6 @@
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import Optional
 
 
 class LogOutput(Enum):
@@ -20,7 +19,7 @@ logger = logging.getLogger("ocean_report")
 
 def configure_logger(
     output: LogOutput = LogOutput.CONSOLE,
-    log_file: Optional[str | Path] = None,
+    log_file: str | Path | None = None,
     level: int = logging.INFO,
     log_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 ) -> logging.Logger:

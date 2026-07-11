@@ -5,14 +5,16 @@ Run with: pytest tests/test_integration_real_apis.py -m integration
 Skip with: pytest tests/ -m "not integration"
 """
 
-import pytest
 from datetime import datetime, timedelta
 
+import pytest
+
+from ocean_report.api_client.exceptions import ApiResponseError
 from ocean_report.application.factory import create_application_context
-from ocean_report.services import tide_service, water_temp_service, wind_service
 from ocean_report.models.noaa.tides import NoaaTideParams
 from ocean_report.models.noaa.water_temperature import NoaaWaterTemperatureParams
 from ocean_report.models.openmeteo.forecast import OpenMeteoForecastParams
+from ocean_report.services import tide_service, water_temp_service, wind_service
 from ocean_report.use_cases.tides import get_daytime_tides_for_date
 from ocean_report.use_cases.water_temperature import get_latest_water_temp
 from ocean_report.use_cases.wind import get_daily_wind_forecast
@@ -175,19 +177,19 @@ def test_run_report_full_integration_preview_mode(tmp_path):
 noaa:
   station_id: "8534720"
   buoy_id: "44091"
-  
+
 email:
   smtp_server: "smtp.example.com"
   smtp_port: 587
   sender: "test@example.com"
   recipients: "test@example.com"
   use_recipient_url: false
-  
+
 location:
   longitude: -74.2
   latitude: 39.5
   beach_orientation_degrees: 140
-  
+
 logging:
   level: "INFO"
   output: "console"
@@ -196,15 +198,14 @@ logging:
     config_file = tmp_path / "test_config.yaml"
     config_file.write_text(config_content)
 
-    result = run_report(
+    # Should complete successfully (returns None)
+    # In preview mode, run_report prints to console and doesn't return structured data
+    # Just verify it completes without error
+    run_report(
         cfg_path=config_file,
         run_email=False,  # Preview only
         test=False,
     )
-
-    # Should complete successfully (returns None)
-    # In preview mode, run_report prints to console and doesn't return structured data
-    # Just verify it completes without error
 
 
 @pytest.mark.integration
@@ -218,7 +219,7 @@ def test_api_error_handling_invalid_station():
     )
 
     # This should raise a validation error
-    with pytest.raises(Exception):
+    with pytest.raises(ApiResponseError):  # API returns 400 for invalid station
         tide_service.fetch_tide_data(
             context=context,
             params=params,

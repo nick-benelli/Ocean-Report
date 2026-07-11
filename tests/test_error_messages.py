@@ -4,16 +4,17 @@ Verifies that error messages provide clear, actionable information to users.
 Run with: pytest tests/test_error_messages.py -m error_quality
 """
 
-import pytest
 from unittest.mock import Mock, patch
-from requests.exceptions import ConnectionError, Timeout, HTTPError
+
+import pytest
+from requests.exceptions import ConnectionError, HTTPError, Timeout
 
 from ocean_report.api_client.client import ApiClient
 from ocean_report.api_client.exceptions import ApiClientError
 from ocean_report.application.context import ApplicationContext
+from ocean_report.config.loader import load_app_config
 from ocean_report.config.schemas import AppConfig
 from ocean_report.services import tide_service, water_temp_service
-from ocean_report.config.loader import load_app_config
 
 
 @pytest.fixture
@@ -89,9 +90,7 @@ def test_tide_service_error_includes_station_id(mock_context):
     with patch.object(mock_context.client, "get") as mock_get:
         mock_get.side_effect = ApiClientError("API request failed for station 8534720")
 
-        params = NoaaTideParams(
-            station="8534720", begin_date="20250704", end_date="20250704"
-        )
+        params = NoaaTideParams(station="8534720", begin_date="20250704", end_date="20250704")
         with pytest.raises(Exception) as exc_info:
             tide_service.fetch_tide_data(context=mock_context, params=params)
 
@@ -204,9 +203,7 @@ def test_pydantic_type_error_is_clear():
     error_msg = str(exc_info.value)
     # Should mention type issue
     assert (
-        "float" in error_msg.lower()
-        or "number" in error_msg.lower()
-        or "type" in error_msg.lower()
+        "float" in error_msg.lower() or "number" in error_msg.lower() or "type" in error_msg.lower()
     )
 
 

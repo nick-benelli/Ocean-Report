@@ -1,13 +1,12 @@
 """Email recipient management."""
 
 import time
+
 from ...logger import logger
 from ...use_cases.email import get_email_recipients
 
 
-def get_bcc_recipients(
-    *, test: bool, use_url: bool, fallback_recipients: str
-) -> list[str]:
+def get_bcc_recipients(*, test: bool, use_url: bool, fallback_recipients: str) -> list[str]:
     """Get and parse BCC recipient list from URL or config.
 
     Args:

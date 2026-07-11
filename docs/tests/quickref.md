@@ -119,16 +119,16 @@ pytest tests/ -m "not integration"  # Default
 
 ## 🆘 Common Issues
 
-**Import errors?**  
+**Import errors?**
 → `pip install -e .`
 
-**Slow tests?**  
+**Slow tests?**
 → `pytest tests/ -m "not integration"`
 
-**Coverage too low?**  
+**Coverage too low?**
 → `pytest tests/ --cov=ocean_report --cov-report=html`
 
-**Integration tests failing?**  
+**Integration tests failing?**
 → Check internet connection and API status
 
 ## 📚 Resources

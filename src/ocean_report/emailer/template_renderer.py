@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 from jinja2 import Environment, FileSystemLoader, TemplateError
 
@@ -14,7 +13,7 @@ from ..models.email import EmailTemplateData
 
 def render_email_template(
     data: EmailTemplateData,
-    template_path: Optional[str | Path] = None,
+    template_path: str | Path | None = None,
 ) -> str:
     """
     Render email body from Jinja2 template.
@@ -78,7 +77,7 @@ def render_email_template(
         raise
 
 
-def load_template_content(template_path: Optional[str | Path] = None) -> str:
+def load_template_content(template_path: str | Path | None = None) -> str:
     """
     Load raw template content without rendering.
 

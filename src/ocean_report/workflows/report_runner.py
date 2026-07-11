@@ -4,18 +4,17 @@ import logging
 import time
 from datetime import date, datetime
 from pathlib import Path
-from typing import Union
 
 from ..application import create_application_context
 from ..emailer.template_renderer import render_email_template
-from ..logger import logger, configure_logger, LogOutput
+from ..logger import LogOutput, configure_logger, logger
 from .data import fetch_raw_data, format_report_data
-from .email import get_bcc_recipients, send_or_preview_email, format_email_subject
+from .email import format_email_subject, get_bcc_recipients, send_or_preview_email
 from .models import FetchParams
 
 
 def run_report(  # pylint: disable=too-many-locals,too-many-statements
-    *, cfg_path: Union[str, Path] = None, run_email: bool = True, test: bool = False
+    *, cfg_path: str | Path = None, run_email: bool = True, test: bool = False
 ) -> None:
     """
     Fetch tide, water temperature, and wind data, format it, and send or print an email report.
@@ -29,9 +28,7 @@ def run_report(  # pylint: disable=too-many-locals,too-many-statements
     logger.info("=" * 80)
     logger.info("Starting Ocean Report Email Process...")
     logger.info("Today is %s", date.today().strftime("%A, %B %d, %Y"))
-    logger.info(
-        "Run mode: %s | Send email: %s", "TEST" if test else "PRODUCTION", run_email
-    )
+    logger.info("Run mode: %s | Send email: %s", "TEST" if test else "PRODUCTION", run_email)
     logger.info("=" * 80)
 
     # Load configuration
@@ -73,9 +70,7 @@ def run_report(  # pylint: disable=too-many-locals,too-many-statements
         )
         raw_data = fetch_raw_data(context, fetch_params)
         email_data = format_report_data(raw_data)
-        logger.info(
-            "All data fetched successfully in %.2f seconds", time.time() - step_start
-        )
+        logger.info("All data fetched successfully in %.2f seconds", time.time() - step_start)
     except Exception as e:
         logger.error(
             "Failed to fetch report data after %.2f seconds: %s",
@@ -132,9 +127,7 @@ def run_report(  # pylint: disable=too-many-locals,too-many-statements
     total_time = time.time() - workflow_start_time
     logger.info("=" * 80)
     logger.info("Ocean Report workflow completed successfully!")
-    logger.info(
-        "Total execution time: %.2f seconds (%.1f minutes)", total_time, total_time / 60
-    )
+    logger.info("Total execution time: %.2f seconds (%.1f minutes)", total_time, total_time / 60)
     logger.info("=" * 80)
 
 

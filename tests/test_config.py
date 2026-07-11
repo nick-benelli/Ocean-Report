@@ -1,11 +1,12 @@
 import os
 import tempfile
-from ocean_report.config.schemas import AppConfig
+
 from ocean_report.config.loader import (
     get_config_dict,
     get_settings,
     load_raw_config,
 )
+from ocean_report.config.schemas import AppConfig
 
 
 def test_load_raw_config(monkeypatch):
@@ -130,10 +131,7 @@ api:
         assert settings.email.smtp_server == "smtp.example.com"
         assert settings.email.smtp_port == 2525
         assert settings.email.sender is None
-        assert (
-            settings.email.recipient_urls.offseason
-            == "https://example.com/offseason.txt"
-        )
+        assert settings.email.recipient_urls.offseason == "https://example.com/offseason.txt"
         assert settings.location.longitude == -73.999
         assert settings.location.latitude == 39.5
         assert settings.summer.memorial_day_offset == -4

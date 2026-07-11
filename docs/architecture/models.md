@@ -97,7 +97,7 @@ from pydantic import BaseModel, ConfigDict
 
 class BaseAPIModel(BaseModel):
     """Base model for API request/response schemas.
-    
+
     Features:
     - Frozen (immutable after creation)
     - Strict validation (no coercion of incompatible types)
@@ -145,39 +145,39 @@ from pydantic import BaseModel, Field
 class EmailTemplateData(BaseModel):
     """
     Data model for email template variables.
-    
+
     This represents the contract between the workflow
     and the Jinja2 email template. All data should be
     pre-formatted and ready for display.
     """
-    
+
     # Header
     long_date: str = Field(
         ..., description="Full date string (e.g., 'Monday, June 24, 2026')"
     )
-    
+
     # Water temperature section
     water_temp: Optional[str] = Field(
         None, description="Formatted water temperature with unit (e.g., '64.4 °F')"
     )
-    
+
     # Tides section
     tide_info: Optional[str] = Field(
         None, description="Formatted tide information with emoji and times"
     )
-    
+
     # Wind section
     wind_info: Optional[str] = Field(
         None, description="Formatted wind forecast with bullet points"
     )
-    
+
     # Footer - station/provider info
     station_name: str = Field(..., description="NOAA station name and ID")
     station_city: str = Field(..., description="Station city name")
     wind_provider: str = Field(
         default="Open-Meteo", description="Wind data provider name"
     )
-    
+
     # Metadata timestamps
     date_retrieved: str = Field(
         ..., description="Formatted data retrieval timestamp (e.g., 'Jun 24 at 6:22 AM')"
@@ -185,7 +185,7 @@ class EmailTemplateData(BaseModel):
     water_temp_measured_at_date: Optional[str] = Field(
         None, description="Water temp measurement timestamp from NOAA sensor"
     )
-    
+
     model_config = {"frozen": True}  # Immutable
 ```
 
@@ -227,7 +227,7 @@ template_dict = data.to_template_dict()
 ```python
 class NoaaWaterTempParams(BaseAPIModel):
     """Query parameters for NOAA water temperature API."""
-    
+
     station: str
     date: str = "latest"
     product: str = "water_temperature"
@@ -235,7 +235,7 @@ class NoaaWaterTempParams(BaseAPIModel):
     time_zone: str = "gmt"
     units: str = "english"
     application: str = "ocean-report"
-    
+
     # Aliases map Python names to API parameter names
     model_config = ConfigDict(
         populate_by_name=True,  # Allow both Python and API names
@@ -246,10 +246,10 @@ class NoaaWaterTempParams(BaseAPIModel):
 ```python
 class NoaaWaterTemperatureRecord(BaseAPIModel):
     """Single water temperature observation."""
-    
+
     timestamp: str = Field(alias="t")
     temperature: float = Field(alias="v")
-    
+
     # Example JSON from API: {"t": "2026-06-16 12:00", "v": "72.5"}
     # Maps to: timestamp="2026-06-16 12:00", temperature=72.5
 ```
@@ -258,7 +258,7 @@ class NoaaWaterTemperatureRecord(BaseAPIModel):
 ```python
 class NoaaWaterTempResponse(BaseAPIModel):
     """Complete response from NOAA water temperature API."""
-    
+
     data: list[NoaaWaterTemperatureRecord]
     metadata: dict | None = None
 ```
@@ -296,7 +296,7 @@ print(response.data[0].timestamp)    # "2026-06-16 12:00"
 ```python
 class NoaaTidesParams(BaseAPIModel):
     """Query parameters for NOAA tide predictions API."""
-    
+
     station: str
     begin_date: str
     end_date: str
@@ -313,11 +313,11 @@ class NoaaTidesParams(BaseAPIModel):
 ```python
 class NoaaTidePredictionRecord(BaseAPIModel):
     """Single tide prediction."""
-    
+
     timestamp: str = Field(alias="t")
     value: str = Field(alias="v")  # Height in feet
     type: str  # "H" for high, "L" for low
-    
+
     @property
     def height_ft(self) -> float:
         """Convert value to float."""
@@ -359,7 +359,7 @@ for tide in response.predictions:
 ```python
 class OpenMeteoForecastParams(BaseAPIModel):
     """Query parameters for Open-Meteo forecast API."""
-    
+
     latitude: float
     longitude: float
     hourly: list[str]  # e.g., ["wind_speed_10m", "wind_direction_10m"]
@@ -371,7 +371,7 @@ class OpenMeteoForecastParams(BaseAPIModel):
 ```python
 class OpenMeteoHourlyData(BaseAPIModel):
     """Hourly forecast data from Open-Meteo."""
-    
+
     time: list[str]  # ISO 8601 timestamps
     wind_speed_10m: list[float]
     wind_direction_10m: list[int]
@@ -381,7 +381,7 @@ class OpenMeteoHourlyData(BaseAPIModel):
 ```python
 class OpenMeteoForecastResponse(BaseAPIModel):
     """Complete response from Open-Meteo forecast API."""
-    
+
     latitude: float
     longitude: float
     hourly: OpenMeteoHourlyData
@@ -396,13 +396,13 @@ class OpenMeteoForecastResponse(BaseAPIModel):
 ```python
 class WindForecastEntry(BaseAPIModel):
     """Processed wind forecast entry for email display."""
-    
+
     time: str  # e.g., "8 AM"
     speed_mph: float
     direction: str  # e.g., "NW"
     wind_type: str  # "Offshore", "Onshore", "Cross-shore"
     direction_degrees: int
-    
+
     # This is NOT an API response model
     # It's a domain model created by processing Open-Meteo data
 ```
@@ -439,7 +439,7 @@ for i, time_str in enumerate(api_response["hourly"]["time"]):
 ```python
 class ApiErrorResponse(BaseAPIModel):
     """Standard error response from APIs."""
-    
+
     error: str
     message: str | None = None
     code: int | None = None
@@ -585,7 +585,7 @@ from pydantic import field_validator
 class NoaaTidesParams(BaseAPIModel):
     station: str
     begin_date: str
-    
+
     @field_validator("begin_date")
     @classmethod
     def validate_date_format(cls, value: str) -> str:
@@ -689,10 +689,10 @@ def test_parse_real_noaa_response():
     client = ApiClient()
     endpoint = WaterTemperatureEndpoint(client)
     params = NoaaWaterTempParams(station="8534720", date="latest")
-    
+
     # Parse response
     response = endpoint.fetch(params)
-    
+
     # Verify model structure
     assert isinstance(response, NoaaWaterTempResponse)
     assert len(response.data) > 0

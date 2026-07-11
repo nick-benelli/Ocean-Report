@@ -15,10 +15,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .context import ApplicationContext
 from ..api_client.factory import create_api_client
 from ..config.loader import get_settings, load_app_config
 from ..config.schemas import AppConfig
+from .context import ApplicationContext
 
 
 def create_application_context(

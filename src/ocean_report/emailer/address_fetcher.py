@@ -2,6 +2,7 @@
 
 import json
 import time
+
 from ..api_client.client import ApiClient
 from ..logger import logger
 
@@ -31,9 +32,7 @@ def fetch_recipients_from_gist(
     logger.debug("    → Fetching recipients from Gist: %s", url)
     fetch_start = time.time()
     response = client.get(url)
-    logger.debug(
-        "    ✓ Recipients fetched from Gist in %.2f seconds", time.time() - fetch_start
-    )
+    logger.debug("    ✓ Recipients fetched from Gist in %.2f seconds", time.time() - fetch_start)
     return response.text
 
 
@@ -50,9 +49,7 @@ def parse_recipients(text: str, verbose: bool = False) -> str:
     """
     # Replace commas with newlines, split lines, strip whitespace, and lowercase
     cleaned = [
-        line.strip().lower()
-        for line in text.replace(",", "\n").splitlines()
-        if line.strip()
+        line.strip().lower() for line in text.replace(",", "\n").splitlines() if line.strip()
     ]
 
     if verbose:

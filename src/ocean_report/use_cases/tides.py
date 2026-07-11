@@ -1,7 +1,6 @@
 """Tide use cases - orchestration layer for tide-related workflows."""
 
 from datetime import datetime
-from typing import List, Tuple
 
 from ..application.factory import ApplicationContext
 from ..logger import logger
@@ -14,7 +13,7 @@ def get_daytime_tides_for_date(
     context: ApplicationContext,
     station_id: str | None = None,
     date: str | None = None,
-) -> Tuple[List[NoaaTidePredictionRecord], datetime]:
+) -> tuple[list[NoaaTidePredictionRecord], datetime]:
     """
     Get filtered daytime tide predictions for a specific date.
 
@@ -62,9 +61,7 @@ def get_daytime_tides_for_date(
     raw_tides = fetch_tide_data(context=context, params=params)
 
     if not raw_tides:
-        logger.warning(
-            "No tide predictions returned for station %s on %s", station_id, date
-        )
+        logger.warning("No tide predictions returned for station %s on %s", station_id, date)
         return []
 
     logger.info("Fetched %d tide predictions", len(raw_tides))

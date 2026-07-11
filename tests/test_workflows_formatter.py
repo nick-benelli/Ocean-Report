@@ -2,12 +2,13 @@
 
 from datetime import datetime
 from unittest.mock import patch
+
 import pytest
 
-from ocean_report.workflows.models import RawReportData
 from ocean_report.models.email import EmailTemplateData
-from ocean_report.workflows.data.formatter import format_report_data
 from ocean_report.models.noaa.tides import NoaaTidePredictionRecord
+from ocean_report.workflows.data.formatter import format_report_data
+from ocean_report.workflows.models import RawReportData
 
 
 @pytest.fixture
@@ -15,12 +16,8 @@ def raw_report_data():
     """Create sample raw report data."""
     return RawReportData(
         tides=[
-            NoaaTidePredictionRecord(
-                timestamp="2025-07-04 08:00", height_feet=4.2, event_type="H"
-            ),
-            NoaaTidePredictionRecord(
-                timestamp="2025-07-04 14:30", height_feet=0.5, event_type="L"
-            ),
+            NoaaTidePredictionRecord(timestamp="2025-07-04 08:00", height_feet=4.2, event_type="H"),
+            NoaaTidePredictionRecord(timestamp="2025-07-04 14:30", height_feet=0.5, event_type="L"),
         ],
         tide_timestamp=datetime(2025, 7, 4, 6, 0, 0),
         water_temp=73.5,
@@ -65,9 +62,7 @@ def test_format_report_data_calls_formatters_with_raw_data(raw_report_data):
 
     with (
         patch("ocean_report.emailer.template_helpers.format_tide_info") as mock_tide,
-        patch(
-            "ocean_report.emailer.template_helpers.format_water_temp_value"
-        ) as mock_temp,
+        patch("ocean_report.emailer.template_helpers.format_water_temp_value") as mock_temp,
         patch("ocean_report.emailer.template_helpers.format_wind_info") as mock_wind,
     ):
         mock_tide.return_value = "Tide text"

@@ -214,11 +214,11 @@ Usage:
 
 ## Benefits
 
-✅ **Works everywhere:** Local, CI/CD, Docker, Kubernetes, cloud functions  
-✅ **Zero config for common case:** Repo checkouts work automatically  
-✅ **Explicit override:** Set `OCEAN_REPORT_CONFIG` when needed  
-✅ **Clear errors:** Helpful message if config not found  
-✅ **Standard practice:** Follows 12-factor app principles  
+✅ **Works everywhere:** Local, CI/CD, Docker, Kubernetes, cloud functions
+✅ **Zero config for common case:** Repo checkouts work automatically
+✅ **Explicit override:** Set `OCEAN_REPORT_CONFIG` when needed
+✅ **Clear errors:** Helpful message if config not found
+✅ **Standard practice:** Follows 12-factor app principles
 ✅ **Cross-platform:** Works on Linux, macOS, Windows
 
 ---
@@ -349,15 +349,15 @@ def resolve_config_path(path: str | Path | None = None) -> Path:
     """Resolve config path to absolute Path, defaulting to project config."""
     if path:
         return Path(path).expanduser().resolve()
-    
+
     # Try OCEAN_REPORT_CONFIG env var
     if env_path := os.getenv("OCEAN_REPORT_CONFIG"):
         return Path(env_path).expanduser().resolve()
-    
+
     # Try project-relative path
     if project_root := find_dotenv("pyproject.toml"):
         return Path(project_root).parent / "configs" / "config.yaml"
-    
+
     # Fallback to user config directory
     return Path.home() / ".config" / "ocean-report" / "config.yaml"
 ```
@@ -374,24 +374,24 @@ def resolve_config_path(path: str | Path | None = None) -> Path:
 ## Best Practices
 
 ### Development
-✅ Use default path (`configs/config.yaml`)  
-✅ Commit config template to version control  
-✅ Use `.env` for secrets  
+✅ Use default path (`configs/config.yaml`)
+✅ Commit config template to version control
+✅ Use `.env` for secrets
 
 ### Production
-✅ Use environment variable (`OCEAN_REPORT_CONFIG`)  
-✅ Store config outside application directory  
-✅ Use secrets management (AWS Secrets Manager, Azure Key Vault, etc.)  
+✅ Use environment variable (`OCEAN_REPORT_CONFIG`)
+✅ Store config outside application directory
+✅ Use secrets management (AWS Secrets Manager, Azure Key Vault, etc.)
 
 ### Testing
-✅ Create separate test configs (`configs/test.yaml`)  
-✅ Override via environment variable in tests  
-✅ Use temporary directories for test configs  
+✅ Create separate test configs (`configs/test.yaml`)
+✅ Override via environment variable in tests
+✅ Use temporary directories for test configs
 
 ### Docker
-✅ Mount config as volume or use ConfigMaps  
-✅ Set `OCEAN_REPORT_CONFIG` explicitly  
-✅ Validate config exists in health checks  
+✅ Mount config as volume or use ConfigMaps
+✅ Set `OCEAN_REPORT_CONFIG` explicitly
+✅ Validate config exists in health checks
 
 ---
 

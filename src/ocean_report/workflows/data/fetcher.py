@@ -1,6 +1,7 @@
 """Data fetching operations for ocean report."""
 
 import time
+
 from ...application import ApplicationContext
 from ...logger import logger
 from ...use_cases import tides as tides_use_case

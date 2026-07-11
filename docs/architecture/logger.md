@@ -287,7 +287,7 @@ from ocean_report.logger import logger
 
 def fetch_water_temp(context, params):
     logger.info("Fetching water temperature for station: %s", params.station)
-    
+
     try:
         response = endpoint.fetch(params)
         logger.debug("API response: %s", response)
@@ -310,9 +310,9 @@ def run_report(context):
     logger.info("Today is %s", date.today().strftime("%A, %B %d, %Y"))
     logger.info("Run mode: %s", "TEST" if test else "PRODUCTION")
     logger.info("=" * 80)
-    
+
     # ... workflow steps ...
-    
+
     logger.info("Ocean Report workflow completed successfully!")
 ```
 
@@ -327,12 +327,12 @@ from ocean_report.logger import logger
 def fetch_all_data(context):
     start_time = time.time()
     logger.info("[STEP 3/6] Fetching weather data from APIs...")
-    
+
     # Fetch data
     water_temp = get_latest_water_temp(context)
     tides = get_tides_for_date(context, date_str)
     wind = get_hourly_wind_forecast(context, date_str)
-    
+
     duration = time.time() - start_time
     logger.info("Data fetched in %.2f seconds", duration)
 ```
@@ -460,12 +460,12 @@ The logger clears existing handlers before configuration to prevent duplicates:
 def configure_logger(...):
     # Clear existing handlers
     logger.handlers.clear()
-    
+
     # Add new handlers
     if output in (LogOutput.CONSOLE, LogOutput.BOTH):
         console_handler = logging.StreamHandler()
         logger.addHandler(console_handler)
-    
+
     if output in (LogOutput.FILE, LogOutput.BOTH):
         file_handler = logging.FileHandler(log_file)
         logger.addHandler(file_handler)
@@ -501,20 +501,20 @@ from ocean_report.logger import configure_logger, LogOutput
 
 def test_configure_logger_console():
     logger = configure_logger(output=LogOutput.CONSOLE, level=logging.INFO)
-    
+
     assert logger.level == logging.INFO
     assert len(logger.handlers) == 1
     assert isinstance(logger.handlers[0], logging.StreamHandler)
 
 def test_configure_logger_file(tmp_path):
     log_file = tmp_path / "test.log"
-    
+
     logger = configure_logger(
         output=LogOutput.FILE,
         log_file=str(log_file),
         level=logging.DEBUG
     )
-    
+
     assert logger.level == logging.DEBUG
     assert len(logger.handlers) == 1
     assert isinstance(logger.handlers[0], logging.FileHandler)
@@ -528,11 +528,11 @@ def test_configure_logger_file(tmp_path):
 ```python
 def test_logger_writes_to_file(tmp_path):
     log_file = tmp_path / "test.log"
-    
+
     configure_logger(output=LogOutput.FILE, log_file=str(log_file))
-    
+
     logger.info("Test message")
-    
+
     # Read log file
     content = log_file.read_text()
     assert "Test message" in content
@@ -549,7 +549,7 @@ import logging
 def test_function_logs_correctly(caplog):
     with caplog.at_level(logging.INFO):
         some_function_that_logs()
-    
+
     assert "Expected log message" in caplog.text
 ```
 
@@ -574,7 +574,7 @@ logger.handlers.clear()
 
 **Symptom**: Console logs work, but file is empty
 
-**Cause**: 
+**Cause**:
 1. Log level too high (e.g., level=ERROR but you're logging INFO)
 2. File path invalid
 3. Permissions issue

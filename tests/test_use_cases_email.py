@@ -1,15 +1,15 @@
 """Tests for email use cases."""
 
-from datetime import date
 from unittest.mock import Mock, patch
+
 import pytest
 
 from ocean_report.application.context import ApplicationContext
 from ocean_report.config.schemas import (
     AppConfig,
     EmailConfig,
-    SummerConfig,
     RecipientUrlsConfig,
+    SummerConfig,
 )
 from ocean_report.use_cases.email import get_email_recipients
 
@@ -54,9 +54,6 @@ def mock_context_offseason():
 
 def test_get_email_recipients_uses_main_url_in_summer(mock_context_summer):
     """Test that main recipient URL is used during summer."""
-
-    summer_date = date(2025, 7, 4)  # July 4th is definitely summer
-
     with (
         patch("ocean_report.use_cases.email.determine_is_summer") as mock_is_summer,
         patch("ocean_report.use_cases.email.fetch_recipients_from_gist") as mock_fetch,
@@ -77,9 +74,6 @@ def test_get_email_recipients_uses_main_url_in_summer(mock_context_summer):
 
 def test_get_email_recipients_uses_offseason_url_in_winter(mock_context_offseason):
     """Test that offseason recipient URL is used during winter."""
-
-    winter_date = date(2025, 1, 15)  # January is definitely off-season
-
     with (
         patch("ocean_report.use_cases.email.determine_is_summer") as mock_is_summer,
         patch("ocean_report.use_cases.email.fetch_recipients_from_gist") as mock_fetch,
@@ -143,9 +137,7 @@ def test_get_email_recipients_creates_default_context_when_none(mock_context_sum
 def test_get_email_recipients_parses_and_cleans_recipients(mock_context_summer):
     """Test that recipient list is parsed and cleaned."""
 
-    raw_recipients = (
-        "  USER1@EXAMPLE.COM  \n user2@example.com \n\n USER3@EXAMPLE.COM  "
-    )
+    raw_recipients = "  USER1@EXAMPLE.COM  \n user2@example.com \n\n USER3@EXAMPLE.COM  "
     cleaned_recipients = "user1@example.com,user2@example.com,user3@example.com"
 
     with (
