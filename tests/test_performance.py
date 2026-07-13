@@ -208,6 +208,7 @@ def test_application_context_creation_performance():
 @pytest.mark.performance
 def test_pydantic_model_validation_performance():
     """Test Pydantic model validation performance."""
+    # pylint: disable=import-outside-toplevel
     from ocean_report.models.noaa.tides import NoaaTidePredictionRecord
 
     # Create 1000 tide records
