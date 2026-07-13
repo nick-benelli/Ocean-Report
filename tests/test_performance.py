@@ -138,9 +138,9 @@ def test_wind_classification_performance():
     elapsed = time.time() - start_time
 
     # Should classify 72 wind directions quickly
-    assert (
-        elapsed < 0.01
-    ), f"classify_wind_relative_to_beach took {elapsed * 1000:.2f}ms for 72 classifications"
+    assert elapsed < 0.01, (
+        f"classify_wind_relative_to_beach took {elapsed * 1000:.2f}ms for 72 classifications"
+    )
     assert len(results) == 72
     assert all(
         r in ["Onshore", "Offshore", "Cross-shore", "Cross/Onshore", "Cross/Offshore"]
