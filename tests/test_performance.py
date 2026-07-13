@@ -3,6 +3,8 @@
 Tests that verify key operations complete within acceptable time limits.
 Run with: pytest tests/test_performance.py -m performance
 """
+# pylint: disable=redefined-outer-name  # pytest fixtures are passed as parameters
+# pylint: disable=import-outside-toplevel
 
 import time
 from datetime import datetime
@@ -208,9 +210,6 @@ def test_application_context_creation_performance():
 @pytest.mark.performance
 def test_pydantic_model_validation_performance():
     """Test Pydantic model validation performance."""
-    # pylint: disable=import-outside-toplevel
-    from ocean_report.models.noaa.tides import NoaaTidePredictionRecord
-
     # Create 1000 tide records
     tide_data = [
         {
