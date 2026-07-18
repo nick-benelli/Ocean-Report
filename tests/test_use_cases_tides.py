@@ -98,10 +98,10 @@ def test_get_daytime_tides_returns_empty_list_when_no_data(mock_context):
         mock_fetch.return_value = []
         mock_filter.return_value = []
 
-        result = get_daytime_tides_for_date(context=mock_context)
+        tides, timestamp = get_daytime_tides_for_date(context=mock_context)
 
-        # When no data, function returns just empty list (not tuple)
-        assert result == []
+        assert tides == []
+        assert isinstance(timestamp, datetime)
 
 
 def test_get_daytime_tides_filters_nighttime(mock_context):

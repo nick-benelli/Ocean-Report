@@ -62,7 +62,7 @@ def get_daytime_tides_for_date(
 
     if not raw_tides:
         logger.warning("No tide predictions returned for station %s on %s", station_id, date)
-        return []
+        return [], retrieval_time
 
     logger.info("Fetched %d tide predictions", len(raw_tides))
 

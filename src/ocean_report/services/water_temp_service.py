@@ -2,6 +2,8 @@
 
 import time
 
+from pydantic import ValidationError
+
 from ..api_client.exceptions import ApiClientError
 from ..application.factory import ApplicationContext
 from ..endpoints.noaa.water_temperature import WaterTemperatureEndpoint
@@ -21,7 +23,7 @@ def fetch_water_temp(
     Fetch water temperature data from the NOAA API.
 
     This is a thin service layer function that only handles API calls.
-    No defaults, no business logic, no error suppression.
+    Returns None if the API is unavailable or returns unexpected data.
 
     Args:
         context (ApplicationContext): The application context containing the API client.
@@ -29,10 +31,7 @@ def fetch_water_temp(
 
     Returns:
         Optional[NoaaWaterTemperatureRecord]: The latest water temperature record,
-            or None if no data.
-
-    Raises:
-        ApiClientError: If the NOAA API request fails.
+            or None if no data or API is unavailable.
     """
     endpoint = WaterTemperatureEndpoint(context.client)
 
@@ -57,8 +56,17 @@ def fetch_water_temp(
 
         return response.data[0]  # Return the latest record
 
-    except ApiClientError as e:
-        logger.error("Failed to fetch water temperature from NOAA API: %s", e)
+    except ValidationError as e:
+        # NOAA returned unexpected JSON (e.g. {"error": ...} instead of {"data": [...]})
+        # This happens when the service is down but the API is reachable.
+        logger.warning(
+            "NOAA Water Temperature API returned unexpected data format (API may be down): %s. "
+            "Continuing report without water temperature.",
+            str(e).split("\n")[0],
+        )
+        return None
+
+    except ApiClientError:
         raise
 
 
