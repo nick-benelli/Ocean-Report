@@ -53,20 +53,17 @@ def fetch_tide_data(
         return response.predictions
 
     except ValidationError as e:
-        # NOAA API is returning unexpected data format (e.g., error response instead of predictions)
+        # NOAA returned unexpected JSON (e.g. {"error": ...} instead of {"predictions": [...]})
+        # This happens when the predictions service is down but the API is reachable.
         logger.warning(
             "NOAA Tides API returned unexpected data format (API may be down or returning observed data only): %s. "
             "Continuing report without tide predictions.",
-            str(e).split("\n")[0],  # First line of validation error
+            str(e).split("\n")[0],
         )
         return []
 
-    except ApiClientError as e:
-        logger.error(
-            "Failed to connect to NOAA Tides API: %s. Continuing report without tide predictions.",
-            e,
-        )
-        return []
+    except ApiClientError:
+        raise
 
 
 def filter_daytime_tides(

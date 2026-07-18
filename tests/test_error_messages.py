@@ -87,22 +87,17 @@ def test_tide_service_error_includes_station_id(mock_context):
     """Test that tide service errors mention context."""
     from ocean_report.models.noaa.tides import NoaaTideParams
 
-    with patch.object(mock_context.client, "get") as mock_get:
-        mock_get.side_effect = ApiClientError("API request failed for station 8534720")
+    with patch.object(mock_context.client, "get_json") as mock_get_json:
+        mock_get_json.side_effect = ApiClientError("API request failed for station 8534720")
 
         params = NoaaTideParams(station="8534720", begin_date="20250704", end_date="20250704")
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(ApiClientError) as exc_info:
             tide_service.fetch_tide_data(context=mock_context, params=params)
 
-        # Error should provide some context (either from our error or from validation)
         error_msg = str(exc_info.value)
-        assert len(error_msg) > 10  # Error message should not be empty
-        # Either has station ID or mentions validation/failed
+        assert len(error_msg) > 10
         assert (
-            "8534720" in error_msg
-            or "failed" in error_msg.lower()
-            or "validation" in error_msg.lower()
-            or "error" in error_msg.lower()
+            "8534720" in error_msg or "failed" in error_msg.lower() or "error" in error_msg.lower()
         )
 
 
@@ -111,22 +106,17 @@ def test_water_temp_service_error_includes_context(mock_context):
     """Test that water temp service errors are informative."""
     from ocean_report.models.noaa.water_temperature import NoaaWaterTemperatureParams
 
-    with patch.object(mock_context.client, "get") as mock_get:
-        mock_get.side_effect = ApiClientError("Connection timeout for station 8534720")
+    with patch.object(mock_context.client, "get_json") as mock_get_json:
+        mock_get_json.side_effect = ApiClientError("Connection timeout for station 8534720")
 
         params = NoaaWaterTemperatureParams(station="8534720")
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(ApiClientError) as exc_info:
             water_temp_service.fetch_water_temp(context=mock_context, params=params)
 
         error_msg = str(exc_info.value)
-        # Should provide some context (either from our error or from validation)
         assert len(error_msg) > 10
-        # Either has station ID or mentions timeout/validation
         assert (
-            "8534720" in error_msg
-            or "timeout" in error_msg.lower()
-            or "validation" in error_msg.lower()
-            or "error" in error_msg.lower()
+            "8534720" in error_msg or "timeout" in error_msg.lower() or "error" in error_msg.lower()
         )
 
 

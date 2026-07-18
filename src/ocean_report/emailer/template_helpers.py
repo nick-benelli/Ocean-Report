@@ -24,7 +24,7 @@ def format_water_temp_value(water_temperature: float | None) -> str | None:
     Returns:
         Formatted temperature string (e.g., "64.4 °F") or None if unavailable.
     """
-    unavailable_text = "Unavailable ⚠️"
+    unavailable_text = "⚠️ Water temperature unavailable ⚠️"
 
     try:
         if water_temperature is None or not isinstance(water_temperature, int | float):
@@ -51,7 +51,7 @@ def format_tide_info(tide_events: list[NoaaTidePredictionRecord]) -> str | None:
         Formatted tide information (without section header) or None if empty.
         Example: "⬇️ Low Tide at 8:23 AM — 0.3 ft\\n⬆️ High Tide at 2:46 PM — 4.1 ft"
     """
-    unavailable_text = "Tide data unavailable ⚠️"
+    unavailable_text = "⚠️ Tide data temporarily unavailable ⚠️"
 
     if not tide_events:
         return unavailable_text

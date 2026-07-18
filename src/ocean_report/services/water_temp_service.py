@@ -57,20 +57,17 @@ def fetch_water_temp(
         return response.data[0]  # Return the latest record
 
     except ValidationError as e:
-        # NOAA API is returning unexpected data format
+        # NOAA returned unexpected JSON (e.g. {"error": ...} instead of {"data": [...]})
+        # This happens when the service is down but the API is reachable.
         logger.warning(
             "NOAA Water Temperature API returned unexpected data format (API may be down): %s. "
             "Continuing report without water temperature.",
-            str(e).split("\n")[0],  # First line of validation error
+            str(e).split("\n")[0],
         )
         return None
 
-    except ApiClientError as e:
-        logger.error(
-            "Failed to connect to NOAA Water Temperature API: %s. Continuing report without water temperature.",
-            e,
-        )
-        return None
+    except ApiClientError:
+        raise
 
 
 def add_unit_of_measure(temp: float) -> str:
