@@ -4,6 +4,8 @@ import time
 from datetime import datetime
 from datetime import time as time_obj
 
+from pydantic import ValidationError
+
 from ..api_client.exceptions import ApiClientError
 from ..application.factory import ApplicationContext
 from ..endpoints.noaa.tides import NoaaTidesEndpoint
@@ -20,7 +22,7 @@ def fetch_tide_data(
     Fetch tide prediction data from the NOAA API.
 
     This is a thin service layer function that only handles API calls.
-    No defaults, no business logic, no error suppression.
+    Returns an empty list if the API is unavailable or returns unexpected data.
 
     Args:
         context (ApplicationContext): The application context containing the API client.
@@ -28,10 +30,8 @@ def fetch_tide_data(
 
     Returns:
         List[NoaaTidePredictionRecord]: A list of validated tide predictions with
-            timestamp, height_feet, and event_type attributes.
-
-    Raises:
-        ApiClientError: If the NOAA API request fails.
+            timestamp, height_feet, and event_type attributes. Returns empty list
+            if the API is down or returns unexpected data format.
     """
     endpoint = NoaaTidesEndpoint(context.client)
 
@@ -52,9 +52,21 @@ def fetch_tide_data(
         )
         return response.predictions
 
+    except ValidationError as e:
+        # NOAA API is returning unexpected data format (e.g., error response instead of predictions)
+        logger.warning(
+            "NOAA Tides API returned unexpected data format (API may be down or returning observed data only): %s. "
+            "Continuing report without tide predictions.",
+            str(e).split("\n")[0],  # First line of validation error
+        )
+        return []
+
     except ApiClientError as e:
-        logger.error("Failed to fetch tide data from NOAA API: %s", e)
-        raise
+        logger.error(
+            "Failed to connect to NOAA Tides API: %s. Continuing report without tide predictions.",
+            e,
+        )
+        return []
 
 
 def filter_daytime_tides(
