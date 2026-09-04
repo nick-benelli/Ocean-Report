@@ -6,7 +6,7 @@ on:
     # 10:35am UTC (6:35am Eastern Time, 3:35am Pacific Time)
     # 09:50am UTC (5:50am Eastern Time, 2:50am Pacific Time)
     # 08:17am UTC (4:17 AM EDT (Eastern Daylight Time, summer), 3:17 AM EST (Eastern Standard Time, winter), 1:17am Pacific Time)
-    - cron: "17 08 * * *"
+    - cron: "19 08 * * *"
   workflow_dispatch:
 
 concurrency:
