@@ -34,7 +34,7 @@ reporting:
 # Deterimine Summertime
 summer:
   memorial_day_offset: -4 # days before Memorial Day (negative = before, positive = after)
-  labor_day_offset: 7 # days after Labor Day
+  labor_day_offset: 21 # days after Labor Day
 
 # API Client Settings
 api:
