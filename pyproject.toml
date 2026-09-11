@@ -99,3 +99,8 @@ warn_unused_configs = true
 ignore_missing_imports = true
 allow_untyped_calls = true
 allow_untyped_defs = true
+
+[dependency-groups]
+dev = [
+    "ruff==0.16.6",
+]
