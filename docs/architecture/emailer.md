@@ -129,7 +129,7 @@ data = EmailTemplateData(
     station_city="Atlantic City",
     wind_provider="Open-Meteo",
     date_retrieved="Jun 16 at 6:45 AM",
-    water_temp_measured_at_date="Jun 16 at 6:30 AM"
+    water_temp_measured_at_date="Jun 16 at 6:30 AM",
 )
 
 body = render_email_template(data)
@@ -202,8 +202,13 @@ result = format_tide_info(tides)
 from ocean_report.emailer.template_helpers import format_wind_info
 
 wind_data = [
-    {"time": "8 AM", "speed_mph": 12.0, "direction": "NW",
-     "direction_deg": 315.0, "wind_type": "Offshore"},
+    {
+        "time": "8 AM",
+        "speed_mph": 12.0,
+        "direction": "NW",
+        "direction_deg": 315.0,
+        "wind_type": "Offshore",
+    },
 ]
 
 result = format_wind_info(wind_data)
@@ -255,6 +260,7 @@ result = format_long_date()
 @dataclass(frozen=True)
 class EmailRecipients:
     """Container for primary and BCC recipients."""
+
     to_email: str = ""
     bcc_list: List[str] = field(default_factory=list)
 ```
@@ -276,10 +282,10 @@ send_email(
     email_password="app_password_123",
     recipients=EmailRecipients(
         to_email="",  # Empty for BCC-only
-        bcc_list=["user1@example.com", "user2@example.com"]
+        bcc_list=["user1@example.com", "user2@example.com"],
     ),
     smtp_server="smtp.gmail.com",
-    smtp_port=587
+    smtp_port=587,
 )
 ```
 
@@ -324,8 +330,7 @@ from ocean_report.api_client.client import ApiClient
 
 client = ApiClient()
 raw_text = fetch_recipients_from_gist(
-    client=client,
-    url="https://gist.githubusercontent.com/.../recipients.txt"
+    client=client, url="https://gist.githubusercontent.com/.../recipients.txt"
 )
 # Returns: "email1@example.com,email2@example.com\nuser3@example.com"
 ```
@@ -406,7 +411,7 @@ email_data = EmailTemplateData(
     station_city="Atlantic City",
     wind_provider="Open-Meteo",
     date_retrieved="Jun 16 at 6:45 AM",
-    water_temp_measured_at_date="Jun 16 at 6:30 AM"
+    water_temp_measured_at_date="Jun 16 at 6:30 AM",
 )
 
 # 2. Render template
@@ -418,12 +423,9 @@ send_email(
     body=body,
     sender_email="surf@example.com",
     email_password="app_password_123",
-    recipients=EmailRecipients(
-        to_email="",
-        bcc_list=["user1@example.com", "user2@example.com"]
-    ),
+    recipients=EmailRecipients(to_email="", bcc_list=["user1@example.com", "user2@example.com"]),
     smtp_server="smtp.gmail.com",
-    smtp_port=587
+    smtp_port=587,
 )
 ```
 
@@ -448,10 +450,7 @@ print(body)
 from pathlib import Path
 
 # Use custom template instead of config default
-body = render_email_template(
-    email_data,
-    template_path=Path("templates/custom_report.txt.jinja")
-)
+body = render_email_template(email_data, template_path=Path("templates/custom_report.txt.jinja"))
 ```
 
 ---
@@ -459,17 +458,13 @@ body = render_email_template(
 ### Pattern 4: Fetching Recipients from URL
 
 ```python
-from ocean_report.emailer.address_fetcher import (
-    fetch_recipients_from_gist,
-    parse_recipients
-)
+from ocean_report.emailer.address_fetcher import fetch_recipients_from_gist, parse_recipients
 from ocean_report.api_client.client import ApiClient
 
 # Fetch from remote URL
 client = ApiClient()
 raw_text = fetch_recipients_from_gist(
-    client=client,
-    url="https://gist.githubusercontent.com/.../recipients.txt"
+    client=client, url="https://gist.githubusercontent.com/.../recipients.txt"
 )
 
 # Parse and normalize
@@ -538,9 +533,11 @@ recipient_list = [email.strip() for email in recipients_str.split(",")]
 ```python
 from ocean_report.emailer.template_helpers import format_water_temp_value
 
+
 def test_format_water_temp_with_value():
     result = format_water_temp_value(72.5)
     assert result == "72.5 °F"
+
 
 def test_format_water_temp_none():
     result = format_water_temp_value(None)
@@ -553,6 +550,7 @@ def test_format_water_temp_none():
 from ocean_report.emailer.template_renderer import render_email_template
 from ocean_report.models.email import EmailTemplateData
 
+
 def test_render_email_template():
     data = EmailTemplateData(
         long_date="Monday, June 16, 2026",
@@ -563,7 +561,7 @@ def test_render_email_template():
         station_city="Test City",
         wind_provider="Test Provider",
         date_retrieved="Jun 16 at 6:45 AM",
-        water_temp_measured_at_date=None
+        water_temp_measured_at_date=None,
     )
 
     body = render_email_template(data)

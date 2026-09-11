@@ -109,8 +109,8 @@ Exceptions (exceptions.py):
 #### Automatic Retries
 ```python
 client = ApiClient(
-    max_retries=3,           # Try up to 3 times
-    backoff_seconds=0.8      # Exponential backoff between retries
+    max_retries=3,  # Try up to 3 times
+    backoff_seconds=0.8,  # Exponential backoff between retries
 )
 ```
 
@@ -124,7 +124,7 @@ The client automatically retries on:
 ```python
 client = ApiClient(
     verify_ssl=True,
-    retry_insecure_on_ssl_error=True  # Fallback to unverified on SSL errors
+    retry_insecure_on_ssl_error=True,  # Fallback to unverified on SSL errors
 )
 ```
 
@@ -158,7 +158,7 @@ with ApiClient() as client:
 response = client.get(
     "https://api.example.com/data",
     params={"station": "8534720"},
-    headers={"User-Agent": "OceanReport/1.0"}
+    headers={"User-Agent": "OceanReport/1.0"},
 )
 print(response.status_code)  # 200
 ```
@@ -180,11 +180,7 @@ print(response.status_code)  # 200
 ```python
 data = client.get_json(
     "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter",
-    params={
-        "station": "8534720",
-        "product": "water_temperature",
-        "format": "json"
-    }
+    params={"station": "8534720", "product": "water_temperature", "format": "json"},
 )
 print(data["data"][0])  # First temperature record
 ```
@@ -339,6 +335,7 @@ data = context.client.get_json("https://api.example.com/data")
 from unittest.mock import Mock
 from ocean_report.api_client import ApiClient
 
+
 def test_endpoint():
     mock_client = Mock(spec=ApiClient)
     mock_client.get_json.return_value = {"data": [{"v": 72.5}]}
@@ -477,7 +474,7 @@ def test_get_json_retries_on_500():
     session = Mock()
     session.get.side_effect = [
         Mock(status_code=500),  # First attempt fails
-        Mock(status_code=200, json=lambda: {"data": []})  # Retry succeeds
+        Mock(status_code=200, json=lambda: {"data": []}),  # Retry succeeds
     ]
 
     client = ApiClient(session=session, max_retries=2)
@@ -503,7 +500,7 @@ def test_real_noaa_request():
     client = ApiClient(timeout=5.0)
     data = client.get_json(
         "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter",
-        params={"station": "8534720", "product": "water_temperature", "format": "json"}
+        params={"station": "8534720", "product": "water_temperature", "format": "json"},
     )
     assert "data" in data
 ```

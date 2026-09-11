@@ -443,6 +443,7 @@ class NoaaWaterTemperatureRecord(BaseModel):
     timestamp: str = Field(alias="t")
     temperature: float = Field(alias="v")
 
+
 # If API returns bad data, Pydantic raises ValidationError immediately
 ```
 

@@ -95,6 +95,7 @@ Domain Models (business logic)
 ```python
 from pydantic import BaseModel, ConfigDict
 
+
 class BaseAPIModel(BaseModel):
     """Base model for API request/response schemas.
 
@@ -104,9 +105,10 @@ class BaseAPIModel(BaseModel):
     - Arbitrary types allowed (for complex objects)
     - Validation enabled
     """
+
     model_config = ConfigDict(
-        frozen=True,          # Immutable
-        strict=False,         # Allow type coercion
+        frozen=True,  # Immutable
+        strict=False,  # Allow type coercion
         arbitrary_types_allowed=False,
         validate_assignment=True,
     )
@@ -122,6 +124,7 @@ class BaseAPIModel(BaseModel):
 class NoaaWaterTempRecord(BaseAPIModel):
     timestamp: str = Field(alias="t")
     temperature: float = Field(alias="v")
+
 
 record = NoaaWaterTempRecord(t="2026-06-16 12:00", v=72.5)
 print(record.temperature)  # 72.5
@@ -142,6 +145,7 @@ record.temperature = 75.0  # Raises FrozenInstanceError
 ```python
 from pydantic import BaseModel, Field
 
+
 class EmailTemplateData(BaseModel):
     """
     Data model for email template variables.
@@ -152,9 +156,7 @@ class EmailTemplateData(BaseModel):
     """
 
     # Header
-    long_date: str = Field(
-        ..., description="Full date string (e.g., 'Monday, June 24, 2026')"
-    )
+    long_date: str = Field(..., description="Full date string (e.g., 'Monday, June 24, 2026')")
 
     # Water temperature section
     water_temp: Optional[str] = Field(
@@ -167,16 +169,12 @@ class EmailTemplateData(BaseModel):
     )
 
     # Wind section
-    wind_info: Optional[str] = Field(
-        None, description="Formatted wind forecast with bullet points"
-    )
+    wind_info: Optional[str] = Field(None, description="Formatted wind forecast with bullet points")
 
     # Footer - station/provider info
     station_name: str = Field(..., description="NOAA station name and ID")
     station_city: str = Field(..., description="Station city name")
-    wind_provider: str = Field(
-        default="Open-Meteo", description="Wind data provider name"
-    )
+    wind_provider: str = Field(default="Open-Meteo", description="Wind data provider name")
 
     # Metadata timestamps
     date_retrieved: str = Field(
@@ -203,7 +201,7 @@ data = EmailTemplateData(
     station_city="Atlantic City",
     wind_provider="Open-Meteo",
     date_retrieved="Jun 16 at 6:45 AM",
-    water_temp_measured_at_date="Jun 16 at 6:30 AM"
+    water_temp_measured_at_date="Jun 16 at 6:30 AM",
 )
 
 # Convert to template dict
@@ -266,10 +264,7 @@ class NoaaWaterTempResponse(BaseAPIModel):
 **Usage Example**:
 ```python
 # Build request params
-params = NoaaWaterTempParams(
-    station="8534720",
-    date="latest"
-)
+params = NoaaWaterTempParams(station="8534720", date="latest")
 
 # Serialize to query params
 query_params = params.model_dump(by_alias=True, exclude_none=True)
@@ -277,15 +272,12 @@ query_params = params.model_dump(by_alias=True, exclude_none=True)
 
 # Parse API response
 api_response = {
-    "data": [
-        {"t": "2026-06-16 12:00", "v": "72.5"},
-        {"t": "2026-06-16 11:54", "v": "72.3"}
-    ]
+    "data": [{"t": "2026-06-16 12:00", "v": "72.5"}, {"t": "2026-06-16 11:54", "v": "72.3"}]
 }
 
 response = NoaaWaterTempResponse.model_validate(api_response)
 print(response.data[0].temperature)  # 72.5
-print(response.data[0].timestamp)    # "2026-06-16 12:00"
+print(response.data[0].timestamp)  # "2026-06-16 12:00"
 ```
 
 ---
@@ -327,17 +319,14 @@ class NoaaTidePredictionRecord(BaseAPIModel):
 **Usage Example**:
 ```python
 params = NoaaTidesParams(
-    station="8534720",
-    begin_date="20260616",
-    end_date="20260617",
-    interval="hilo"
+    station="8534720", begin_date="20260616", end_date="20260617", interval="hilo"
 )
 
 # Parse response
 api_response = {
     "predictions": [
         {"t": "2026-06-16 07:32", "v": "3.1", "type": "H"},
-        {"t": "2026-06-16 13:45", "v": "0.8", "type": "L"}
+        {"t": "2026-06-16 13:45", "v": "0.8", "type": "L"},
     ]
 }
 
@@ -414,7 +403,7 @@ api_response = {
     "hourly": {
         "time": ["2026-06-16T08:00", "2026-06-16T12:00"],
         "wind_speed_10m": [12.5, 10.2],
-        "wind_direction_10m": [315, 270]
+        "wind_direction_10m": [315, 270],
     }
 }
 
@@ -426,7 +415,7 @@ for i, time_str in enumerate(api_response["hourly"]["time"]):
         speed_mph=api_response["hourly"]["wind_speed_10m"][i],
         direction="NW" if i == 0 else "W",
         wind_type="Offshore" if i == 0 else "Cross-shore",
-        direction_degrees=api_response["hourly"]["wind_direction_10m"][i]
+        direction_degrees=api_response["hourly"]["wind_direction_10m"][i],
     )
     entries.append(entry)
 ```
@@ -473,11 +462,12 @@ class NoaaWaterTemperatureRecord(BaseAPIModel):
     timestamp: str = Field(alias="t")  # API uses "t"
     temperature: float = Field(alias="v")  # API uses "v"
 
+
 # API response: {"t": "2026-06-16 12:00", "v": "72.5"}
 record = NoaaWaterTemperatureRecord.model_validate({"t": "...", "v": 72.5})
 
 # Access with readable names
-print(record.timestamp)    # Not "record.t"
+print(record.timestamp)  # Not "record.t"
 print(record.temperature)  # Not "record.v"
 ```
 
@@ -494,10 +484,7 @@ record = NoaaWaterTemperatureRecord(t="...", v=72.5)
 record.temperature = 75.0  # Raises FrozenInstanceError
 
 # ✅ Create new instance instead
-updated = NoaaWaterTemperatureRecord(
-    t=record.timestamp,
-    v=75.0
-)
+updated = NoaaWaterTemperatureRecord(t=record.timestamp, v=75.0)
 ```
 
 ---
@@ -512,6 +499,7 @@ class NoaaWaterTempParams(BaseAPIModel):
     station: str
     date: str
     # ...
+
 
 # Response (what we receive)
 class NoaaWaterTempResponse(BaseAPIModel):
@@ -535,6 +523,7 @@ class NoaaWaterTempResponse(BaseAPIModel):
     data: list[NoaaWaterTemperatureRecord]  # ← Nested model
     metadata: dict | None = None
 
+
 class NoaaWaterTemperatureRecord(BaseAPIModel):  # ← Nested model
     timestamp: str
     temperature: float
@@ -556,6 +545,7 @@ class NoaaWaterTempParams(BaseAPIModel):
     station: str
     date: str
 
+
 # ✅ Valid
 params = NoaaWaterTempParams(station="8534720", date="latest")
 
@@ -570,8 +560,8 @@ params = NoaaWaterTempParams(station=8534720, date=123)
 
 ```python
 class NoaaWaterTempParams(BaseAPIModel):
-    station: str              # Required
-    date: str = "latest"      # Optional with default
+    station: str  # Required
+    date: str = "latest"  # Optional with default
     metadata: dict | None = None  # Optional, can be None
 ```
 
@@ -581,6 +571,7 @@ class NoaaWaterTempParams(BaseAPIModel):
 
 ```python
 from pydantic import field_validator
+
 
 class NoaaTidesParams(BaseAPIModel):
     station: str
@@ -608,11 +599,11 @@ class NoaaTidesParams(BaseAPIModel):
 **Example**:
 ```python
 # API models (direct API interaction)
-NoaaWaterTempParams      # API request
-NoaaWaterTempResponse    # API response
+NoaaWaterTempParams  # API request
+NoaaWaterTempResponse  # API response
 
 # Domain models (processed data)
-WindForecastEntry        # Processed wind data for email
+WindForecastEntry  # Processed wind data for email
 ```
 
 ---
@@ -671,6 +662,7 @@ def test_water_temp_record_validation():
     record = NoaaWaterTemperatureRecord(t="2026-06-16 12:00", v=72.5)
     assert record.timestamp == "2026-06-16 12:00"
     assert record.temperature == 72.5
+
 
 def test_water_temp_record_invalid():
     # Invalid data (temperature is string, not float)

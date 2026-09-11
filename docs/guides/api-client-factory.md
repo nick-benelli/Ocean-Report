@@ -101,10 +101,7 @@ from ocean_report.config.loader import load_app_config
 
 # Create custom session with additional configuration
 session = requests.Session()
-session.headers.update({
-    "User-Agent": "OceanReport/1.0",
-    "Accept": "application/json"
-})
+session.headers.update({"User-Agent": "OceanReport/1.0", "Accept": "application/json"})
 
 # Inject session into client
 config = load_app_config("config.yaml")
@@ -127,6 +124,7 @@ import pytest
 from ocean_report.api_client.factory import create_api_client
 from ocean_report.config.schemas import AppConfig, ApiConfig
 
+
 def test_api_interaction():
     """Test API interactions with a mocked session."""
     # Create mock session
@@ -137,13 +135,7 @@ def test_api_interaction():
     mock_session.get.return_value = mock_response
 
     # Create minimal config for testing
-    config = AppConfig(
-        api=ApiConfig(
-            timeout_seconds=5,
-            verify_ssl=False,
-            max_retries=1
-        )
-    )
+    config = AppConfig(api=ApiConfig(timeout_seconds=5, verify_ssl=False, max_retries=1))
 
     # Create client with mock
     client = create_api_client(config, session=mock_session)
@@ -165,10 +157,12 @@ def test_api_interaction():
 from ocean_report.config.loader import load_app_config
 from ocean_report.api_client.factory import create_api_client
 
+
 def create_production_client():
     """Create client optimized for production."""
     config = load_app_config("config/production.yaml")
     return create_api_client(config)
+
 
 def create_development_client():
     """Create client for development with relaxed SSL."""
@@ -176,11 +170,13 @@ def create_development_client():
     # development.yaml might have verify_ssl: false
     return create_api_client(config)
 
+
 def create_test_client():
     """Create client with shorter timeouts for testing."""
     config = load_app_config("config/test.yaml")
     # test.yaml might have timeout_seconds: 5.0
     return create_api_client(config)
+
 
 # Usage
 if os.getenv("ENV") == "production":
@@ -228,6 +224,7 @@ from ocean_report.config.schemas import AppConfig, ApiConfig
 from ocean_report.api_client.factory import create_api_client
 from ocean_report.config.loader import load_app_config
 
+
 def create_client_with_overrides(base_config: AppConfig, **overrides):
     """Create client with specific config overrides."""
     # Extract current API config
@@ -242,21 +239,15 @@ def create_client_with_overrides(base_config: AppConfig, **overrides):
 
     return create_api_client(new_app_config)
 
+
 # Usage
 base_config = load_app_config("config.yaml")
 
 # Create client with extended timeout for slow endpoints
-slow_client = create_client_with_overrides(
-    base_config,
-    timeout_seconds=60.0,
-    max_retries=5
-)
+slow_client = create_client_with_overrides(base_config, timeout_seconds=60.0, max_retries=5)
 
 # Create client with SSL verification disabled for local testing
-local_client = create_client_with_overrides(
-    base_config,
-    verify_ssl=False
-)
+local_client = create_client_with_overrides(base_config, verify_ssl=False)
 ```
 
 ---
@@ -448,7 +439,7 @@ Each layer has a single responsibility:
 **1. Always load config first**
 ```python
 config = load_app_config("config.yaml")  # Validates
-client = create_api_client(config)       # Uses validated config
+client = create_api_client(config)  # Uses validated config
 ```
 
 **2. Use factory consistently**
@@ -516,6 +507,7 @@ from unittest.mock import Mock
 from ocean_report.api_client.factory import create_api_client
 from ocean_report.config.schemas import AppConfig, ApiConfig
 
+
 @pytest.fixture
 def mock_session():
     """Mock session that returns test data."""
@@ -526,17 +518,14 @@ def mock_session():
     session.get.return_value = response
     return session
 
+
 @pytest.fixture
 def test_config():
     """Test configuration."""
     return AppConfig(
-        api=ApiConfig(
-            timeout_seconds=5,
-            verify_ssl=False,
-            max_retries=1,
-            backoff_seconds=0.1
-        )
+        api=ApiConfig(timeout_seconds=5, verify_ssl=False, max_retries=1, backoff_seconds=0.1)
     )
+
 
 def test_client_makes_request(mock_session, test_config):
     """Test that client makes requests correctly."""
@@ -557,6 +546,7 @@ def test_client_makes_request(mock_session, test_config):
 import pytest
 from ocean_report.api_client.factory import create_api_client
 from ocean_report.config.loader import load_app_config
+
 
 @pytest.mark.integration
 def test_client_with_real_config():

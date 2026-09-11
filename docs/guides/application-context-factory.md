@@ -55,6 +55,7 @@ context = create_application_context(config_path="config/prod.yaml")
 
 # Also accepts Path objects
 from pathlib import Path
+
 context = create_application_context(config_path=Path("config/prod.yaml"))
 ```
 
@@ -136,13 +137,15 @@ context = create_application_context(config=config)
 # Create context once
 main_context = create_application_context()
 
+
 # Pass it through in functions that may or may not have a context
 # This is useful for dependency injection patterns
-def process_data(context = None):
+def process_data(context=None):
     """Process data using provided or default context."""
     ctx = create_application_context(context=context)
     # ctx is always valid here - either the passed context or a new one
     return ctx.client.get("https://api.example.com/data")
+
 
 # Call with existing context (no-op, returns same instance)
 result = process_data(context=main_context)
@@ -160,6 +163,7 @@ result = process_data()
 ```python
 from ocean_report.application import create_application_context
 
+
 def initialize_application(env: str = "default"):
     """Initialize application with environment-specific configuration."""
     if env == "default":
@@ -167,6 +171,7 @@ def initialize_application(env: str = "default"):
     else:
         config_path = f"config/{env}.yaml"
         return create_application_context(config_path=config_path)
+
 
 # Usage
 dev_context = initialize_application("dev")
@@ -183,6 +188,7 @@ import pytest
 from ocean_report.config.schemas import AppConfig, ApiConfig
 from ocean_report.application import create_application_context
 
+
 @pytest.fixture
 def test_context():
     """Create test context with custom configuration."""
@@ -198,6 +204,7 @@ def test_context():
     )
     return create_application_context(config=test_config)
 
+
 def test_api_call(test_context):
     """Test using custom test context."""
     response = test_context.client.get("https://test.example.com")
@@ -210,6 +217,7 @@ def test_api_call(test_context):
 
 ```python
 from ocean_report.application import create_application_context, ApplicationContext
+
 
 class ApplicationService:
     """Service that maintains a single application context."""
@@ -228,6 +236,7 @@ class ApplicationService:
         """Reset the singleton (useful for testing)."""
         cls._context = None
 
+
 # Usage
 context = ApplicationService.get_context()
 
@@ -243,6 +252,7 @@ ApplicationService.reset()  # Clean state for next test
 import os
 from ocean_report.application import create_application_context
 
+
 def get_context_for_environment():
     """Get context based on APP_ENV environment variable."""
     env = os.getenv("APP_ENV", "dev")
@@ -253,6 +263,7 @@ def get_context_for_environment():
         return create_application_context(config_path="config/staging.yaml")
     else:
         return create_application_context(config_path="config/dev.yaml")
+
 
 # Usage
 context = get_context_for_environment()
@@ -265,6 +276,7 @@ context = get_context_for_environment()
 ```python
 from contextlib import contextmanager
 from ocean_report.application import create_application_context
+
 
 @contextmanager
 def application_context(config_path: str | None = None):
@@ -280,6 +292,7 @@ def application_context(config_path: str | None = None):
         # Cleanup if needed (e.g., close connections)
         # ApiClient sessions are closed automatically when garbage collected
         pass
+
 
 # Usage
 with application_context("config/prod.yaml") as ctx:
@@ -324,11 +337,13 @@ create_application_context(my_config)  # TypeError!
 Only ONE source of configuration can be provided:
 
 ```python
-provided_params = sum([
-    context is not None,
-    config is not None,
-    config_path is not None,
-])
+provided_params = sum(
+    [
+        context is not None,
+        config is not None,
+        config_path is not None,
+    ]
+)
 
 if provided_params > 1:
     raise ValueError(
@@ -486,8 +501,8 @@ provided. Multiple parameters create ambiguous configuration sources.
 context = create_application_context()
 
 # ApplicationContext is a frozen dataclass with two fields:
-context.config    # AppConfig - validated configuration
-context.client    # ApiClient - HTTP client with retry logic
+context.config  # AppConfig - validated configuration
+context.client  # ApiClient - HTTP client with retry logic
 
 # Immutable - prevents accidental changes
 context.config = other_config  # ❌ Raises AttributeError
@@ -511,10 +526,12 @@ from ocean_report.application import create_application_context
 # At application startup
 app_context = create_application_context()
 
+
 # Use throughout application
 def main():
     # Fetch water temperature
     from ocean_report.use_cases.water_temp import get_latest_water_temp
+
     temp, time, data_time = get_latest_water_temp(app_context)
     print(f"Water temp: {temp}°F at {time}")
 ```
@@ -528,23 +545,21 @@ import pytest
 from ocean_report.application import create_application_context
 from ocean_report.config.schemas import AppConfig, ApiConfig
 
+
 @pytest.fixture
 def test_context():
     """Test context with fast timeouts."""
     config = AppConfig(
-        api=ApiConfig(
-            timeout_seconds=5,
-            verify_ssl=False,
-            max_retries=1,
-            backoff_seconds=0.1
-        ),
+        api=ApiConfig(timeout_seconds=5, verify_ssl=False, max_retries=1, backoff_seconds=0.1),
         # ... other test config
     )
     return create_application_context(config=config)
 
+
 def test_use_case(test_context):
     """Test with custom context."""
     from ocean_report.use_cases.water_temp import get_latest_water_temp
+
     temp, _, _ = get_latest_water_temp(test_context)
     assert isinstance(temp, float)
 ```
@@ -556,12 +571,14 @@ def test_use_case(test_context):
 ```python
 from ocean_report.application import create_application_context, ApplicationContext
 
+
 def process_data(context: ApplicationContext | None = None):
     """Process data with provided or default context."""
     ctx = create_application_context(context=context)
     # ctx is always valid here
     response = ctx.client.get("https://api.example.com/data")
     return response.json()
+
 
 # Call with context
 result = process_data(context=my_context)
@@ -581,7 +598,7 @@ result = process_data()
 config = load_app_config("config.yaml")
 context = create_application_context(
     config=config,
-    config_path="other.yaml"  # ERROR!
+    config_path="other.yaml",  # ERROR!
 )
 ```
 
@@ -607,6 +624,7 @@ context = create_application_context(config_path="missing.yaml")
 ```python
 # ✅ Fix - verify file exists
 from pathlib import Path
+
 config_path = Path("config/prod.yaml")
 assert config_path.exists(), f"Config not found: {config_path}"
 context = create_application_context(config_path=config_path)

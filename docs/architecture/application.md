@@ -16,14 +16,14 @@ Imagine you have 10 functions that need both `config` and `client`:
 
 ```python
 # Without ApplicationContext ❌
-def fetch_water_temp(config, client, station_id):
-    ...
+def fetch_water_temp(config, client, station_id): ...
 
-def fetch_tides(config, client, station_id):
-    ...
 
-def fetch_wind(config, client, lat, lon):
-    ...
+def fetch_tides(config, client, station_id): ...
+
+
+def fetch_wind(config, client, lat, lon): ...
+
 
 # Every function needs both parameters!
 water_temp = fetch_water_temp(config, client, "8534720")
@@ -39,6 +39,7 @@ def fetch_water_temp(context, station_id):
     # Access config: context.config
     # Access client: context.client
     ...
+
 
 context = create_application_context()
 water_temp = fetch_water_temp(context, "8534720")
@@ -98,6 +99,7 @@ from dataclasses import dataclass
 from ..api_client.client import ApiClient
 from ..config.schemas import AppConfig
 
+
 @dataclass(frozen=True)
 class ApplicationContext:
     """Immutable container for application dependencies.
@@ -109,6 +111,7 @@ class ApplicationContext:
     Being frozen (immutable) prevents accidental modification during
     the workflow execution.
     """
+
     config: AppConfig
     client: ApiClient
 ```
@@ -236,17 +239,19 @@ Multiple sources create ambiguity:
 # ❌ What should this do?
 context = create_application_context(
     config=my_config,
-    config_path="other_config.yaml"  # Which one wins?
+    config_path="other_config.yaml",  # Which one wins?
 )
 ```
 
 **Enforcement**:
 ```python
-provided_params = sum([
-    context is not None,
-    config is not None,
-    config_path is not None,
-])
+provided_params = sum(
+    [
+        context is not None,
+        config is not None,
+        config_path is not None,
+    ]
+)
 
 if provided_params > 1:
     raise ValueError("Only one parameter may be provided")
@@ -334,11 +339,13 @@ import pytest
 from ocean_report.application import create_application_context
 from ocean_report.config.loader import load_app_config
 
+
 @pytest.fixture
 def test_context():
     # Load test-specific config
     config = load_app_config("tests/fixtures/test_config.yaml")
     return create_application_context(config=config)
+
 
 def test_water_temp_fetch(test_context):
     temp, _, _ = get_latest_water_temp(context=test_context)
@@ -404,24 +411,24 @@ The `ApplicationContext.config` contains all application settings. See [Config C
 context = create_application_context()
 
 # NOAA settings
-context.config.noaa.station_id       # "8534720"
-context.config.noaa.buoy_id          # "44009"
+context.config.noaa.station_id  # "8534720"
+context.config.noaa.buoy_id  # "44009"
 
 # Email settings
-context.config.email.host            # "smtp.gmail.com"
-context.config.email.port            # 587
-context.config.email.address         # "sender@example.com"
-context.config.email.password        # From environment variable
+context.config.email.host  # "smtp.gmail.com"
+context.config.email.port  # 587
+context.config.email.address  # "sender@example.com"
+context.config.email.password  # From environment variable
 
 # Location settings
-context.config.location.latitude     # 39.58
-context.config.location.longitude    # -74.22
+context.config.location.latitude  # 39.58
+context.config.location.longitude  # -74.22
 context.config.location.beach_direction  # 140
 
 # API client settings
-context.config.api.timeout           # 10.0
-context.config.api.verify_ssl        # True
-context.config.api.max_retries       # 3
+context.config.api.timeout  # 10.0
+context.config.api.verify_ssl  # True
+context.config.api.max_retries  # 3
 ```
 
 ---
@@ -441,17 +448,16 @@ def test_create_default_context():
     assert isinstance(context.config, AppConfig)
     assert isinstance(context.client, ApiClient)
 
+
 def test_create_from_config_path():
     context = create_application_context(config_path="tests/fixtures/test.yaml")
 
     assert context.config.noaa.station_id == "TEST_STATION"
 
+
 def test_mutual_exclusivity():
     with pytest.raises(ValueError, match="Only one parameter"):
-        create_application_context(
-            config=AppConfig(...),
-            config_path="config.yaml"
-        )
+        create_application_context(config=AppConfig(...), config_path="config.yaml")
 ```
 
 ---
@@ -485,7 +491,9 @@ def test_context_in_workflow():
 ```python
 # ❌ With global config
 import ocean_report
+
 ocean_report.CONFIG = load_config("config.yaml")  # Modifies global state
+
 
 # Now every test must reset global state
 def test_something():
@@ -511,11 +519,11 @@ def test_something():
 
 ```python
 # ❌ Separate parameters
-def fetch_water_temp(config, client, station_id):
-    ...
+def fetch_water_temp(config, client, station_id): ...
 
-def fetch_tides(config, client, station_id):
-    ...
+
+def fetch_tides(config, client, station_id): ...
+
 
 def run_report(config, client):
     water = fetch_water_temp(config, client, config.noaa.station_id)
@@ -525,11 +533,11 @@ def run_report(config, client):
 
 ```python
 # ✅ With context
-def fetch_water_temp(context, station_id):
-    ...
+def fetch_water_temp(context, station_id): ...
 
-def fetch_tides(context, station_id):
-    ...
+
+def fetch_tides(context, station_id): ...
+
 
 def run_report(context):
     water = fetch_water_temp(context, context.config.noaa.station_id)
@@ -552,13 +560,14 @@ class ApplicationContext:
     logger: logging.Logger  # Used by many components
     metrics: MetricsCollector  # Used by many components
 
+
 # ❌ Bad additions: workflow-specific data
 @dataclass(frozen=True)
 class ApplicationContext:
     config: AppConfig
     client: ApiClient
     water_temp: float  # ❌ This is workflow data, not a dependency!
-    tides: list        # ❌ This is workflow data, not a dependency!
+    tides: list  # ❌ This is workflow data, not a dependency!
 ```
 
 **Guideline**: Only add things that are:
@@ -576,10 +585,12 @@ class ApplicationContext:
 ```python
 context = create_application_context()
 
+
 def bad_function(ctx):
     # ❌ If not frozen, this would modify shared state
     ctx.config = some_other_config
     # Now all code using this context is broken!
+
 
 bad_function(context)
 # Without frozen=True, context is now corrupted
@@ -617,10 +628,7 @@ context = ApplicationContext(config=config, client=client)
 **Considered**:
 ```python
 # Option 1: Direct construction
-context = ApplicationContext(
-    config=load_app_config(),
-    client=create_api_client(...)
-)
+context = ApplicationContext(config=load_app_config(), client=create_api_client(...))
 
 # Option 2: Factory function
 context = create_application_context()
@@ -642,10 +650,7 @@ context = create_application_context()
 
 **Cause**: Multiple conflicting parameters:
 ```python
-create_application_context(
-    config=my_config,
-    config_path="config.yaml"
-)
+create_application_context(config=my_config, config_path="config.yaml")
 ```
 
 **Fix**: Provide only one:

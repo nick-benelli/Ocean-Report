@@ -189,19 +189,15 @@ def run_report(...):
 from ocean_report.workflows.data.fetcher import fetch_raw_data
 
 fetch_params = FetchParams(
-    station_id="8534720",
-    date_str="20260616",
-    latitude=39.58,
-    longitude=-74.22,
-    beach_direction=140
+    station_id="8534720", date_str="20260616", latitude=39.58, longitude=-74.22, beach_direction=140
 )
 
 data = fetch_raw_data(context, fetch_params)
 
 # Access fetched data
-print(data.water_temp)      # 72.5
-print(data.tides)           # [{"time": "7:32 AM", ...}, ...]
-print(data.wind_entries)    # [WindForecastEntry(...), ...]
+print(data.water_temp)  # 72.5
+print(data.tides)  # [{"time": "7:32 AM", ...}, ...]
+print(data.wind_entries)  # [WindForecastEntry(...), ...]
 ```
 
 **Structure**:
@@ -288,7 +284,7 @@ send_or_preview_email(
     run_email=True,
     subject="Daily Water Report",
     body="Email content here...",
-    bcc_recipients=["user1@example.com", "user2@example.com"]
+    bcc_recipients=["user1@example.com", "user2@example.com"],
 )
 ```
 
@@ -312,17 +308,13 @@ from datetime import date
 
 # Production
 subject = format_email_subject(
-    subject_name="🌊 LBI Daily Water Report",
-    today=date.today(),
-    test=False
+    subject_name="🌊 LBI Daily Water Report", today=date.today(), test=False
 )
 # "🌊 LBI Daily Water Report: 2026-06-16"
 
 # Test mode
 subject = format_email_subject(
-    subject_name="🌊 LBI Daily Water Report",
-    today=date.today(),
-    test=True
+    subject_name="🌊 LBI Daily Water Report", today=date.today(), test=True
 )
 # "TEST: 🌊 LBI Daily Water Report: 2026-06-16"
 ```
@@ -350,7 +342,7 @@ html_path = write_email_preview(
     body="Email content...",
     sender_email="surf@example.com",
     email_recipients="",
-    bcc_recipients=["user1@example.com", "user2@example.com"]
+    bcc_recipients=["user1@example.com", "user2@example.com"],
 )
 
 print(f"Preview saved to: {html_path}")
@@ -372,10 +364,7 @@ print(f"Preview saved to: {html_path}")
 from ocean_report.workflows.email.validator import validate_email_credentials
 
 # Raises ValueError if missing
-validate_email_credentials(
-    sender="surf@example.com",
-    password="app_password_123"
-)
+validate_email_credentials(sender="surf@example.com", password="app_password_123")
 ```
 
 ---
@@ -390,11 +379,11 @@ validate_email_credentials(
 @dataclass
 class FetchParams:
     station_id: str
-    date_str: str              # YYYYMMDD format
+    date_str: str  # YYYYMMDD format
     latitude: float
     longitude: float
-    beach_facing_deg: float    # Beach orientation in degrees
-    forecast_times: set[str]   # Times to fetch (e.g., {"08:00", "12:00"})
+    beach_facing_deg: float  # Beach orientation in degrees
+    forecast_times: set[str]  # Times to fetch (e.g., {"08:00", "12:00"})
 ```
 
 ### RawReportData
@@ -404,12 +393,12 @@ class FetchParams:
 ```python
 @dataclass
 class RawReportData:
-    tides: list                      # List of NoaaTidePredictionRecord
+    tides: list  # List of NoaaTidePredictionRecord
     tide_timestamp: datetime
     water_temp: float | None
     water_temp_timestamp: datetime
-    water_temp_data_time: str | None # Sensor measurement time
-    wind_forecast: list              # List of WindForecastEntry dicts
+    water_temp_data_time: str | None  # Sensor measurement time
+    wind_forecast: list  # List of WindForecastEntry dicts
     wind_timestamp: datetime | None
 ```
 
@@ -521,8 +510,8 @@ from ocean_report.workflows.report_runner import run_report
 
 # Send real email to production recipients
 run_report(
-    run_email=True,   # Send email
-    test=False        # Production recipients
+    run_email=True,  # Send email
+    test=False,  # Production recipients
 )
 ```
 
@@ -534,7 +523,7 @@ run_report(
 # Preview email without sending
 run_report(
     run_email=False,  # Preview only
-    test=True         # Test recipients
+    test=True,  # Test recipients
 )
 ```
 
@@ -544,11 +533,7 @@ run_report(
 
 ```python
 # Use different config file
-run_report(
-    cfg_path="config/staging.yaml",
-    run_email=True,
-    test=False
-)
+run_report(cfg_path="config/staging.yaml", run_email=True, test=False)
 ```
 
 ---
@@ -583,10 +568,11 @@ jobs:
 from unittest.mock import patch, Mock
 from ocean_report.models.email import EmailTemplateData
 
-@patch('ocean_report.workflows.report_runner.fetch_raw_data')
-@patch('ocean_report.workflows.report_runner.format_report_data')
-@patch('ocean_report.workflows.report_runner.render_email_template')
-@patch('ocean_report.workflows.report_runner.send_or_preview_email')
+
+@patch("ocean_report.workflows.report_runner.fetch_raw_data")
+@patch("ocean_report.workflows.report_runner.format_report_data")
+@patch("ocean_report.workflows.report_runner.render_email_template")
+@patch("ocean_report.workflows.report_runner.send_or_preview_email")
 def test_run_report_preview_mode(mock_send, mock_render, mock_format, mock_fetch):
     # Mock data fetching
     mock_fetch.return_value = Mock()  # RawReportData
@@ -601,7 +587,7 @@ def test_run_report_preview_mode(mock_send, mock_render, mock_format, mock_fetch
         station_city="Test City",
         wind_provider="Test Provider",
         date_retrieved="Jun 16 at 6:45 AM",
-        water_temp_measured_at_date=None
+        water_temp_measured_at_date=None,
     )
 
     # Mock template rendering
@@ -615,11 +601,7 @@ def test_run_report_preview_mode(mock_send, mock_render, mock_format, mock_fetch
     mock_format.assert_called_once()
     mock_render.assert_called_once()
     mock_send.assert_called_once_with(
-        context=Any,
-        run_email=False,
-        subject=Any,
-        body="Email body content",
-        bcc_recipients=Any
+        context=Any, run_email=False, subject=Any, body="Email body content", bcc_recipients=Any
     )
 ```
 
@@ -631,6 +613,7 @@ def test_run_report_preview_mode(mock_send, mock_render, mock_format, mock_fetch
 from ocean_report.workflows.data.formatter import format_report_data
 from ocean_report.workflows.models import RawReportData
 
+
 def test_format_report_data():
     """Test data formatting to EmailTemplateData."""
     raw_data = RawReportData(
@@ -640,7 +623,7 @@ def test_format_report_data():
         water_temp_timestamp=datetime.now(),
         water_temp_data_time="2026-06-16 12:00",
         wind_forecast=[...],
-        wind_timestamp=datetime.now()
+        wind_timestamp=datetime.now(),
     )
 
     email_data = format_report_data(raw_data)
@@ -662,7 +645,7 @@ def test_run_report_end_to_end():
     # Run with real API calls but don't send email
     run_report(
         run_email=False,  # Preview only
-        test=True
+        test=True,
     )
 
     # If we get here without exceptions, workflow succeeded

@@ -63,10 +63,7 @@ API Client Layer
 from ocean_report.services.water_temp_service import fetch_water_temp
 from ocean_report.models.noaa.water_temperature import NoaaWaterTempParams
 
-params = NoaaWaterTempParams(
-    station="8534720",
-    date="latest"
-)
+params = NoaaWaterTempParams(station="8534720", date="latest")
 
 record = fetch_water_temp(context=context, params=params)
 
@@ -111,10 +108,7 @@ from ocean_report.services.tide_service import fetch_tides
 from ocean_report.models.noaa.tides import NoaaTidesParams
 
 params = NoaaTidesParams(
-    station="8534720",
-    begin_date="20260616",
-    end_date="20260617",
-    interval="hilo"
+    station="8534720", begin_date="20260616", end_date="20260617", interval="hilo"
 )
 
 tides = fetch_tides(context=context, params=params)
@@ -147,7 +141,7 @@ params = OpenMeteoForecastParams(
     latitude=39.58,
     longitude=-74.22,
     hourly=["wind_speed_10m", "wind_direction_10m"],
-    wind_speed_unit="mph"
+    wind_speed_unit="mph",
 )
 
 forecast = fetch_wind_forecast(context=context, params=params)
@@ -184,6 +178,7 @@ def fetch_water_temp(context, params):
     endpoint = WaterTemperatureEndpoint(context.client)
     response = endpoint.fetch(params)
     return response.data[0] if response.data else None
+
 
 # Use Case (handles defaults)
 def get_latest_water_temp(context, station_id=None):
@@ -351,13 +346,14 @@ except ApiClientError as e:
 ```python
 from unittest.mock import Mock, patch
 
+
 def test_fetch_water_temp():
     # Mock context
     context = Mock()
     context.client = Mock()
 
     # Mock endpoint
-    with patch('ocean_report.services.water_temp_service.WaterTemperatureEndpoint') as MockEndpoint:
+    with patch("ocean_report.services.water_temp_service.WaterTemperatureEndpoint") as MockEndpoint:
         mock_endpoint = Mock()
         MockEndpoint.return_value = mock_endpoint
 
@@ -385,10 +381,7 @@ def test_fetch_water_temp():
 def test_fetch_water_temp_real_api():
     context = create_application_context()
 
-    params = NoaaWaterTempParams(
-        station="8534720",
-        date="latest"
-    )
+    params = NoaaWaterTempParams(station="8534720", date="latest")
 
     record = fetch_water_temp(context, params)
 
@@ -411,11 +404,13 @@ def test_fetch_water_temp_real_api():
 ```python
 # services/wind_service.py
 
+
 def fetch_wind_forecast(context, params):
     """Fetch wind forecast from Open-Meteo."""
     endpoint = ForecastEndpoint(context.client)
     response = endpoint.fetch(params)
     return response
+
 
 def process_hourly_wind(forecast_response, target_hours):
     """Extract specific hours from forecast.
@@ -441,6 +436,7 @@ def fetch_water_temp(context):
     params = NoaaWaterTempParams(station=station, date="latest")
     ...
 
+
 # ✅ Right
 def fetch_water_temp(context, params):
     # Params provided by caller
@@ -459,6 +455,7 @@ def fetch_tides(context, params):
 
     # Business rule: only show high tides above 3ft
     return [t for t in response.predictions if t.type == "H" and t.height_ft > 3.0]
+
 
 # ✅ Right
 def fetch_tides(context, params):
@@ -479,6 +476,7 @@ def fetch_water_temp(context, params):
         return endpoint.fetch(params)
     except ApiClientError:
         return None  # ❌ Silent failure!
+
 
 # ✅ Right
 def fetch_water_temp(context, params):

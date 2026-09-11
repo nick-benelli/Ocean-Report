@@ -98,19 +98,14 @@ class BaseEndpoint:
     def get_json(self, path: str, *, params=None, headers=None):
         """Execute GET request and return JSON."""
         return self.client.get_json(
-            self.build_url(path),
-            params=self.serialize_params(params),
-            headers=headers
+            self.build_url(path), params=self.serialize_params(params), headers=headers
         )
 ```
 
 **Usage**:
 ```python
 endpoint = WaterTemperatureEndpoint(client)
-data = endpoint.get_json(
-    "/datagetter",
-    params=NoaaWaterTempParams(station="8534720")
-)
+data = endpoint.get_json("/datagetter", params=NoaaWaterTempParams(station="8534720"))
 ```
 
 ---
@@ -122,6 +117,7 @@ data = endpoint.get_json(
 ```python
 class NoaaEndpoint(BaseEndpoint):
     """Base for all NOAA API endpoints."""
+
     BASE_URL = "https://api.tidesandcurrents.noaa.gov/api/prod"
 ```
 
@@ -163,7 +159,7 @@ params = NoaaWaterTempParams(
     format="json",
     time_zone="gmt",
     units="english",
-    application="ocean-report"
+    application="ocean-report",
 )
 
 response = endpoint.fetch(params)
@@ -211,7 +207,7 @@ params = NoaaTidesParams(
     interval="hilo",  # High/low tides only
     format="json",
     time_zone="lst_ldt",
-    units="english"
+    units="english",
 )
 
 response = endpoint.fetch(params)
@@ -307,7 +303,7 @@ params = OpenMeteoForecastParams(
     longitude=-74.22,
     hourly=["wind_speed_10m", "wind_direction_10m"],
     wind_speed_unit="mph",
-    timezone="America/New_York"
+    timezone="America/New_York",
 )
 
 response = endpoint.fetch(params)
@@ -328,7 +324,7 @@ class WaterTemperatureEndpoint:
     def fetch(
         self,
         params: NoaaWaterTempParams,  # ← Typed input
-    ) -> NoaaWaterTempResponse:        # ← Typed output
+    ) -> NoaaWaterTempResponse:  # ← Typed output
         data = self.get_json(self.PATH, params=params)
         return NoaaWaterTempResponse.model_validate(data)
 ```
@@ -360,6 +356,7 @@ class WaterTemperatureEndpoint:
 class WaterTemperatureEndpoint:
     def fetch(self, params: NoaaWaterTempParams):
         return self.get_json(self.PATH, params=params)
+
 
 # ❌ Bad: Endpoint has business logic
 class WaterTemperatureEndpoint:
@@ -470,10 +467,7 @@ def test_water_temp_endpoint_real_api():
     endpoint = WaterTemperatureEndpoint(client)
 
     params = NoaaWaterTempParams(
-        station="8534720",
-        date="latest",
-        product="water_temperature",
-        format="json"
+        station="8534720", date="latest", product="water_temperature", format="json"
     )
 
     response = endpoint.fetch(params)

@@ -74,7 +74,7 @@ configure_logger(
     output=output_map[config.logging.output],
     log_file=config.logging.file_path,
     level=level_map[config.logging.level],
-    log_format=config.logging.format
+    log_format=config.logging.format,
 )
 ```
 
@@ -138,10 +138,7 @@ Perfect for cron jobs and production servers:
 ```python
 from ocean_report.logger import configure_logger, LogOutput
 
-configure_logger(
-    output=LogOutput.FILE,
-    log_file="logs/production.log"
-)
+configure_logger(output=LogOutput.FILE, log_file="logs/production.log")
 ```
 
 **Benefits:**
@@ -158,10 +155,7 @@ See logs in real-time AND save for later:
 ```python
 from ocean_report.logger import configure_logger, LogOutput
 
-configure_logger(
-    output=LogOutput.BOTH,
-    log_file="logs/debug.log"
-)
+configure_logger(output=LogOutput.BOTH, log_file="logs/debug.log")
 ```
 
 **Benefits:**
@@ -183,10 +177,7 @@ from ocean_report.logger import configure_logger, LogOutput
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 log_file = Path(f"logs/reports/ocean_report_{timestamp}.log")
 
-configure_logger(
-    output=LogOutput.BOTH,
-    log_file=log_file
-)
+configure_logger(output=LogOutput.BOTH, log_file=log_file)
 ```
 
 **Result:**
@@ -210,7 +201,7 @@ from ocean_report.logger import configure_logger, LogOutput
 configure_logger(
     output=LogOutput.BOTH,
     log_file="logs/debug.log",
-    level=logging.DEBUG  # Show everything
+    level=logging.DEBUG,  # Show everything
 )
 ```
 
@@ -234,11 +225,7 @@ from datetime import date
 from ocean_report.logger import configure_logger, LogOutput
 
 log_file = f"logs/production/{date.today()}.log"
-configure_logger(
-    output=LogOutput.FILE,
-    log_file=log_file,
-    level=logging.INFO
-)
+configure_logger(output=LogOutput.FILE, log_file=log_file, level=logging.INFO)
 ```
 
 **Result:**
@@ -314,6 +301,7 @@ Track timing for operations:
 import time
 from ocean_report.logger import logger
 
+
 def fetch_all_data(context):
     start_time = time.time()
     logger.info("[STEP 3/6] Fetching weather data from APIs...")
@@ -341,6 +329,7 @@ Add visual structure to logs:
 
 ```python
 from ocean_report.logger import logger
+
 
 def run_report(context):
     logger.info("=" * 80)
@@ -371,6 +360,7 @@ Log errors with full context:
 
 ```python
 from ocean_report.logger import logger
+
 
 def process_data(data):
     try:
@@ -468,9 +458,7 @@ configure_logger(
 ### Production Format (aligned columns)
 
 ```python
-configure_logger(
-    log_format="%(asctime)s | %(levelname)-8s | %(message)s"
-)
+configure_logger(log_format="%(asctime)s | %(levelname)-8s | %(message)s")
 ```
 
 **Output:**
@@ -507,7 +495,7 @@ No need to create directories manually:
 ```python
 configure_logger(
     output=LogOutput.FILE,
-    log_file="logs/very/deep/nested/path/app.log"  # All created automatically
+    log_file="logs/very/deep/nested/path/app.log",  # All created automatically
 )
 ```
 
@@ -577,7 +565,7 @@ configure_logger(LogOutput.FILE, log_file="logs/app.log")
    # If level=ERROR, you won't see INFO messages
    configure_logger(level=logging.ERROR)  # Only ERROR and CRITICAL
    logger.info("This won't appear!")  # ❌
-   logger.error("This will appear")    # ✅
+   logger.error("This will appear")  # ✅
    ```
 
 3. **For file output, check the file path is correct:**

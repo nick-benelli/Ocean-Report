@@ -263,6 +263,7 @@ All config validation is done with Pydantic models:
 ```python
 class AppConfig(StrictModel):
     """Root configuration model."""
+
     noaa: NoaaConfig
     email: EmailConfig
     location: LocationConfig
@@ -291,7 +292,7 @@ email:
 ```python
 class NoaaConfig(StrictModel):
     station_id: str = "8534720"  # Atlantic City, NJ
-    buoy_id: str = "44091"        # Delaware Bay buoy
+    buoy_id: str = "44091"  # Delaware Bay buoy
 ```
 
 **YAML**:
@@ -361,7 +362,7 @@ location:
 ```python
 class SummerConfig(StrictModel):
     start_offset_days: int = -14  # Summer starts 14 days before Memorial Day
-    end_offset_days: int = 0      # Summer ends on Labor Day
+    end_offset_days: int = 0  # Summer ends on Labor Day
 ```
 
 **YAML**:
@@ -451,9 +452,11 @@ station_id = context.config.noaa.station_id
 import pytest
 from ocean_report.config.loader import load_app_config
 
+
 @pytest.fixture
 def test_config():
     return load_app_config("tests/fixtures/test_config.yaml")
+
 
 def test_something(test_config):
     assert test_config.noaa.station_id == "TEST_STATION"
@@ -543,10 +546,12 @@ import pytest
 from pydantic import ValidationError
 from ocean_report.config.schemas import ApiConfig
 
+
 def test_api_config_defaults():
     config = ApiConfig()
     assert config.timeout == 10.0
     assert config.verify_ssl is True
+
 
 def test_api_config_invalid_timeout():
     with pytest.raises(ValidationError):
@@ -561,9 +566,11 @@ def test_api_config_invalid_timeout():
 import pytest
 from ocean_report.config.loader import load_app_config, FileNotFoundError
 
+
 def test_load_config_from_file():
     config = load_app_config("tests/fixtures/valid_config.yaml")
     assert config.noaa.station_id == "8534720"
+
 
 def test_load_config_missing_file():
     with pytest.raises(FileNotFoundError):

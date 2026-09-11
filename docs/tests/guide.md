@@ -276,17 +276,10 @@ def mock_context():
 def test_descriptive_name(mock_context):
     """Test docstring explaining what this verifies."""
     # Arrange
-    params = NoaaTideParams(
-        station="8534720",
-        begin_date="20250704",
-        end_date="20250704"
-    )
+    params = NoaaTideParams(station="8534720", begin_date="20250704", end_date="20250704")
 
     # Act
-    result = tide_service.fetch_tide_data(
-        context=mock_context,
-        params=params
-    )
+    result = tide_service.fetch_tide_data(context=mock_context, params=params)
 
     # Assert
     assert result is not None
@@ -326,7 +319,7 @@ def test_operation_speed():
     perform_operation()
     elapsed = time.time() - start
 
-    assert elapsed < 0.1, f"Took {elapsed*1000:.2f}ms (expected <100ms)"
+    assert elapsed < 0.1, f"Took {elapsed * 1000:.2f}ms (expected <100ms)"
 ```
 
 ## Debugging Tests

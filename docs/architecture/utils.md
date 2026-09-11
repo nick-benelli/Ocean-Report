@@ -89,16 +89,12 @@ from datetime import date
 is_summer = determine_is_summer(
     today=date(2026, 7, 4),
     memorial_offset=-14,  # Start 14 days before Memorial Day
-    labor_offset=0        # End on Labor Day
+    labor_offset=0,  # End on Labor Day
 )
 # True
 
 # Check if October 1st, 2026 is in summer
-is_summer = determine_is_summer(
-    today=date(2026, 10, 1),
-    memorial_offset=-14,
-    labor_offset=0
-)
+is_summer = determine_is_summer(today=date(2026, 10, 1), memorial_offset=-14, labor_offset=0)
 # False
 ```
 
@@ -110,7 +106,7 @@ config = get_settings()
 is_summer = determine_is_summer(
     today=date.today(),
     memorial_offset=config.summer.memorial_day_offset,
-    labor_offset=config.summer.labor_day_offset
+    labor_offset=config.summer.labor_day_offset,
 )
 
 # Use to select recipient list
@@ -134,15 +130,15 @@ else:
 ```python
 from ocean_report.utils.wind_utils import degrees_to_compass
 
-direction = degrees_to_compass(0)      # "N"
-direction = degrees_to_compass(45)     # "NE"
-direction = degrees_to_compass(90)     # "E"
-direction = degrees_to_compass(135)    # "SE"
-direction = degrees_to_compass(180)    # "S"
-direction = degrees_to_compass(225)    # "SW"
-direction = degrees_to_compass(270)    # "W"
-direction = degrees_to_compass(315)    # "NW"
-direction = degrees_to_compass(348)    # "N" (wraps around)
+direction = degrees_to_compass(0)  # "N"
+direction = degrees_to_compass(45)  # "NE"
+direction = degrees_to_compass(90)  # "E"
+direction = degrees_to_compass(135)  # "SE"
+direction = degrees_to_compass(180)  # "S"
+direction = degrees_to_compass(225)  # "SW"
+direction = degrees_to_compass(270)  # "W"
+direction = degrees_to_compass(315)  # "NW"
+direction = degrees_to_compass(348)  # "N" (wraps around)
 ```
 
 **Algorithm**:
@@ -206,11 +202,11 @@ classify_wind(wind_degrees=45, beach_degrees=140)
 ```python
 from ocean_report.utils.wind_utils import format_hour_12
 
-format_hour_12(8)   # "8 AM"
+format_hour_12(8)  # "8 AM"
 format_hour_12(12)  # "12 PM"
 format_hour_12(14)  # "2 PM"
 format_hour_12(20)  # "8 PM"
-format_hour_12(0)   # "12 AM"
+format_hour_12(0)  # "12 AM"
 ```
 
 ---
@@ -228,6 +224,7 @@ def degrees_to_compass(degrees: float) -> str:
     # No API calls, no config access, no global state
     index = round(degrees / 22.5) % 16
     return COMPASS_POINTS[index]
+
 
 # ❌ Impure function (don't do this in utils)
 def degrees_to_compass():
@@ -247,6 +244,7 @@ def degrees_to_compass():
 # ❌ Wrong - utils importing from higher layers
 from ocean_report.use_cases.wind import get_hourly_wind_forecast
 from ocean_report.config.loader import get_settings
+
 
 # ✅ Right - utils are self-contained
 def degrees_to_compass(degrees: float) -> str:
@@ -274,6 +272,7 @@ def test_degrees_to_compass_cardinal_directions():
     assert degrees_to_compass(90) == "E"
     assert degrees_to_compass(180) == "S"
     assert degrees_to_compass(270) == "W"
+
 
 def test_degrees_to_compass_wrapping():
     assert degrees_to_compass(360) == "N"
@@ -306,15 +305,18 @@ print(wind_type)  # "Offshore"
 ```python
 from ocean_report.utils.wind_utils import degrees_to_compass, format_hour_12
 
+
 def process_wind_data(raw_forecast):
     """Transform raw API data using utils."""
     processed = []
     for entry in raw_forecast:
-        processed.append({
-            "time": format_hour_12(entry["hour"]),  # ✅ Using util
-            "direction": degrees_to_compass(entry["direction_deg"]),  # ✅ Using util
-            "speed": entry["speed_mph"]
-        })
+        processed.append(
+            {
+                "time": format_hour_12(entry["hour"]),  # ✅ Using util
+                "direction": degrees_to_compass(entry["direction_deg"]),  # ✅ Using util
+                "speed": entry["speed_mph"],
+            }
+        )
     return processed
 ```
 
@@ -331,7 +333,7 @@ config = get_settings()
 is_summer = determine_is_summer(
     today=date.today(),
     memorial_offset=config.summer.memorial_day_offset,  # From config
-    labor_offset=config.summer.labor_day_offset          # From config
+    labor_offset=config.summer.labor_day_offset,  # From config
 )
 ```
 
@@ -347,10 +349,12 @@ def test_classify_wind_offshore():
     result = classify_wind(wind_degrees=315, beach_degrees=140)
     assert result == "Offshore"
 
+
 def test_classify_wind_onshore():
     # Beach faces SE (140°), wind from SE (140°)
     result = classify_wind(wind_degrees=140, beach_degrees=140)
     assert result == "Onshore"
+
 
 def test_classify_wind_cross_shore():
     # Beach faces SE (140°), wind from NE (45°)
@@ -392,12 +396,14 @@ def test_degrees_to_compass_edge_cases():
 ```python
 # utils/temperature_utils.py
 
+
 def celsius_to_fahrenheit(celsius: float) -> float:
     """Convert Celsius to Fahrenheit.
 
     Formula: F = C * 9/5 + 32
     """
     return celsius * 9 / 5 + 32
+
 
 def fahrenheit_to_celsius(fahrenheit: float) -> float:
     """Convert Fahrenheit to Celsius.
@@ -418,10 +424,9 @@ def fahrenheit_to_celsius(fahrenheit: float) -> float:
 def is_summer_season():
     config = get_settings()  # ❌ Util shouldn't access config
     return determine_is_summer(
-        date.today(),
-        config.summer.memorial_day_offset,
-        config.summer.labor_day_offset
+        date.today(), config.summer.memorial_day_offset, config.summer.labor_day_offset
     )
+
 
 # ✅ Right - caller passes config values
 def determine_is_summer(today, memorial_offset, labor_offset):
@@ -439,6 +444,7 @@ def get_current_wind_classification():
     wind_data = fetch_wind_forecast()  # ❌ API call!
     return classify_wind(wind_data.direction, 140)
 
+
 # ✅ Right - caller fetches data, util just calculates
 def classify_wind(wind_degrees, beach_degrees):
     # ✅ Pure calculation
@@ -455,10 +461,12 @@ def log_and_classify_wind(wind_degrees, beach_degrees):
     logger.info(f"Classifying wind: {wind_degrees}°")  # ❌ Side effect!
     return classify_wind(wind_degrees, beach_degrees)
 
+
 # ✅ Right - caller handles logging
 def classify_wind(wind_degrees, beach_degrees):
     # ✅ No side effects, just returns result
     ...
+
 
 # Caller decides to log
 result = classify_wind(315, 140)
@@ -505,8 +513,8 @@ logger.info(f"Wind classification: {result}")
 
 ```python
 # ✅ Good - explicit parameters
-def determine_is_summer(today, memorial_offset, labor_offset):
-    ...
+def determine_is_summer(today, memorial_offset, labor_offset): ...
+
 
 # ❌ Bad - hidden defaults
 def determine_is_summer(today, memorial_offset=-14, labor_offset=0):

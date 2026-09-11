@@ -70,7 +70,7 @@ print(f"Water temp: {temp}°F (retrieved at {retrieval_time})")
 # Override with specific station
 temp, retrieval_time, data_time = get_latest_water_temp(
     context,
-    station_id="8557380"  # Different station
+    station_id="8557380",  # Different station
 )
 ```
 
@@ -376,7 +376,7 @@ wind = get_hourly_wind_forecast(
     date_str="20260616",
     latitude=40.7,  # NYC instead of configured location
     longitude=-74.0,
-    beach_direction=90  # East-facing
+    beach_direction=90,  # East-facing
 )
 ```
 
@@ -423,6 +423,7 @@ def test_filter_daytime_tides():
     assert daytime[0]["time"] == "09:30 AM"
     assert daytime[1]["time"] == "03:45 PM"
 
+
 def test_classify_wind_offshore():
     # Beach faces SE (140°), wind from NW (315°)
     wind_type = classify_wind_type(315, 140)
@@ -436,7 +437,8 @@ def test_classify_wind_offshore():
 ```python
 from unittest.mock import patch, Mock
 
-@patch('ocean_report.use_cases.water_temperature.fetch_water_temp')
+
+@patch("ocean_report.use_cases.water_temperature.fetch_water_temp")
 def test_get_latest_water_temp_with_default(mock_fetch):
     # Mock service return
     mock_record = Mock()
@@ -489,6 +491,7 @@ def test_get_latest_water_temp_real():
 ```python
 # use_cases/surf_conditions.py
 
+
 def get_surf_conditions(context, date_str):
     """Determine surf conditions based on wind, waves, tides.
 
@@ -511,11 +514,13 @@ def get_surf_conditions(context, date_str):
             tide_state=tide_state,
         )
 
-        conditions.append({
-            "hour": hour,
-            "rating": rating,  # "Excellent", "Good", "Fair", "Poor"
-            "explanation": explain_rating(...)
-        })
+        conditions.append(
+            {
+                "hour": hour,
+                "rating": rating,  # "Excellent", "Good", "Fair", "Poor"
+                "explanation": explain_rating(...),
+            }
+        )
 
     return conditions
 ```
@@ -534,6 +539,7 @@ def fetch_tides(context, params):
     # ❌ Filtering is business logic!
     return [t for t in response.predictions if 6 <= get_hour(t.timestamp) <= 20]
 
+
 # ✅ Right (in use case)
 def get_tides_for_date(context, date_str):
     params = NoaaTidesParams(...)
@@ -550,6 +556,7 @@ def get_tides_for_date(context, date_str):
 def get_latest_water_temp(context):
     station_id = "8534720"  # ❌ Hardcoded
     ...
+
 
 # ✅ Right
 def get_latest_water_temp(context, station_id=None):
@@ -568,10 +575,12 @@ def get_latest_water_temp(context):
     ...
     return f"Water Temperature: {temp}°F"  # ❌ Presentation logic
 
+
 # ✅ Right (use case returns data)
 def get_latest_water_temp(context):
     ...
     return temp, retrieval_time, data_time  # ✅ Raw data
+
 
 # Formatting happens in Emailer layer
 formatted = format_water_temp(temp)  # ✅ Separate concern

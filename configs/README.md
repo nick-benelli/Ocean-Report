@@ -155,6 +155,7 @@ configs/
 Load a specific config:
 ```python
 from ocean_report.config import load_config
+
 config = load_config("configs/config.dev.yaml")
 ```
 

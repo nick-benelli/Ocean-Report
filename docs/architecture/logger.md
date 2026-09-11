@@ -83,10 +83,11 @@ logger = logging.getLogger("ocean_report")
 ```python
 from enum import Enum
 
+
 class LogOutput(Enum):
     CONSOLE = "console"  # Print to terminal only
-    FILE = "file"        # Write to file only
-    BOTH = "both"        # Both terminal and file
+    FILE = "file"  # Write to file only
+    BOTH = "both"  # Both terminal and file
 ```
 
 **Usage**:
@@ -134,19 +135,11 @@ configure_logger()
 logger.info("This goes to console")
 
 # File only
-configure_logger(
-    output=LogOutput.FILE,
-    log_file="logs/app.log",
-    level=logging.DEBUG
-)
+configure_logger(output=LogOutput.FILE, log_file="logs/app.log", level=logging.DEBUG)
 logger.debug("This goes to file")
 
 # Both console and file
-configure_logger(
-    output=LogOutput.BOTH,
-    log_file="logs/app.log",
-    level=logging.INFO
-)
+configure_logger(output=LogOutput.BOTH, log_file="logs/app.log", level=logging.INFO)
 logger.info("This goes to both console and file")
 ```
 
@@ -159,11 +152,11 @@ logger.info("This goes to both console and file")
 ```python
 import logging
 
-logger.debug("Detailed debugging information")      # DEBUG (10)
-logger.info("General informational messages")       # INFO (20)
-logger.warning("Warning messages")                  # WARNING (30)
-logger.error("Error messages")                      # ERROR (40)
-logger.critical("Critical error messages")          # CRITICAL (50)
+logger.debug("Detailed debugging information")  # DEBUG (10)
+logger.info("General informational messages")  # INFO (20)
+logger.warning("Warning messages")  # WARNING (30)
+logger.error("Error messages")  # ERROR (40)
+logger.critical("Critical error messages")  # CRITICAL (50)
 ```
 
 **When to Use Each Level**:
@@ -243,7 +236,7 @@ configure_logger(
     output=output_map[config.logging.output],
     log_file=config.logging.file_path,
     level=level_map[config.logging.level],
-    log_format=config.logging.format
+    log_format=config.logging.format,
 )
 ```
 
@@ -256,23 +249,16 @@ from ocean_report.logger import configure_logger, LogOutput
 import logging
 
 # Development: console with DEBUG
-configure_logger(
-    output=LogOutput.CONSOLE,
-    level=logging.DEBUG
-)
+configure_logger(output=LogOutput.CONSOLE, level=logging.DEBUG)
 
 # Production: file only with INFO
-configure_logger(
-    output=LogOutput.FILE,
-    log_file="logs/production.log",
-    level=logging.INFO
-)
+configure_logger(output=LogOutput.FILE, log_file="logs/production.log", level=logging.INFO)
 
 # Production with monitoring: both with WARNING
 configure_logger(
     output=LogOutput.BOTH,
     log_file="logs/production.log",
-    level=logging.WARNING  # Only warnings and errors
+    level=logging.WARNING,  # Only warnings and errors
 )
 ```
 
@@ -284,6 +270,7 @@ configure_logger(
 
 ```python
 from ocean_report.logger import logger
+
 
 def fetch_water_temp(context, params):
     logger.info("Fetching water temperature for station: %s", params.station)
@@ -303,6 +290,7 @@ def fetch_water_temp(context, params):
 
 ```python
 from ocean_report.logger import logger
+
 
 def run_report(context):
     logger.info("=" * 80)
@@ -324,6 +312,7 @@ def run_report(context):
 import time
 from ocean_report.logger import logger
 
+
 def fetch_all_data(context):
     start_time = time.time()
     logger.info("[STEP 3/6] Fetching weather data from APIs...")
@@ -343,6 +332,7 @@ def fetch_all_data(context):
 
 ```python
 from ocean_report.logger import logger
+
 
 def process_data(data):
     try:
@@ -376,9 +366,7 @@ def process_data(data):
 
 #### Minimal Format
 ```python
-configure_logger(
-    log_format="%(levelname)s: %(message)s"
-)
+configure_logger(log_format="%(levelname)s: %(message)s")
 # Output: INFO: Starting Ocean Report workflow...
 ```
 
@@ -409,7 +397,7 @@ The logger automatically creates log directories if they don't exist:
 ```python
 configure_logger(
     output=LogOutput.FILE,
-    log_file="logs/runs/2026/june/report.log"  # Creates all directories
+    log_file="logs/runs/2026/june/report.log",  # Creates all directories
 )
 ```
 
@@ -499,6 +487,7 @@ logger.propagate = False
 import logging
 from ocean_report.logger import configure_logger, LogOutput
 
+
 def test_configure_logger_console():
     logger = configure_logger(output=LogOutput.CONSOLE, level=logging.INFO)
 
@@ -506,14 +495,11 @@ def test_configure_logger_console():
     assert len(logger.handlers) == 1
     assert isinstance(logger.handlers[0], logging.StreamHandler)
 
+
 def test_configure_logger_file(tmp_path):
     log_file = tmp_path / "test.log"
 
-    logger = configure_logger(
-        output=LogOutput.FILE,
-        log_file=str(log_file),
-        level=logging.DEBUG
-    )
+    logger = configure_logger(output=LogOutput.FILE, log_file=str(log_file), level=logging.DEBUG)
 
     assert logger.level == logging.DEBUG
     assert len(logger.handlers) == 1
@@ -545,6 +531,7 @@ def test_logger_writes_to_file(tmp_path):
 
 ```python
 import logging
+
 
 def test_function_logs_correctly(caplog):
     with caplog.at_level(logging.INFO):
